@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "633369671789",
+    "project_id": "wao-mobiel-app",
+    "storage_bucket": "wao-mobiel-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633369671789:android:871d7b1bfe4a1f30066764",
+        "android_client_info": {
+          "package_name": "com.example.wao_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "633369671789-qqrr4anf5pelmnd1mdu5c6khg04r9t1r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-BzbjolKBkPAPGc3rsvAnut4eLmdOa-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "633369671789-qqrr4anf5pelmnd1mdu5c6khg04r9t1r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
