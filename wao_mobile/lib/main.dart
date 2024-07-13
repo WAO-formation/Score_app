@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:wao_mobile/screens/login.dart';
 import 'package:wao_mobile/screens/signup.dart';
-import 'package:wao_mobile/screens/teams_dashboard.dart';
 import 'dart:ui';
 
 import 'Theme/dark_theme.dart';
 import 'Theme/light_theme.dart';
-import 'Theme/theme_provider.dart';
 import 'custom_widgets/bottom_nav_bar.dart';
 
 void main() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../custom_widgets/bottom_nav_bar.dart';
 import 'dashboard.dart';
 
 
@@ -182,7 +183,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
               onPressed: () {
                 Navigator.push(
                   context, 
-                  MaterialPageRoute(builder: (context) => const DashboardPage())
+                  MaterialPageRoute(builder: (context) =>  BottomNavBar())
                 );
               }, 
               label: Container(

@@ -3,8 +3,8 @@ import '../custom_widgets/Welcome_box.dart';
 import '../custom_widgets/custom_appbar.dart';
 import 'dashboard.dart';
 
-class AboutHome extends StatefulWidget {
-  const AboutHome({super.key, });
+class PrivacyPolicy extends StatefulWidget {
+  const PrivacyPolicy({super.key, });
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -18,10 +18,10 @@ class AboutHome extends StatefulWidget {
 
 
   @override
-  State<AboutHome> createState() => _AboutHomeState();
+  State<PrivacyPolicy> createState() => _PrivacyPolicyState();
 }
 
-class _AboutHomeState extends State<AboutHome> {
+class _PrivacyPolicyState extends State<PrivacyPolicy> {
   static const double spacePix = 20.0; // spacing pixel 
 
 
@@ -37,24 +37,24 @@ class _AboutHomeState extends State<AboutHome> {
     final screenWidth = MediaQuery.of(context).size.width;
 
 
-    
+
     return Scaffold(
       backgroundColor: Colors.white, // Set the background color
 
-        appBar:  CustomAppBar(
-          title: 'About',
+      appBar:  CustomAppBar(
+        title: 'Privacy Rules',
         leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-    onPressed: () {
-    Navigator.pop(context);
-    }
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context);
+            }
         ),
-        ),
+      ),
 
       body:  Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        
+
         child: Container(
           padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 40.0),
           child: Column(
@@ -76,7 +76,7 @@ class _AboutHomeState extends State<AboutHome> {
 
             children: <Widget>[
               /** About logo tile */
-              WelcomeToWAO(title: 'About WAO',),
+              WelcomeToWAO(title: 'WAO Privacy Rules',),
 
               SizedBox(height:60.0),
 
@@ -126,11 +126,11 @@ class _AboutHomeState extends State<AboutHome> {
             ],
           ),
         ),
-        
-      ),
-      
 
-      
+      ),
+
+
+
     );
   }
 }
@@ -138,7 +138,7 @@ class _AboutHomeState extends State<AboutHome> {
 
 class AboutTile extends StatelessWidget {
   const AboutTile({super.key, required this.tileLabel, required this.tileContent, });
-  
+
   final String tileLabel;
   final String tileContent;
 
@@ -148,37 +148,37 @@ class AboutTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-      alignment: Alignment.center,
-      margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-      child: Column(
-        //mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          /*======= Section heading ======*/
-          Text(
-            tileLabel.toUpperCase(), 
-            style: const TextStyle(
-              fontSize: 18,
-              color:  Color.fromARGB(255, 193, 2, 48),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height:10.0),
-          
-          const SizedBox(height: spacePix), // space
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+        alignment: Alignment.center,
+        margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+        child: Column(
+          //mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              /*======= Section heading ======*/
+              Text(
+                tileLabel.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  color:  Color.fromARGB(255, 193, 2, 48),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height:10.0),
 
-          // Section content
-          Text(
-            tileContent, 
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xff2F3B4A),
-            ),
-          )
-        ]
-      )
+              const SizedBox(height: spacePix), // space
+
+              // Section content
+              Text(
+                tileContent,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xff2F3B4A),
+                ),
+              )
+            ]
+        )
     );
-  
+
   }
 }
 

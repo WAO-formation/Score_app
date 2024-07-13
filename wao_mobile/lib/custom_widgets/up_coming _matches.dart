@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../screens/teams_dashboard.dart';
+
 class UpcomingMatches extends StatelessWidget {
   final String teamA;
   final String teamB;
@@ -141,7 +143,12 @@ class topTeamsState extends State<topTeams> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
               ),
-              onPressed: (){},
+              onPressed: (){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TeamsHome(title: '',))
+                  );
+              },
               child: const Text(
                 'Visit Team',
                 style: TextStyle(
@@ -213,9 +220,14 @@ class otherTeamsState extends State<otherTeams> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
               ),
-              onPressed: () {},
+              onPressed: (){
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TeamsHome(title: '',))
+                );
+              },
               child: const Text(
-                'More',
+                'Visit',
                 style: TextStyle(
                   fontSize: 15.0,
                   color: Colors.white,

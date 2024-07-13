@@ -17,10 +17,10 @@ class WelcomeToWAO extends StatelessWidget{
 
     return Container(
         margin: EdgeInsets.symmetric(horizontal: screenWidth*0.02, vertical: screenHeight*0.005),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration:  BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
-          color: Theme.of(context).colorScheme.secondary,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        decoration:  const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          color:Color(0xff011E41),
         ),
 
         child : Row(

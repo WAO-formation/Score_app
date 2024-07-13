@@ -1,35 +1,9 @@
 import 'package:flutter/material.dart';
+import '../custom_widgets/Welcome_box.dart';
+import '../custom_widgets/custom_appbar.dart';
 import 'dashboard.dart';
 
-void main() {
-  runApp(const TeamsPage());
-}
 
-class TeamsPage extends StatelessWidget {
-  const TeamsPage({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'WAO Score App',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        fontFamily: 'Bronzier medium',
-        
-      ),
-      home: const TeamsHome(title: 'Main Teams'),
-    );
-  }
-}
 
 class TeamsHome extends StatefulWidget {
   const TeamsHome({super.key, required this.title});
@@ -51,35 +25,6 @@ class TeamsHome extends StatefulWidget {
 
 class _TeamsHomeState extends State<TeamsHome> {
   static const double spacePix = 20.0; // spacing pixel 
-  Color bgcolor =  const Color.fromARGB(255, 1, 30, 65);
-  Color fgcolor =  const Color.fromARGB(255, 162, 170, 173);
-  int _counter = 0;     
-  IconData icon = Icons.light_mode;
-  String _tltip = "light mode";
-
-  void _toggleTheme() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-      if (_counter%2 == 0) {
-        bgcolor =  const Color.fromARGB(255, 1, 30, 65);
-        fgcolor =  const Color.fromARGB(255, 162, 170, 173);
-        icon = Icons.light_mode;
-        _tltip = "light mode";
-      }else{
-        bgcolor = const Color.fromARGB(255, 162, 170, 173);
-        fgcolor = const Color.fromARGB(255, 1, 30, 65);
-        icon = Icons.dark_mode;
-        _tltip = "dark mode";
-      }
-      _counter -= 2;
-    });
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,218 +37,225 @@ class _TeamsHomeState extends State<TeamsHome> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     
-    AppBar appBar = AppBar(
-      // Here we create our AppBar and style it
-      backgroundColor: const Color.fromARGB(255, 193, 2, 48),
-      
-      title: Row( 
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButton(onPressed: _toggleTheme, icon: Icon( icon ), tooltip: _tltip,),
-        ]
-      ),
-    );
-    
     return Scaffold(
-      backgroundColor: bgcolor, // Set the background color 
+      backgroundColor: Colors.white, // Set the background color
       
-      appBar: appBar,
-      
-      body:  Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-          children: <Widget>[
-            /** Teams logo tile */
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: screenWidth*0.05, vertical: screenHeight*0.005),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                color: Color.fromARGB(255, 193, 2, 48),
-              ),
-              
-              child : Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Tile image
-                  Container(
-                    width: 50.0,
-                    height: 50.0,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      image: DecorationImage(
-                        image: AssetImage("assets/images/WAO_LOGO.jpg"), 
-                        fit: BoxFit.cover,
-                        scale: 0.0195,
-                        filterQuality: FilterQuality.high,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: spacePix),
-
-                  const Text(
-                    "TEAMS", 
-                    style: TextStyle(
-                      fontSize: 15, 
-                      color:  Colors.white70,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ]
-              )
-            ),
-            
-            /*======= Teams tile ======*/
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: screenWidth*0.1, vertical: screenHeight*0.005),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10)
-              ),
-
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                    children: [
-                      TeamsTile(
-                        tileLabel: "SQ FC", 
-                        tileImage: "assets/images/teams.jpg", 
-                        tileWidth: screenWidth, 
-                        tileHeight: screenHeight, 
-                        textColor: fgcolor,
-                      ),
-
-                      TeamsTile(
-                        tileLabel: "SMT FC", 
-                        tileImage: "assets/images/teams.jpg", 
-                        tileWidth: screenWidth, 
-                        tileHeight: screenHeight, 
-                        textColor: fgcolor,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: spacePix), // space
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                    children: [
-                      TeamsTile(
-                        tileLabel: "WAO FC", 
-                        tileImage: "assets/images/teams.jpg", 
-                        tileWidth: screenWidth, 
-                        tileHeight: screenHeight, 
-                        textColor: fgcolor,
-                      ),
-
-                      TeamsTile(
-                        tileLabel: "GRT FC", 
-                        tileImage: "assets/images/teams.jpg", 
-                        tileWidth: screenWidth, 
-                        tileHeight: screenHeight, 
-                        textColor: fgcolor,
-                      ),
-                    ],
-                  )
-                
-                ],
-              ),
-            ),
-
-            
-          ],
+      appBar: CustomAppBar(
+        title: 'Team Details',
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context);
+            }
         ),
       ),
       
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 193, 2, 48),
-        ),
-        height: appBar.preferredSize.height,
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (context) => const DashboardPage())
-            );
-          }, 
-          foregroundColor: Colors.white70,
-          label: const Text("Dashboard")
-        ),
-      )
-  
-    );
-  }
-}
+      body:  SingleChildScrollView(
+        child: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 5.0,),
+            child:  Column(
+              // Column is also a layout widget. It takes a list of children and
+              // arranges them vertically. By default, it sizes itself to fit its
+              // children horizontally, and tries to be as tall as its parent.
+              //
+              // Invoke "debug painting" (press "p" in the console, choose the
+              // "Toggle Debug Paint" action from the Flutter Inspector in Android
+              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+              // to see the wireframe for each widget.
+              //
+              // Column has various properties to control how it sizes itself and
+              // how it positions its children. Here we use mainAxisAlignment to
+              // center the children vertically; the main axis here is the vertical
+              // axis because Columns are vertical (the cross axis would be
+              // horizontal).
+
+              children: <Widget>[
+                /** Teams logo tile */
+                const WelcomeToWAO(title: ' WAO Team Details',),
+                const SizedBox(height: 20.0),
+
+                Image.asset(
+                    'assets/images/teams.jpg',
+                    height: 235.0
+                ),
+
+                const SizedBox(height:20.0),
+
+                 Container(
+                   margin: EdgeInsets.only(left: 15.0, right: 15.0 ),
+                   child: Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children:[
+
+                      // basic team information regarding their achievement
+                       Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
+                          decoration: BoxDecoration(
+                              color: const Color(0xff011638),
+                            borderRadius: BorderRadius.circular(10.0)
+                          ),
+                          child:  const Column(
+                            children: <Widget> [
+                              Text(
+                                "Goals",
+                                style:  TextStyle(
+                                    color: Color(0xffC10230),
+                                    fontSize: 20.0,
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text(
+                                "20",
+                                style:  TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              )
+                            ]
+                          )
+                        ),
 
 
-class TeamsTile extends StatelessWidget {
-  const TeamsTile({super.key, required this.tileLabel, required this.tileImage , required this.tileWidth, required this.tileHeight, required this.textColor});
-  
-  final String tileLabel;
-  final String tileImage;
-  final double tileWidth;
-  final double tileHeight;
-  final Color textColor;
+                       Container(
+                            padding: EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
+                            decoration: BoxDecoration(
+                                color: Color(0xff011638),
+                                borderRadius: BorderRadius.circular(10.0)
+                            ),
+                            child:  const Column(
+                                children: <Widget> [
+                                  Text(
+                                    "Games",
+                                    style:  TextStyle(
+                                        color: Color(0xffC10230),
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  Text(
+                                    "4",
+                                    style:  TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
 
-  static const double spacePix = 5.0; // spacing pixel 
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        // Team image
-        Container(
-          width: tileWidth*0.3,
-          height: tileHeight*0.2,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(tileImage), 
-              fit: BoxFit.cover,
-              scale: (tileWidth*0.3)/1024,
-              filterQuality: FilterQuality.high,
+                       Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
+                            decoration: BoxDecoration(
+                                color: const Color(0xff011638),
+                                borderRadius: BorderRadius.circular(10.0)
+                            ),
+                            child:  const Column(
+                                children: <Widget> [
+                                  Text(
+                                    "Points",
+                                    style:  TextStyle(
+                                        color: Color(0xffC10230),
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  Text(
+                                    "15",
+                                    style:  TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  )
+                                ]
+                            )
+                        ),
+
+                    ]
+                                 ),
+                 ),
+
+                const SizedBox(height: 30.0),
+
+                //short details about the team that the supporters have to know
+                const Text(
+                    'Team Information',
+                  style:  TextStyle(
+                      color: Color(0xffC10230),
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+
+                const SizedBox(height: 10.0),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0,),
+                  child: const Text(
+                    'WAO is a 2-ball multiple scoring sport played on a spherical pitch, and thrives on technology. (WAO is acronym for World As One)',
+                    style:  TextStyle(
+                        color: Color(0xff2F3B4A),
+                        fontSize: 20.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: 25.0),
+
+                //call to action for the supporters to follow the team so that they can get updated when their team is having a match
+                //for this section if the user is already following the team then this section won't be displayed to the current user
+
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0,),
+                  child: const Text(
+                    'In order to get team updates about matches and success achieved by the team click the button below to follow the team.',
+                    style:  TextStyle(
+                      color: Color(0xff2F3B4A),
+                      fontSize: 20.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: 20.0),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:  const Color(0xffC10230),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
+                  ),
+                  onPressed: (){},
+                  child: const Text(
+                    'Follow',
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20.0),
+
+              ],
             ),
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
         ),
-                      
-        /*======= Team name ======*/
-        Text(
-          tileLabel.toUpperCase(), 
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-      ]
-    
+      ),
+
     );
-  
   }
 }
+
+
+

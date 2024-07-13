@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
 import 'login.dart';
 import 'dashboard.dart';
 
@@ -203,7 +204,7 @@ class _SignUpHomePageState extends State<SignUpHomePage> {
               onPressed: () {
                 Navigator.push(
                   context, 
-                  MaterialPageRoute(builder: (context) => const DashboardPage())
+                  MaterialPageRoute(builder: (context) =>  BottomNavBar())
                 );
               }, 
               label: Container(

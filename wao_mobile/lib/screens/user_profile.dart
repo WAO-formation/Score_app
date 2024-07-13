@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/screens/wao_privacy_policy.dart';
+import 'package:wao_mobile/screens/wao_rules.dart';
 import '../custom_widgets/Welcome_box.dart';
 import '../custom_widgets/custom_appbar.dart';
+import 'about_dashboard.dart';
 
 
 class UserProfile extends StatefulWidget {
@@ -18,7 +21,7 @@ class UserProfileState extends State<UserProfile> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 50.0),
+          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 30.0),
           child: Column(
             children: <Widget>[
               const WelcomeToWAO(title: 'Welcome To WAO',),
@@ -46,22 +49,53 @@ class UserProfileState extends State<UserProfile> {
               const SizedBox(height: 50.0),
 
               const ProfileButtons(
-                pageName: 'Profile',
-                iconName: Icons.person,
-              ),
-              const SizedBox(height: 20.0),
-
-              const ProfileButtons(
                 pageName: 'Team',
                 iconName: Icons.people,
               ),
               const SizedBox(height: 20.0),
 
-              const ProfileButtons(
-                pageName: 'About',
-                iconName: Icons.book,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AboutHome())
+                  );
+                },
+                child: const ProfileButtons(
+                  pageName: 'About',
+                  iconName: Icons.book,
+                ),
               ),
               const SizedBox(height: 20.0),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GameRules())
+                  );
+                },
+                child: const ProfileButtons(
+                  pageName: 'Rules',
+                  iconName: Icons.list,
+                ),
+              ),
+              const SizedBox(height: 20.0),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PrivacyPolicy())
+                  );
+                },
+                child: const ProfileButtons(
+                  pageName: 'Privacy',
+                  iconName: Icons.shield,
+                ),
+              ),
+              const SizedBox(height: 20.0),
+
 
               const ProfileButtons(
                 pageName: 'Logout',

@@ -4,6 +4,7 @@ import '../custom_widgets/Welcome_box.dart';
 import '../custom_widgets/custom_appbar.dart';
 import '../custom_widgets/up_coming _matches.dart';
 import 'about_dashboard.dart';
+import 'all_teams.dart';
 import 'livescore_dashboard.dart';
 import 'package:wao_mobile/screens/teams_dashboard.dart';
 import 'package:wao_mobile/screens/officiate_dashboard.dart';
@@ -110,8 +111,8 @@ class _DashboardHomeState extends State<DashboardHome> {
       appBar:  CustomAppBar(
       title: 'Dashboard',
     ),
-      body:  const SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
+      body:   SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
             child: Column(
               // Column is also a layout widget. It takes a list of children and
               // arranges them vertically. By default, it sizes itself to fit its
@@ -132,13 +133,13 @@ class _DashboardHomeState extends State<DashboardHome> {
               children: <Widget>[
 
                 /** Dashboard logo tile */
-                WelcomeToWAO(title: 'Welcome to WAO',),
-                SizedBox(height: 30.0),
+                const WelcomeToWAO(title: 'Welcome to WAO',),
+                const SizedBox(height: 30.0),
 
                 /*======= Dahboard tiles ======*/
 
                 // ROW 1 TILES
-                SingleChildScrollView(
+                const SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -187,25 +188,47 @@ class _DashboardHomeState extends State<DashboardHome> {
                   ),
                 ),
 
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
 
                 // ROW 2 TILES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Teams', style: TextStyle(fontSize:25.0, fontWeight: FontWeight.bold)),
-                    Text('See all', style: TextStyle(fontSize:20.0, fontWeight: FontWeight.w500, color: Color(0xffC10230)))
+                    const Text(
+                        'Teams',
+                        style: TextStyle(
+                            fontSize:25.0,
+                            fontWeight: FontWeight.bold
+                        )
+                    ),
+
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>  allTeams())
+                          );
+                        },
+                        child: const Text(
+                            'See all',
+                            style: TextStyle(
+                                fontSize:20.0,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xffC10230)
+                            )
+                        )
+                    )
                   ],
                 ),
-                SizedBox(height:20.0),
+                const SizedBox(height:20.0),
 
-                topTeams(
+                const topTeams(
                   teamName: 'Team Q',
                   imagePath: 'assets/images/officiate.jpg',
                 ),
-                SizedBox(height:20.0),
+                const SizedBox(height:20.0),
 
-                Row(
+                const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children:[
                     otherTeams(

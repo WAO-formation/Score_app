@@ -211,6 +211,7 @@ class OfficiateTile extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          SizedBox(height:10.0),
           
           const SizedBox(height: spacePix), // space
 
@@ -220,7 +221,6 @@ class OfficiateTile extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               color: Color(0xff2F3B4A),
-              fontWeight: FontWeight.bold,
             ),
           )
         ]
