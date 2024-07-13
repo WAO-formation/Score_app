@@ -183,7 +183,7 @@ class otherTeamsState extends State<otherTeams> {
       elevation: 4,
       borderRadius: BorderRadius.circular(20.0),
       child: Container(
-        width: screenWidth * 0.45,
+        width: screenWidth * 0.43,
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: screenWidth * 0.02),
         decoration: BoxDecoration(
           color: const Color(0xffdee2e6),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/Theme/theme_data.dart';
+import '../custom_widgets/Welcome_box.dart';
+import '../custom_widgets/custom_appbar.dart';
+import '../custom_widgets/up_coming _matches.dart';
 import 'about_dashboard.dart';
 import 'livescore_dashboard.dart';
 import 'package:wao_mobile/screens/teams_dashboard.dart';
@@ -29,7 +32,7 @@ class DashboardPage extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         fontFamily: 'Bronzier medium',
-        
+
       ),
       home: const DashboardHome(title: 'Main Dashboard'),
     );
@@ -59,7 +62,7 @@ class _DashboardHomeState extends State<DashboardHome> {
   Color bgcolor =  lightColorScheme.surface;
   Color fgcolor =  lightColorScheme.surface;
   Color WlcContainer = lightColorScheme.secondary;
-  int _counter = 0;     
+  int _counter = 0;
   IconData icon = Icons.light_mode;
   String _tltip = "light mode";
 
@@ -100,31 +103,15 @@ class _DashboardHomeState extends State<DashboardHome> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    AppBar appBar = AppBar(
-      // Here we create our AppBar and style it
-      flexibleSpace: const Padding(padding: EdgeInsets.symmetric(vertical:10.0),),
-      leading: IconButton(
-        onPressed: () {},
-        icon: const Icon(
-          Icons.person_rounded, size: 40, color: Colors.white
-        ),
-      ),
-      
-      backgroundColor: WlcContainer,
 
-      title: const Center(child: Text('DashBoard', style: TextStyle(color: Colors.white, fontSize:20.0))),
-      actions: [
-          IconButton(onPressed: _toggleTheme, icon: Icon( icon, color: Colors.white ), tooltip: _tltip,),
-        ]
-    );
-    
     return Scaffold(
-      backgroundColor: bgcolor, // Set the background color 
-      
-      appBar: appBar,
-      
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
+      backgroundColor: bgcolor, // Set the background color
+
+      appBar:  CustomAppBar(
+      title: 'Dashboard',
+    ),
+      body:  const SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
             child: Column(
               // Column is also a layout widget. It takes a list of children and
               // arranges them vertically. By default, it sizes itself to fit its
@@ -145,102 +132,98 @@ class _DashboardHomeState extends State<DashboardHome> {
               children: <Widget>[
 
                 /** Dashboard logo tile */
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: screenWidth*0.05, vertical: screenHeight*0.005),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration:  BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(15)),
-                    color: WlcContainer
-                  ),
-
-                  child : Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Tile image
-                      Container(
-                        width: 50.0,
-                        height: 50.0,
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          image: DecorationImage(
-                            image: AssetImage("assets/images/WAO_LOGO.jpg"),
-                            fit: BoxFit.cover,
-                            scale: 0.0195,
-                            filterQuality: FilterQuality.high,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: spacePix),
-
-                      const Text(
-                        "Welcome to WAO",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color:  Colors.white70,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ]
-                  )
-                ),
-                const SizedBox(height: 30.0),
+                WelcomeToWAO(title: 'Welcome to WAO',),
+                SizedBox(height: 30.0),
 
                 /*======= Dahboard tiles ======*/
 
                 // ROW 1 TILES
-                const  Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    DashboardTile(
-                      tileLabel: "About Us",
-                      tileImage: "assets/images/about.jpg",
-                      pageName: AboutPage(),
-                    ),
-                    const SizedBox(width: spacePix),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      UpcomingMatches(
+                        teamA: 'Team A',
+                        teamB: 'Team B',
+                        date: 'June 20',
+                        time: '12:20',
+                        ImagePath1: 'assets/images/teams.jpg',
+                        ImagePath2: 'assets/images/officiate.jpg',
+                      ),
+                      SizedBox(width:20.0),
+                      UpcomingMatches(
+                        teamA: 'Team A',
+                        teamB: 'Team B',
+                        date: 'June 20',
+                        time: '12:20',
+                        ImagePath1: 'assets/images/teams.jpg',
+                        ImagePath2: 'assets/images/officiate.jpg',
+                      ),
 
-                    DashboardTile(
-                      tileLabel: "   Teams    ",
-                      tileImage: "assets/images/teams.jpg",
-                      pageName: TeamsPage(),
-                    ),
-                  ],
+                      SizedBox(width:20.0),
+
+                      UpcomingMatches(
+                        teamA: 'Team A',
+                        teamB: 'Team B',
+                        date: 'June 20',
+                        time: '12:20',
+                        ImagePath1: 'assets/images/teams.jpg',
+                        ImagePath2: 'assets/images/officiate.jpg',
+                      ),
+
+                      SizedBox(width:20.0),
+
+                      UpcomingMatches(
+                        teamA: 'Team A',
+                        teamB: 'Team B',
+                        date: 'June 20',
+                        time: '12:20',
+                        ImagePath1: 'assets/images/teams.jpg',
+                        ImagePath2: 'assets/images/officiate.jpg',
+                      ),
+                      SizedBox(width:20.0),
+                    ],
+                  ),
                 ),
 
                 SizedBox(height: 30.0),
 
                 // ROW 2 TILES
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    DashboardTile(
-                      tileLabel: "Live Scores ",
-                      tileImage: "assets/images/livescores.jpg",
-                      pageName: LiveScoresPage(),
-                      ),
-
-                    const SizedBox(width: spacePix),
-
-                    DashboardTile(
-                      tileLabel: "  Officiate ",
-                      tileImage: "assets/images/officiate.jpg",
-                      pageName: OfficiatePage(),
-                      ),
+                    Text('Teams', style: TextStyle(fontSize:25.0, fontWeight: FontWeight.bold)),
+                    Text('See all', style: TextStyle(fontSize:20.0, fontWeight: FontWeight.w500, color: Color(0xffC10230)))
                   ],
-                )
+                ),
+                SizedBox(height:20.0),
 
+                topTeams(
+                  teamName: 'Team Q',
+                  imagePath: 'assets/images/officiate.jpg',
+                ),
+                SizedBox(height:20.0),
+
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children:[
+                    otherTeams(
+                      teamName: 'Team G',
+                      imagePath: 'assets/images/teams.jpg',
+                    ),
+                    SizedBox(width:15.0),
+                    otherTeams(
+                      teamName: 'Team B',
+                      imagePath: 'assets/images/livescores.jpg',
+                    ),
+                  ]
+                )
               ],
             ),
         ),
 
-      
-      bottomNavigationBar: Container(
-        decoration:  BoxDecoration(
-          color: WlcContainer,
-        ),
-        height: appBar.preferredSize.height,
-      )
+
       
     );
   }
