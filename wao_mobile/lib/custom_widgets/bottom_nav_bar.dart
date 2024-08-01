@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:wao_mobile/screens/about_dashboard.dart';
-import 'package:wao_mobile/screens/dashboard.dart';
-import 'package:wao_mobile/screens/livescore_dashboard.dart';
-import 'package:wao_mobile/screens/officiate_dashboard.dart';
-import 'package:wao_mobile/screens/teams_dashboard.dart';
+import 'package:wao_mobile/screens/user/about_dashboard.dart';
+import 'package:wao_mobile/screens/dashboard/dashboard.dart';
+import 'package:wao_mobile/screens/scores/livescore_dashboard.dart';
+import 'package:wao_mobile/screens/officiates/officiate_dashboard.dart';
+import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
 
 import '../Theme/theme_data.dart';
-import '../screens/user_profile.dart';
+import '../screens/user/user_profile.dart';
 
 class BottomNavBar extends StatefulWidget{
   @override

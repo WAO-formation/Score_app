@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/wao_privacy_policy.dart';
-import 'package:wao_mobile/screens/wao_rules.dart';
-import '../custom_widgets/Welcome_box.dart';
-import '../custom_widgets/custom_appbar.dart';
+import 'package:wao_mobile/screens/user/wao_privacy_policy.dart';
+import 'package:wao_mobile/screens/user/wao_rules.dart';
+import '../../custom_widgets/Welcome_box.dart';
+import '../../custom_widgets/custom_appbar.dart';
+import '../teams/user_team_spesification.dart';
 import 'about_dashboard.dart';
 
 
@@ -48,9 +49,17 @@ class UserProfileState extends State<UserProfile> {
 
               const SizedBox(height: 50.0),
 
-              const ProfileButtons(
-                pageName: 'Team',
-                iconName: Icons.people,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>   userTeamSpecification())
+                  );
+                },
+                child: const ProfileButtons(
+                  pageName: 'Team',
+                  iconName: Icons.people,
+                ),
               ),
               const SizedBox(height: 20.0),
 

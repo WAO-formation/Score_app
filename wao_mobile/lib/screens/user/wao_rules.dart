@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../custom_widgets/Welcome_box.dart';
-import '../custom_widgets/custom_appbar.dart';
-import 'dashboard.dart';
+import '../../custom_widgets/Welcome_box.dart';
+import '../../custom_widgets/custom_appbar.dart';
+import '../dashboard/dashboard.dart';
 
-class PrivacyPolicy extends StatefulWidget {
-  const PrivacyPolicy({super.key, });
+class GameRules extends StatefulWidget {
+  const GameRules({super.key, });
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -18,10 +18,10 @@ class PrivacyPolicy extends StatefulWidget {
 
 
   @override
-  State<PrivacyPolicy> createState() => _PrivacyPolicyState();
+  State<GameRules> createState() => _GameRulesState();
 }
 
-class _PrivacyPolicyState extends State<PrivacyPolicy> {
+class _GameRulesState extends State<GameRules> {
   static const double spacePix = 20.0; // spacing pixel 
 
 
@@ -42,7 +42,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       backgroundColor: Colors.white, // Set the background color
 
       appBar:  CustomAppBar(
-        title: 'Privacy Rules',
+        title: 'Rules',
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () {
@@ -76,7 +76,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
             children: <Widget>[
               /** About logo tile */
-              WelcomeToWAO(title: 'WAO Privacy Rules',),
+              const WelcomeToWAO(title: ' WAO Game Rules',),
 
               SizedBox(height:60.0),
 

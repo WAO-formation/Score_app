@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/Theme/theme_data.dart';
-import '../custom_widgets/Welcome_box.dart';
-import '../custom_widgets/custom_appbar.dart';
-import 'dashboard.dart';
+import '../../custom_widgets/Welcome_box.dart';
+import '../../custom_widgets/custom_appbar.dart';
+import '../dashboard/dashboard.dart';
 
 void main() {
   runApp(const LiveScoresPage());
