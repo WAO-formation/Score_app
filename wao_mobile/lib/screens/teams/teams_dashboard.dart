@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../custom_widgets/Welcome_box.dart';
-import '../custom_widgets/custom_appbar.dart';
-import 'dashboard.dart';
+import '../../custom_widgets/Welcome_box.dart';
+import '../../custom_widgets/custom_appbar.dart';
+import '../dashboard/dashboard.dart';
 
 
 
@@ -245,7 +245,30 @@ class _TeamsHomeState extends State<TeamsHome> {
                   ),
                 ),
 
+                const SizedBox(height: 30.0),
+
+                const Text(
+                  'Team Announcement',
+                  style:  TextStyle(
+                      color: Color(0xffC10230),
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+
                 const SizedBox(height: 20.0),
+
+                const teamAnnouncement(
+                  AnnouncementTitle: 'Team A',
+                  Content: 'we have a match today against team B at 12 pm, hope you chair us up',
+                ),
+                const SizedBox(height: 10.0),
+
+                const teamAnnouncement(
+                  AnnouncementTitle: 'Team A',
+                  Content: 'thank God we won the match against team B',
+                ),
+                const SizedBox(height: 10.0),
 
               ],
             ),
@@ -258,4 +281,54 @@ class _TeamsHomeState extends State<TeamsHome> {
 }
 
 
+
+class teamAnnouncement extends StatelessWidget{
+
+  final String AnnouncementTitle;
+  final String Content;
+
+  const teamAnnouncement({
+    super.key,
+    required this.AnnouncementTitle,
+    required this.Content,
+
+  });
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Container(
+      width: screenWidth,
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0),
+        margin: const EdgeInsets.symmetric(horizontal: 10.0,),
+        decoration: BoxDecoration(
+            color: const Color(0xffdee2e6),
+            borderRadius: BorderRadius.circular(10.0)
+        ),
+      child:  Column(
+        children:[
+          Text(
+              AnnouncementTitle,
+            style:  const TextStyle(
+              color: Color(0xff011638),
+              fontSize: 20.0,
+            ),
+          ),
+          const SizedBox(height: 5.0),
+          Text(
+            Content,
+            style:  const TextStyle(
+              color: Color(0xff2F3B4A),
+              fontSize: 15.0,
+            ),
+          ),
+        ]
+      )
+    );
+  }
+
+}
 

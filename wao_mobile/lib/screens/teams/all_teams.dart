@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/teams_dashboard.dart';
+import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
 
-import '../custom_widgets/Welcome_box.dart';
-import '../custom_widgets/custom_appbar.dart';
-import '../custom_widgets/up_coming _matches.dart';
+import '../../custom_widgets/Welcome_box.dart';
+import '../../custom_widgets/custom_appbar.dart';
+import '../../custom_widgets/up_coming _matches.dart';
 
 class allTeams extends StatefulWidget{
   @override

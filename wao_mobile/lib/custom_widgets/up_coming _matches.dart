@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/teams_dashboard.dart';
+import '../screens/teams/teams_dashboard.dart';
 
 class UpcomingMatches extends StatelessWidget {
   final String teamA;
