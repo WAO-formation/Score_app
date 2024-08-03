@@ -89,7 +89,7 @@ class splashButtomNavState extends State<splashButtomNav>{
     return BottomAppBar(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
       height: 125.0,
-     // color: Colors.green,
+     color: Colors.white,
       child: Container(
           child:   Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,16 +105,16 @@ class splashButtomNavState extends State<splashButtomNav>{
                         width: 2.0, // Border width
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
                   ),
                   onPressed: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUpHomePage(title: '',))
+                        MaterialPageRoute(builder: (context) => const SignupHomePage(title: '',))
                     );
                   },
                   child: const Text(
-                    'Login',
+                    'Signup',
                     style: TextStyle(
                       fontSize: 15.0,
                       color: Color(0xffC10230), // Text color
@@ -133,7 +133,7 @@ class splashButtomNavState extends State<splashButtomNav>{
                         width: 2.0, // Border width
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -142,7 +142,7 @@ class splashButtomNavState extends State<splashButtomNav>{
                     );
                   },
                   child: const Text(
-                    'Register',
+                    'Login',
                     style: TextStyle(
                       fontSize: 15.0,
                       color: Color(0xffffffff), // Text color

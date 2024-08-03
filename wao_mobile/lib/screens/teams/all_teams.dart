@@ -4,69 +4,68 @@ import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
 
 import '../../custom_widgets/Welcome_box.dart';
 import '../../custom_widgets/custom_appbar.dart';
-import '../../custom_widgets/up_coming _matches.dart';
 
 class allTeams extends StatefulWidget{
   @override
   State<allTeams> createState() => allTeamsState();
 
-  }
+}
 
 class allTeamsState extends State<allTeams>{
   @override
   Widget build(BuildContext context) {
 
     return  Scaffold(
-      backgroundColor: Colors.white,
-      appBar:  CustomAppBar(
-        title: 'All Teams',
-        leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            }
-        ),
-        ),
-
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
-          child: const Column(
-            children: [
-              WelcomeToWAO(
-                title: 'WAO Teams',
-              ),
-
-              const SizedBox(height: 30.0),
-
-              teams(
-                teamName: 'Team A',
-                imagePath: 'assets/images/teams.jpg',
-              ),
-              const SizedBox(height: 20.0),
-
-              teams(
-                teamName: 'Team G',
-                imagePath: 'assets/images/officiate.jpg',
-              ),
-              const SizedBox(height: 20.0),
-
-              teams(
-                teamName: 'Team A',
-                imagePath: 'assets/images/teams.jpg',
-              ),
-              const SizedBox(height: 20.0),
-
-              teams(
-                teamName: 'Team G',
-                imagePath: 'assets/images/officiate.jpg',
-              ),
-              const SizedBox(height: 20.0),
-
-            ]
+        backgroundColor: Colors.white,
+        appBar:  CustomAppBar(
+          title: 'All Teams',
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+              }
           ),
         ),
-      )
+
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
+            child: const Column(
+                children: [
+                  WelcomeToWAO(
+                    title: 'WAO Teams',
+                  ),
+
+                  const SizedBox(height: 30.0),
+
+                  teams(
+                    teamName: 'Team A',
+                    imagePath: 'assets/images/teams.jpg',
+                  ),
+                  const SizedBox(height: 20.0),
+
+                  teams(
+                    teamName: 'Team G',
+                    imagePath: 'assets/images/officiate.jpg',
+                  ),
+                  const SizedBox(height: 20.0),
+
+                  teams(
+                    teamName: 'Team A',
+                    imagePath: 'assets/images/teams.jpg',
+                  ),
+                  const SizedBox(height: 20.0),
+
+                  teams(
+                    teamName: 'Team G',
+                    imagePath: 'assets/images/officiate.jpg',
+                  ),
+                  const SizedBox(height: 20.0),
+
+                ]
+            ),
+          ),
+        )
     );
   }
 

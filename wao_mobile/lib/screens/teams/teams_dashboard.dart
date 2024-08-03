@@ -88,98 +88,101 @@ class _TeamsHomeState extends State<TeamsHome> {
                  Container(
                    margin: EdgeInsets.only(left: 15.0, right: 15.0 ),
                    child: Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children:[
-
-                      // basic team information regarding their achievement
-                       Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
-                          decoration: BoxDecoration(
-                              color: const Color(0xff011638),
-                            borderRadius: BorderRadius.circular(10.0)
-                          ),
-                          child:  const Column(
-                            children: <Widget> [
-                              Text(
-                                "Goals",
-                                style:  TextStyle(
-                                    color: Color(0xffC10230),
-                                    fontSize: 20.0,
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "20",
-                                style:  TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              )
-                            ]
-                          )
-                        ),
-
-
-                       Container(
-                            padding: EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
-                            decoration: BoxDecoration(
-                                color: Color(0xff011638),
-                                borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            child:  const Column(
-                                children: <Widget> [
-                                  Text(
-                                    "Games",
-                                    style:  TextStyle(
-                                        color: Color(0xffC10230),
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  Text(
-                                    "4",
-                                    style:  TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  )
-                                ]
-                            )
-                        ),
-
-
-                       Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical:20.0),
-                            decoration: BoxDecoration(
-                                color: const Color(0xff011638),
-                                borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            child:  const Column(
-                                children: <Widget> [
-                                  Text(
-                                    "Points",
-                                    style:  TextStyle(
-                                        color: Color(0xffC10230),
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  Text(
-                                    "15",
-                                    style:  TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  )
-                                ]
-                            )
-                        ),
-
-                    ]
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [
+                       // basic team information regarding their achievement
+                       Expanded(
+                         child: Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                           decoration: BoxDecoration(
+                             color: const Color(0xff011638),
+                             borderRadius: BorderRadius.circular(10.0),
+                           ),
+                           child: const Column(
+                             children: <Widget>[
+                               Text(
+                                 "Goals",
+                                 style: TextStyle(
+                                   color: Color(0xffC10230),
+                                   fontSize: 13.0,
+                                   fontWeight: FontWeight.bold,
                                  ),
+                               ),
+                               Text(
+                                 "20",
+                                 style: TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 15.0,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                             ],
+                           ),
+                         ),
+                       ),
+                       SizedBox(width: 10), // Optional: add spacing between containers
+                       Expanded(
+                         child: Container(
+                           padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                           decoration: BoxDecoration(
+                             color: Color(0xff011638),
+                             borderRadius: BorderRadius.circular(10.0),
+                           ),
+                           child: const Column(
+                             children: <Widget>[
+                               Text(
+                                 "Games",
+                                 style: TextStyle(
+                                   color: Color(0xffC10230),
+                                   fontSize: 13.0,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                               Text(
+                                 "4",
+                                 style: TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 15.0,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                             ],
+                           ),
+                         ),
+                       ),
+                       SizedBox(width: 10), // Optional: add spacing between containers
+                       Expanded(
+                         child: Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                           decoration: BoxDecoration(
+                             color: const Color(0xff011638),
+                             borderRadius: BorderRadius.circular(10.0),
+                           ),
+                           child: const Column(
+                             children: <Widget>[
+                               Text(
+                                 "Points",
+                                 style: TextStyle(
+                                   color: Color(0xffC10230),
+                                   fontSize: 16.0,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                               Text(
+                                 "13",
+                                 style: TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 15.0,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                             ],
+                           ),
+                         ),
+                       ),
+                     ],
+                   ),
+
                  ),
 
                 const SizedBox(height: 30.0),

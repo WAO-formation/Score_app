@@ -29,8 +29,8 @@ class UpcomingMatches extends StatelessWidget {
     //in this container we describe the container that will be used to display the upcoming matches in a slider
     return Center(
       child: Container(
-        width: screenWidth * 0.9, // Adjust the width as needed
-        height: screenWidth * 0.5, // Adjust the height as needed
+        width: screenWidth * 0.9,
+        height: screenWidth * 0.6,
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: screenWidth * 0.05),
         decoration: BoxDecoration(
           color: const Color(0xffF8C3D0),
@@ -218,7 +218,7 @@ class otherTeamsState extends State<otherTeams> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 5.0),
               ),
               onPressed: (){
                 Navigator.push(
@@ -229,7 +229,7 @@ class otherTeamsState extends State<otherTeams> {
               child: const Text(
                 'Visit',
                 style: TextStyle(
-                  fontSize: 15.0,
+                  fontSize: 12.0,
                   color: Colors.white,
                 ),
               ),

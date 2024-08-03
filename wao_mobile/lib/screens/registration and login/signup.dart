@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/screens/registration%20and%20login/signup.dart';
+
 import '../../custom_widgets/bottom_nav_bar.dart';
-import 'login.dart';
 import '../dashboard/dashboard.dart';
+import 'login.dart';
+
 
 void main() {
-  runApp(const MySignUpPage());
+  runApp(const MyLoginPage());
 }
 
-class MySignUpPage extends StatelessWidget {
-  const MySignUpPage({super.key});
+class MyLoginPage extends StatelessWidget {
+  const MyLoginPage({super.key});
 
   // This widget is the root of your application.
   @override
@@ -26,15 +29,17 @@ class MySignUpPage extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         fontFamily: 'Bronzier medium',
-        
+
       ),
-      home: const SignUpHomePage(title: 'Sign Up Page'),
+      home: const SignupHomePage(title: 'Log In Page'),
     );
   }
 }
 
-class SignUpHomePage extends StatefulWidget {
-  const SignUpHomePage({super.key, required this.title});
+
+
+class SignupHomePage extends StatefulWidget {
+  const SignupHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -48,11 +53,11 @@ class SignUpHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<SignUpHomePage> createState() => _SignUpHomePageState();
+  State<SignupHomePage> createState() => _SignupHomePageState();
 }
 
-class _SignUpHomePageState extends State<SignUpHomePage> {
-  static const double spacePix = 20.0; // spacing pixel 
+class _SignupHomePageState extends State<SignupHomePage> {
+  static const double spacePix = 20.0; // spacing pixel
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +70,7 @@ class _SignUpHomePageState extends State<SignUpHomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     bool _isRememberMeChecked = false;
-    
+
 
 
     return Scaffold(
@@ -91,10 +96,10 @@ class _SignUpHomePageState extends State<SignUpHomePage> {
               // center the children vertically; the main axis here is the vertical
               // axis because Columns are vertical (the cross axis would be
               // horizontal).
-             // mainAxisAlignment: MainAxisAlignment.spaceAround,
+              // mainAxisAlignment: MainAxisAlignment.spaceAround,
 
               children: <Widget>[
-               /*======= LOGO Holder ======*/
+                /*======= LOGO Holder ======*/
                 Container(
                   //margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
                   width: 110.0,
@@ -122,201 +127,174 @@ class _SignUpHomePageState extends State<SignUpHomePage> {
 
                 const SizedBox(height: 20.0), // space
 
-               Container(
-                 height: screenHeight*0.705 ,
-                   padding: const EdgeInsets.only( top: 70.0, left: 20.0, right:20.0),
-                 decoration: const BoxDecoration(
-                   color: Colors.white,
-                   borderRadius: BorderRadius.only(
-                     topLeft: Radius.circular(100),
-                   ),
-                 ),
+                Container(
+                    height: screenHeight*0.705 ,
+                    padding: const EdgeInsets.only( top: 70.0, left: 20.0, right:20.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(100),
+                      ),
+                    ),
 
-                 child:  Column(
-                   children:[
+                    child:  Column(
+                        children:[
 
-                     const Text(
-                         'Sign up',
-                         style: TextStyle(
-                           fontSize: 25.0, fontWeight: FontWeight.bold,
-                           color: Color(0xff011E41),
-                         )
-                     ),
-                     const SizedBox(height: 35.0), // space
+                          const Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 25.0, fontWeight: FontWeight.bold,
+                                color: Color(0xff011E41),
+                              )
+                          ),
+                          const SizedBox(height: 35.0), // space
 
-                     /*======= Email entry field ======*/
+                          /*======= Email entry field ======*/
 
-                       const TextField(
-                   keyboardType: TextInputType.emailAddress,
-                   decoration: InputDecoration(
-                     labelText: 'Email',
-                     labelStyle:  TextStyle(color: Color(0xff011638),),
-                     hintText: 'Enter your email',
-                     hintStyle: TextStyle(color: Colors.grey),
-                     suffixIcon: Icon(Icons.mail, color: Color(0xff011E41),),
-                     border: OutlineInputBorder(
-                       borderSide: BorderSide(color: Color(0xff011638),),
-                     ),
-                     enabledBorder: OutlineInputBorder(
-                       borderSide: BorderSide(color: Color(0xff011638),),
-                     ),
-                     focusedBorder: OutlineInputBorder(
-                       borderSide: BorderSide(color: Color(0xff011638),),
-                     ),
-                   ),
-                 ),
+                          const TextField(
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              labelStyle:  TextStyle(color: Color(0xff011638),),
+                              hintText: 'Enter your email',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              suffixIcon: Icon(Icons.mail, color: Color(0xff011E41),),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                            ),
+                          ),
 
-                     const SizedBox(height: 25.0), // space
+                          const SizedBox(height: 25.0), // space
 
-                     /*======= Password entry field ======*/
+                          /*======= Password entry field ======*/
 
-                     const TextField(
-                       keyboardType: TextInputType.emailAddress,
-                       decoration: InputDecoration(
-                         labelText: 'Password',
-                         labelStyle:  TextStyle(color: Color(0xff011638),),
-                         hintText: 'Enter your password',
-                         hintStyle: TextStyle(color: Colors.grey),
-                         suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
-                         border: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                         enabledBorder: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                         focusedBorder: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                       ),
-                       style: TextStyle(
-                         color: Colors.black, // Set your desired text color here
-                       ),
-                       obscureText: true,
-                     ),
-
-
-                     const SizedBox(height: 25.0), // space
+                          const TextField(
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              labelStyle:  TextStyle(color: Color(0xff011638),),
+                              hintText: 'Enter your password',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Color(0xff011638),),
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: Colors.black, // Set your desired text color here
+                            ),
+                            obscureText: true,
+                          ),
 
 
-                     /*======= Password re-entry field ======*/
+                          const SizedBox(height: 25.0), // space
+
+                    const TextField(
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle:  TextStyle(color: Color(0xff011638),),
+                        hintText: 'Enter your password',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xff011638),),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xff011638),),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xff011638),),
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: Colors.black, // Set your desired text color here
+                      ),
+                      obscureText: true,
+                    ),
 
 
-                     const TextField(
-                       decoration: InputDecoration(
-                         labelText: 'Confirm Password',
-                         labelStyle:  TextStyle(color: Color(0xff011638),),
-                         hintText: 're-enter your password',
-                         hintStyle: TextStyle(color: Colors.grey),
-                         suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
-                         border: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                         enabledBorder: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                         focusedBorder: OutlineInputBorder(
-                           borderSide: BorderSide(color: Color(0xff011638),),
-                         ),
-                       ),
-                       style: TextStyle(
-                         color: Colors.black, // Set your desired text color here
-                       ),
-                       obscureText: true,
-                     ),
+                    const SizedBox(height: 25.0), //
 
-                     const SizedBox(height: 25.0), // space
-
-                     /* ================ remember me and the forgot password functionality =============== */
-
-                     Row(
-                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                         children: [
-                           Row(
-                             children: <Widget>[
-                               Checkbox(
-                                 value: _isRememberMeChecked,
-                                 onChanged: (bool? value) {
-                                   setState(() {
-                                     _isRememberMeChecked = value ?? false;
-                                   });
-                                 },
-                               ),
-                               const Text(
-                                 'Remember Me',
-                                 style: TextStyle(
-                                     fontSize: 16,
-                                   color: Color(0xff011638),
-                                 ),
-                               ),
-                             ],
-                           ),
+                          /* ================ remember me and the forgot password functionality =============== */
 
 
-                         ]
-                     ),
+                          SizedBox(height: spacePix), // space
 
-                     SizedBox(height: spacePix), // space
+                          /*======= Sign up button ======*/
+                          FloatingActionButton.extended(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) =>  BottomNavBar())
+                              );
+                            },
+                            label: Container(
+                              margin: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+                              child: const Text('Register', style: TextStyle(fontSize: 15),),
+                            ),
+                            backgroundColor: const Color.fromARGB(255, 193, 2, 48),
+                            foregroundColor: Colors.white70,
+                            hoverColor: Colors.black,
+                          ),
 
-                     /*======= Sign up button ======*/
-                     FloatingActionButton.extended(
-                       onPressed: () {
-                         Navigator.push(
-                             context,
-                             MaterialPageRoute(builder: (context) =>  BottomNavBar())
-                         );
-                       },
-                       label: Container(
-                         margin: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                         child: const Text('Sign Up', style: TextStyle(fontSize: 15),),
-                       ),
-                       backgroundColor: const Color.fromARGB(255, 193, 2, 48),
-                       foregroundColor: Colors.white70,
-                       hoverColor: Colors.black,
-                     ),
+                          SizedBox(height: spacePix-5), // space
+                          /* === SignIn button */
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Already have an Account?',
+                                style: TextStyle(
+                                  color: Color(0xff011E41),
+                                ),
+                              ),
 
-                     SizedBox(height: spacePix-5), // space
-                     /* === SignIn button */
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         const Text(
-                           'Already have an Account?',
-                           style: TextStyle(
-                             color: Color(0xff011E41),
-                           ),
-                         ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const LoginHomePage(title: '',))
+                                  );
+                                },
+                                child: const Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xffC10230),
+                                  ),
+                                ),
+                              ),
 
-                         TextButton(
-                           onPressed: () {
-                             Navigator.push(
-                                 context,
-                                 MaterialPageRoute(builder: (context) => const MyLoginPage())
-                             );
-                           },
-                           child: const Text(
-                             'Login',
-                             style: TextStyle(
-                                 decoration: TextDecoration.underline,
-                                 fontWeight: FontWeight.bold,
-                                 color: Color(0xffC10230),
-                             ),
-                           ),
-                         ),
+                            ],
+                          )
 
-                       ],
-                     )
-
-                   ]
-                 )
-               )
+                        ]
+                    )
+                )
               ],
             ),
           ),
         ),
       ),
-      
+
     );
   }
 
 }
+
 

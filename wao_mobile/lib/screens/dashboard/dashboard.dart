@@ -59,38 +59,12 @@ class DashboardHome extends StatefulWidget {
 }
 
 class _DashboardHomeState extends State<DashboardHome> {
-  static const double spacePix = 10.0; // spacing pixel
+// spacing pixel
   Color bgcolor =  lightColorScheme.surface;
   Color fgcolor =  lightColorScheme.surface;
   Color WlcContainer = lightColorScheme.secondary;
-  int _counter = 0;
   IconData icon = Icons.light_mode;
-  String _tltip = "light mode";
 
-  void _toggleTheme() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-      if (_counter%2 == 0) {
-         bgcolor =  lightColorScheme.surface;
-         fgcolor =  lightColorScheme.onSurface;
-          WlcContainer = lightColorScheme.secondary;
-        icon = Icons.light_mode;
-        _tltip = "light mode";
-      }else{
-        bgcolor =  darkColorScheme.surface;
-        fgcolor =  darkColorScheme.primary;
-         WlcContainer = darkColorScheme.secondary;
-        icon = Icons.dark_mode;
-        _tltip = "dark mode";
-      }
-      _counter -= 2;
-    });
-  }
 
 
   @override
@@ -235,7 +209,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                       teamName: 'Team G',
                       imagePath: 'assets/images/teams.jpg',
                     ),
-                    SizedBox(width:15.0),
+                    SizedBox(width:10.0),
                     otherTeams(
                       teamName: 'Team B',
                       imagePath: 'assets/images/livescores.jpg',

@@ -30,6 +30,7 @@ class BottomNavBarState extends State<BottomNavBar>{
 
       bottomNavigationBar: SizedBox(
         height: 80.0,
+
         child: BottomNavigationBar(
             selectedItemColor: Colors.white ,
             unselectedItemColor: const Color(0xffadb5bd),
@@ -39,7 +40,8 @@ class BottomNavBarState extends State<BottomNavBar>{
               });
             },
             currentIndex: currentIndex,items:const [
-              BottomNavigationBarItem(icon: Icon(Icons.home, size:35.0), label: 'Home'),
+              BottomNavigationBarItem(icon: Icon(Icons.home, size:35.0), label: 'Home',
+                backgroundColor: Color(0xff011E41), ),
               BottomNavigationBarItem(icon: Icon(Icons.leaderboard,size:35.0), label: 'Score'),
               BottomNavigationBarItem(icon: Icon(Icons.supervisor_account, size:35.0), label:'Officiate'),
           BottomNavigationBarItem(icon: Icon(Icons.account_circle, size:35.0), label:' Score' ),
