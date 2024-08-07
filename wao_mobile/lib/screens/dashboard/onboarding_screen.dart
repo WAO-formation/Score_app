@@ -94,7 +94,7 @@ class splashButtomNavState extends State<splashButtomNav>{
      color: Colors.white,
       child: Container(
           child:   Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
 
                 ElevatedButton(
@@ -124,6 +124,7 @@ class splashButtomNavState extends State<splashButtomNav>{
                   ),
                 ),
 
+                //const SizedBox(width: 20.0),
                 // Register button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(

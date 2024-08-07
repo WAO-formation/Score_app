@@ -127,7 +127,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                 const SizedBox(height: 20.0), // space
 
                 Container(
-                    height: screenHeight*0.705 ,
+                    height: screenHeight*0.75 ,
                     padding: const EdgeInsets.only( top: 70.0, left: 20.0, right:20.0),
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -157,7 +157,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                               labelStyle:  TextStyle(color: Color(0xff011638),),
                               hintText: 'Enter your email',
                               hintStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.mail, color: Color(0xff011E41),),
+                              suffixIcon: Icon(Icons.mail, color: Color(0xff333533),),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(color: Color(0xff011638),),
                               ),
@@ -181,7 +181,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                               labelStyle:  TextStyle(color: Color(0xff011638),),
                               hintText: 'Enter your password',
                               hintStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
+                              suffixIcon: Icon(Icons.lock, color: Color(0xff333533),),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(color: Color(0xff011638),),
                               ),
@@ -242,20 +242,31 @@ class _LoginHomePageState extends State<LoginHomePage> {
                           SizedBox(height: spacePix), // space
 
                           /*======= Sign up button ======*/
-                          FloatingActionButton.extended(
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xffC10230), // Background color of the button
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0), // Border radius
+                                side: const BorderSide(
+                                  color:Color(0xffC10230), // Border color
+                                  width: 2.0, // Border width
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
+                            ),
                             onPressed: () {
-                              Navigator.pushReplacement(
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (context) =>  BottomNavBar())
                               );
                             },
-                            label: Container(
-                              margin: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                              child: const Text('Login', style: TextStyle(fontSize: 15),),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                color: Color(0xffffffff), // Text color
+                              ),
                             ),
-                            backgroundColor: const Color.fromARGB(255, 193, 2, 48),
-                            foregroundColor: Colors.white70,
-                            hoverColor: Colors.black,
                           ),
 
                           SizedBox(height: spacePix-5), // space
