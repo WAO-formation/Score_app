@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/screens/user/wao_privacy_policy.dart';
 import 'package:wao_mobile/screens/user/wao_rules.dart';
-import '../../custom_widgets/Welcome_box.dart';
-import '../../custom_widgets/custom_appbar.dart';
-import '../teams/user_team_spesification.dart';
-import 'about_dashboard.dart';
+import 'package:wao_mobile/Theme/theme_data.dart';
+import 'package:wao_mobile/custom_widgets/Welcome_box.dart';
+import 'package:wao_mobile/custom_widgets/custom_appbar.dart';
+import 'package:wao_mobile/screens/teams/user_team_spesification.dart';
+import 'package:wao_mobile/screens/user/about_dashboard.dart';
 
 
 class UserProfile extends StatefulWidget {
+  const UserProfile({super.key});
+
   @override
   State<UserProfile> createState() => UserProfileState();
 }
@@ -36,11 +39,11 @@ class UserProfileState extends State<UserProfile> {
                 ),
               ),
               const SizedBox(height: 10.0),
-              const Center(
+               Center(
                 child: Text(
                   'WAO Sport',
                   style: TextStyle(
-                    color: Color(0xff011638),
+                    color: lightColorScheme.secondary,
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -148,16 +151,16 @@ class ProfileButtons extends StatelessWidget {
         children: <Widget>[
           Text(
             pageName,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 20.0,
               fontWeight: FontWeight.w500,
-              color: Color(0xff011638),
+              color: lightColorScheme.secondary,
             ),
           ),
           Icon(
             iconName,
             size: 35.0,
-            color: const Color(0xff011638),
+            color: lightColorScheme.secondary,
           ),
         ],
       ),

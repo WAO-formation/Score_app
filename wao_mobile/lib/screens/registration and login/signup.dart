@@ -265,7 +265,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
 
                               TextButton(
                                 onPressed: () {
-                                  Navigator.push(
+                                  Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(builder: (context) => const LoginHomePage(title: '',))
                                   );

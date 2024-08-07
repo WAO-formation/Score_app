@@ -3,11 +3,7 @@ import 'package:wao_mobile/Theme/theme_data.dart';
 import '../../custom_widgets/Welcome_box.dart';
 import '../../custom_widgets/custom_appbar.dart';
 import '../../custom_widgets/up_coming _matches.dart';
-import '../user/about_dashboard.dart';
 import '../teams/all_teams.dart';
-import '../scores/livescore_dashboard.dart';
-import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
-import 'package:wao_mobile/screens/officiates/officiate_dashboard.dart';
 
 void main() {
   runApp(const DashboardPage());

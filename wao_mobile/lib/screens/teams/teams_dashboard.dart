@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../Theme/theme_data.dart';
 import '../../custom_widgets/Welcome_box.dart';
 import '../../custom_widgets/custom_appbar.dart';
 import '../dashboard/dashboard.dart';
@@ -86,7 +87,7 @@ class _TeamsHomeState extends State<TeamsHome> {
                 const SizedBox(height:20.0),
 
                  Container(
-                   margin: EdgeInsets.only(left: 15.0, right: 15.0 ),
+                   margin: const EdgeInsets.only(left: 15.0, right: 15.0 ),
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
@@ -95,20 +96,20 @@ class _TeamsHomeState extends State<TeamsHome> {
                          child: Container(
                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
                            decoration: BoxDecoration(
-                             color: const Color(0xff011638),
+                             color: lightColorScheme.secondary,
                              borderRadius: BorderRadius.circular(10.0),
                            ),
-                           child: const Column(
+                           child:  Column(
                              children: <Widget>[
                                Text(
                                  "Goals",
                                  style: TextStyle(
-                                   color: Color(0xffC10230),
+                                   color: lightColorScheme.primary,
                                    fontSize: 13.0,
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               Text(
+                               const Text(
                                  "20",
                                  style: TextStyle(
                                    color: Colors.white,
@@ -120,25 +121,25 @@ class _TeamsHomeState extends State<TeamsHome> {
                            ),
                          ),
                        ),
-                       SizedBox(width: 10), // Optional: add spacing between containers
+                       const SizedBox(width: 10), // Optional: add spacing between containers
                        Expanded(
                          child: Container(
-                           padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
                            decoration: BoxDecoration(
-                             color: Color(0xff011638),
+                             color: lightColorScheme.secondary,
                              borderRadius: BorderRadius.circular(10.0),
                            ),
-                           child: const Column(
+                           child:  Column(
                              children: <Widget>[
                                Text(
                                  "Games",
                                  style: TextStyle(
-                                   color: Color(0xffC10230),
+                                   color: lightColorScheme.primary,
                                    fontSize: 13.0,
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               Text(
+                               const Text(
                                  "4",
                                  style: TextStyle(
                                    color: Colors.white,
@@ -150,25 +151,25 @@ class _TeamsHomeState extends State<TeamsHome> {
                            ),
                          ),
                        ),
-                       SizedBox(width: 10), // Optional: add spacing between containers
+                       const SizedBox(width: 10), // Optional: add spacing between containers
                        Expanded(
                          child: Container(
                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
                            decoration: BoxDecoration(
-                             color: const Color(0xff011638),
+                             color: lightColorScheme.secondary,
                              borderRadius: BorderRadius.circular(10.0),
                            ),
-                           child: const Column(
+                           child:  Column(
                              children: <Widget>[
                                Text(
                                  "Points",
                                  style: TextStyle(
-                                   color: Color(0xffC10230),
+                                   color: lightColorScheme.primary,
                                    fontSize: 16.0,
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               Text(
+                               const Text(
                                  "13",
                                  style: TextStyle(
                                    color: Colors.white,
@@ -188,10 +189,10 @@ class _TeamsHomeState extends State<TeamsHome> {
                 const SizedBox(height: 30.0),
 
                 //short details about the team that the supporters have to know
-                const Text(
+                 Text(
                     'Team Information',
                   style:  TextStyle(
-                      color: Color(0xffC10230),
+                      color: lightColorScheme.primary,
                       fontSize: 25.0,
                       fontWeight: FontWeight.bold
                   ),
@@ -211,49 +212,12 @@ class _TeamsHomeState extends State<TeamsHome> {
                   ),
                 ),
 
-                const SizedBox(height: 25.0),
-
-                //call to action for the supporters to follow the team so that they can get updated when their team is having a match
-                //for this section if the user is already following the team then this section won't be displayed to the current user
-
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0,),
-                  child: const Text(
-                    'In order to get team updates about matches and success achieved by the team click the button below to follow the team.',
-                    style:  TextStyle(
-                      color: Color(0xff2F3B4A),
-                      fontSize: 20.0,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-
-                const SizedBox(height: 20.0),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:  const Color(0xffC10230),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
-                  ),
-                  onPressed: (){},
-                  child: const Text(
-                    'Follow',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
                 const SizedBox(height: 30.0),
 
-                const Text(
+                 Text(
                   'Team Announcement',
                   style:  TextStyle(
-                      color: Color(0xffC10230),
+                      color: lightColorScheme.primary,
                       fontSize: 25.0,
                       fontWeight: FontWeight.bold
                   ),
@@ -315,8 +279,8 @@ class teamAnnouncement extends StatelessWidget{
         children:[
           Text(
               AnnouncementTitle,
-            style:  const TextStyle(
-              color: Color(0xff011638),
+            style:   TextStyle(
+              color: lightColorScheme.secondary,
               fontSize: 20.0,
             ),
           ),

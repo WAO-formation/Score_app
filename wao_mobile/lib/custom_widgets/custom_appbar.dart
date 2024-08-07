@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Theme/theme_data.dart';
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool centerTitle;
@@ -28,7 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: const Icon(Icons.more_vert, color: Colors.white, size: 18.0),
           ),
         ],
-        backgroundColor: Color(0xff011E41),
+        backgroundColor: lightColorScheme.secondary,
       ),
     )
     ;

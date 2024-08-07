@@ -66,8 +66,6 @@ class _OfficiateHomeState extends State<OfficiateHome> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
 
     return Scaffold(
@@ -131,19 +129,19 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                       backgroundColor: const Color(0xffffffff), // Background color of the button
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0), // Border radius
-                        side: const BorderSide(
-                          color:Color(0xffC10230), // Border color
+                        side:  BorderSide(
+                          color:  lightColorScheme.primary, // Border color
                           width: 2.0, // Border width
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
                     ),
                     onPressed: () {},
-                    child: const Text(
+                    child:  Text(
                       'More',
                       style: TextStyle(
                         fontSize: 15.0,
-                        color: Color(0xffC10230), // Text color
+                        color:  lightColorScheme.primary, // Text color
                       ),
                     ),
                   ),
@@ -151,11 +149,11 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                   // Register button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xffC10230), // Background color of the button
+                      backgroundColor:  lightColorScheme.primary, // Background color of the button
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0), // Border radius
-                        side: const BorderSide(
-                          color:Color(0xffC10230), // Border color
+                        side:  BorderSide(
+                          color:  lightColorScheme.primary, // Border color
                           width: 2.0, // Border width
                         ),
                       ),
@@ -205,9 +203,9 @@ class OfficiateTile extends StatelessWidget {
           /*======= Section heading ======*/
           Text(
             tileLabel.toUpperCase(), 
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 18,
-              color:  Color.fromARGB(255, 193, 2, 48),
+              color:  lightColorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),

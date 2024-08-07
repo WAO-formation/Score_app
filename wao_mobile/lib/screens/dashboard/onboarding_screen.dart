@@ -27,46 +27,48 @@ class _onboardingSreenState extends State<onboardingSreen> {
     return Scaffold(
      backgroundColor: Colors.white,
 
-        body: Center(
-          child: Container(
-              margin: const EdgeInsets.only( top: 150.0),
-            child:  Column(
-              children: [
-                Material(
-                  elevation: 5,
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: const CircleAvatar(
-                    radius: 70.0, // Image size
-                    backgroundImage: AssetImage('assets/images/WAO_LOGO.jpg'),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Container(
+                margin: const EdgeInsets.only( top: 150.0),
+              child:  Column(
+                children: [
+                  Material(
+                    elevation: 5,
+                    borderRadius: BorderRadius.circular(20.0),
+                    child: const CircleAvatar(
+                      radius: 70.0, // Image size
+                      backgroundImage: AssetImage('assets/images/WAO_LOGO.jpg'),
+                    ),
                   ),
-                ),
-                SizedBox(height:20.0),
-                const Text(
-                 "WAO",
-                  style: TextStyle(
-                    fontSize: 50,
-                    color:  Color.fromARGB(255, 193, 2, 48),
-                    fontWeight: FontWeight.bold,
+                  SizedBox(height:20.0),
+                  const Text(
+                   "WAO",
+                    style: TextStyle(
+                      fontSize: 50,
+                      color:  Color.fromARGB(255, 193, 2, 48),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
 
-                SizedBox(height:20.0),
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric( horizontal: 15.0),
-                    child: const Text(
-                      "Welcome to the new era of digitised sports where technology meets skills, Wao! ",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Color(0xff011638),
+                  SizedBox(height:20.0),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric( horizontal: 15.0),
+                      child: const Text(
+                        "Welcome to the new era of digitised sports where technology meets skills, Wao! ",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Color(0xff011638),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                
-              ]
-            )
+
+                ]
+              )
+            ),
           ),
         ),
       bottomNavigationBar: splashButtomNav(),

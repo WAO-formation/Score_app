@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/screens/dashboard/onboarding_screen.dart';
-import 'package:wao_mobile/screens/registration%20and%20login/login.dart';
-import 'package:wao_mobile/screens/registration%20and%20login/signup.dart';
-import 'package:wao_mobile/team_admin/admin_team_dashboard.dart';
-import 'dart:ui';
 
 import 'Theme/dark_theme.dart';
 import 'Theme/light_theme.dart';
-import 'custom_widgets/bottom_nav_bar.dart';
 
 void main() {
   runApp(

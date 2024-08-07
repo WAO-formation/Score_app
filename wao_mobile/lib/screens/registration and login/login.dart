@@ -68,7 +68,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
     // than having to individually change instances of widgets.
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool _isRememberMeChecked = false;
+    bool isRememberMeChecked = false;
 
 
 
@@ -209,10 +209,10 @@ class _LoginHomePageState extends State<LoginHomePage> {
                                 Row(
                                   children: <Widget>[
                                     Checkbox(
-                                      value: _isRememberMeChecked,
+                                      value: isRememberMeChecked,
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          _isRememberMeChecked = value ?? false;
+                                          isRememberMeChecked = value ?? false;
                                         });
                                       },
                                     ),
@@ -244,7 +244,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                           /*======= Sign up button ======*/
                           FloatingActionButton.extended(
                             onPressed: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(builder: (context) =>  BottomNavBar())
                               );

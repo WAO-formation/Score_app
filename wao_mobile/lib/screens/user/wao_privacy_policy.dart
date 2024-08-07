@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../Theme/theme_data.dart';
 import '../../custom_widgets/Welcome_box.dart';
 import '../../custom_widgets/custom_appbar.dart';
-import '../dashboard/dashboard.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key, });
@@ -22,7 +22,7 @@ class PrivacyPolicy extends StatefulWidget {
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-  static const double spacePix = 20.0; // spacing pixel 
+// spacing pixel
 
 
   @override
@@ -33,8 +33,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
 
 
@@ -103,11 +101,11 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffC10230), // Background color of the button
+                  backgroundColor: lightColorScheme.primary, // Background color of the button
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0), // Border radius
-                    side: const BorderSide(
-                      color:Color(0xffC10230), // Border color
+                    side:  BorderSide(
+                      color: lightColorScheme.primary, // Border color
                       width: 2.0, // Border width
                     ),
                   ),
@@ -157,9 +155,9 @@ class AboutTile extends StatelessWidget {
               /*======= Section heading ======*/
               Text(
                 tileLabel.toUpperCase(),
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
-                  color:  Color.fromARGB(255, 193, 2, 48),
+                  color:  lightColorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),

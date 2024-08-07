@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../Theme/theme_data.dart';
 import '../screens/teams/teams_dashboard.dart';
 
 class UpcomingMatches extends StatelessWidget {
@@ -23,7 +24,6 @@ class UpcomingMatches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     //in this container we describe the container that will be used to display the upcoming matches in a slider
@@ -128,8 +128,8 @@ class topTeamsState extends State<topTeams> {
             const SizedBox(height:10.0),
              Text(
               widget.teamName,
-              style: const TextStyle(
-                  color: Color(0xff011638),
+              style:  TextStyle(
+                 backgroundColor: lightColorScheme.secondary,
                   fontSize: 20.0,
                 fontWeight: FontWeight.bold
               ),
@@ -137,7 +137,7 @@ class topTeamsState extends State<topTeams> {
             const SizedBox(height:10.0),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor:  const Color(0xffC10230),
+                backgroundColor:  lightColorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
@@ -205,8 +205,8 @@ class otherTeamsState extends State<otherTeams> {
             const SizedBox(height: 10.0),
             Text(
               widget.teamName,
-              style: const TextStyle(
-                color: Color(0xff011638),
+              style:  TextStyle(
+                color: lightColorScheme.secondary,
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
               ),
@@ -214,7 +214,7 @@ class otherTeamsState extends State<otherTeams> {
             const SizedBox(height: 10.0),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffC10230),
+                backgroundColor:lightColorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
 
+import '../../Theme/theme_data.dart';
 import '../../custom_widgets/Welcome_box.dart';
 import '../../custom_widgets/custom_appbar.dart';
 
@@ -110,8 +111,8 @@ class teams extends StatelessWidget{
               const SizedBox(height: 10.0),
               Text(
                 teamName,
-                style: const TextStyle(
-                  color: Color(0xff011638),
+                style:  TextStyle(
+                  color: lightColorScheme.secondary,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -119,7 +120,7 @@ class teams extends StatelessWidget{
               const SizedBox(height: 10.0),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffC10230),
+                  backgroundColor: lightColorScheme.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),

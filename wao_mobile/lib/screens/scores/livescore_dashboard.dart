@@ -103,10 +103,10 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                 const SizedBox(height: spacePix), // space
 
                 /** Heading */
-                const Text(
+                 Text(
                   'Live Scores',
                   style: TextStyle(
-                    fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xff011638),
+                    fontSize: 25, fontWeight: FontWeight.bold, color: lightColorScheme.secondary,
                   ),
                 ),
                 SizedBox(height:10.0),
@@ -115,7 +115,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                   margin: EdgeInsets.symmetric(horizontal: screenWidth*0.1, vertical: screenHeight*0.005),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                   decoration: BoxDecoration(
-                    color: const Color(0xffC10230),
+                    color: lightColorScheme.primary,
                     borderRadius: BorderRadius.circular(10)
                   ),
 
@@ -197,31 +197,31 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                     backgroundColor: const Color(0xffffffff), // Background color of the button
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0), // Border radius
-                      side: const BorderSide(
-                        color:Color(0xffC10230), // Border color
+                      side:  BorderSide(
+                        color:  lightColorScheme.primary, // Border color
                         width: 2.0, // Border width
                       ),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
                   ),
                   onPressed: () {},
-                  child: const Text(
+                  child:  Text(
                     'Details',
                     style: TextStyle(
                       fontSize: 15.0,
-                      color: Color(0xffC10230), // Text color
+                      color:  lightColorScheme.primary, // Text color
                     ),
                   ),
                 ),
 
                 SizedBox(height: 30.0),
 
-                const Text(
+                 Text(
                   'Up Coming Matches',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xff011638),
+                    color: lightColorScheme.secondary,
                   ),
                 ),
 
@@ -231,7 +231,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                   margin: EdgeInsets.symmetric(horizontal: screenWidth*0.1, vertical: screenHeight*0.005),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   decoration: BoxDecoration(
-                    color:Color(0xff011638),
+                    color: lightColorScheme.secondary,
                     borderRadius: BorderRadius.circular(10)
                   ),
 
@@ -252,7 +252,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                     margin: EdgeInsets.symmetric(horizontal: screenWidth*0.1, vertical: screenHeight*0.005),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     decoration: BoxDecoration(
-                        color:Color(0xff011638),
+                        color: lightColorScheme.secondary,
                         borderRadius: BorderRadius.circular(10)
                     ),
 
@@ -273,7 +273,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                   margin: EdgeInsets.symmetric(horizontal: screenWidth*0.1, vertical: screenHeight*0.005),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Color(0xff011638),
+                    color:   lightColorScheme.secondary,
                     borderRadius: BorderRadius.circular(10)
                   ),
 

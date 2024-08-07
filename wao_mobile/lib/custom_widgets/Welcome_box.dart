@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Theme/theme_data.dart';
+
 
 
 class WelcomeToWAO extends StatelessWidget{
@@ -18,9 +20,9 @@ class WelcomeToWAO extends StatelessWidget{
     return Container(
         margin: EdgeInsets.symmetric(horizontal: screenWidth*0.02, vertical: screenHeight*0.005),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration:  const BoxDecoration(
+        decoration:   BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(10)),
-          color:Color(0xff011E41),
+          color:  lightColorScheme.secondary,
         ),
 
         child : Row(
