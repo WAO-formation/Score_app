@@ -111,7 +111,20 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  const snackBar = SnackBar(
+                    duration: Duration(seconds: 5),
+                    content: Column(
+                      children: [
+                        Text('Downloading...'),
+                        SizedBox(width: 20),
+                        LinearProgressIndicator(),
+                      ],
+                    ),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                },
                 child: const Text(
                   'More',
                   style: TextStyle(

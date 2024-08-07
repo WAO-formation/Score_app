@@ -1,161 +1,102 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:wao_mobile/screens/registration%20and%20login/login.dart';
 import 'package:wao_mobile/screens/registration%20and%20login/signup.dart';
 
-class onboardingSreen extends StatefulWidget {
-  const onboardingSreen({
-    super.key, 
-  });
-  
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
 
   @override
-  State<onboardingSreen> createState() => _onboardingSreenState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _onboardingSreenState extends State<onboardingSreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-     backgroundColor: Colors.white,
-
-        body: SingleChildScrollView(
+      body: Container(
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromARGB(255, 1, 30, 65),
+              Color.fromARGB(255, 34, 193, 195),
+              Color.fromARGB(255, 253, 187, 45),
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
           child: Center(
             child: Container(
-                margin: const EdgeInsets.only( top: 150.0),
-              child:  Column(
+              margin: const EdgeInsets.only(top: 150.0),
+
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Material(
                     elevation: 5,
                     borderRadius: BorderRadius.circular(20.0),
                     child: const CircleAvatar(
-                      radius: 70.0, // Image size
+                      radius: 70.0,
                       backgroundImage: AssetImage('assets/images/WAO_LOGO.jpg'),
                     ),
                   ),
-                  SizedBox(height:20.0),
+                  const SizedBox(height: 20.0),
                   const Text(
-                   "WAO",
+                    "WAO Sport",
                     style: TextStyle(
-                      fontSize: 50,
-                      color:  Color.fromARGB(255, 193, 2, 48),
+                      fontSize: 30,
+                      color: Color.fromARGB(255, 193, 2, 48),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  SizedBox(height:20.0),
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric( horizontal: 15.0),
-                      child: const Text(
-                        "Welcome to the new era of digitised sports where technology meets skills, Wao! ",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color(0xff011638),
-                        ),
+                  const SizedBox(height: 20.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      "Welcome to the new era of digitised sports where technology meets skills, Wao!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Color(0xffffffff),
+                        fontWeight: FontWeight.bold
                       ),
                     ),
                   ),
 
-                ]
-              )
+                  SizedBox(height: 150.0),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 1, 30, 65),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginHomePage(title: '')),
+                      );
+                    },
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        color: Color(0xffffffff),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      bottomNavigationBar: splashButtomNav(),
-    );
-  }
-
-}
-
-
-class splashButtomNav extends StatefulWidget{
-  @override
-  State<splashButtomNav> createState() => splashButtomNavState();
-
-}
-
-class splashButtomNavState extends State<splashButtomNav>{
-  @override
-  Widget build(BuildContext context) {
-
-    return BottomAppBar(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-      height: 125.0,
-     color: Colors.white,
-      child: Container(
-          child:   Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffffffff), // Background color of the button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Border radius
-                      side: const BorderSide(
-                        color:Color(0xffC10230), // Border color
-                        width: 2.0, // Border width
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SignupHomePage(title: '',))
-                    );
-                  },
-                  child: const Text(
-                    'Signup',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Color(0xffC10230), // Text color
-                    ),
-                  ),
-                ),
-
-                //const SizedBox(width: 20.0),
-                // Register button
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffC10230), // Background color of the button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Border radius
-                      side: const BorderSide(
-                        color:Color(0xffC10230), // Border color
-                        width: 2.0, // Border width
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginHomePage(title: '',))
-                    );
-                  },
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Color(0xffffffff), // Text color
-                    ),
-                  ),
-                ),
-              ]
-          )
       ),
     );
   }
-
 }
+

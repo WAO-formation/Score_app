@@ -248,7 +248,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                               padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
                             ),
                             onPressed: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(builder: (context) =>  BottomNavBar())
                               );

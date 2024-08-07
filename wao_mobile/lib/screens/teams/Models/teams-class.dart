@@ -28,13 +28,13 @@ class TeamsCart extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      margin: const EdgeInsets.only(left: 10.0),
+      margin: const EdgeInsets.only(left: 15.0),
       child: Material(
         elevation: 4,
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
-          width: screenWidth * 0.9,
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: screenWidth * 0.02),
+          width: screenWidth * 0.8,
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
           decoration: BoxDecoration(
             color: const Color(0xffdee2e6),
             borderRadius: BorderRadius.circular(20.0),

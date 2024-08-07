@@ -56,7 +56,7 @@ class OfficiateHome extends StatefulWidget {
 }
 
 class _OfficiateHomeState extends State<OfficiateHome> {
-  static const double spacePix = 20.0; // spacing pixel
+// spacing pixel
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +136,20 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      const snackBar = SnackBar(
+                        duration: Duration(seconds: 5),
+                        content: Column(
+                          children: [
+                            Text('Downloading...'),
+                            SizedBox(width: 20),
+                            LinearProgressIndicator(),
+                          ],
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                    },
                     child:  Text(
                       'More',
                       style: TextStyle(

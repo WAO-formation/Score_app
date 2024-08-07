@@ -35,7 +35,7 @@ class _AboutHomeState extends State<AboutHome> {
     // than having to individually change instances of widgets.
 
 
-    
+
     return Scaffold(
       backgroundColor: Colors.white, // Set the background color
 
@@ -52,7 +52,7 @@ class _AboutHomeState extends State<AboutHome> {
       body:  Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        
+
         child: Container(
           padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 40.0),
           child: Column(
@@ -111,7 +111,20 @@ class _AboutHomeState extends State<AboutHome> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  const snackBar = SnackBar(
+                    duration: Duration(seconds: 5),
+                    content: Column(
+                      children: [
+                        Text('Downloading...'),
+                        SizedBox(width: 20),
+                        LinearProgressIndicator(),
+                      ],
+                    ),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                },
                 child: const Text(
                   'More',
                   style: TextStyle(
@@ -124,11 +137,11 @@ class _AboutHomeState extends State<AboutHome> {
             ],
           ),
         ),
-        
-      ),
-      
 
-      
+      ),
+
+
+
     );
   }
 }
@@ -136,7 +149,7 @@ class _AboutHomeState extends State<AboutHome> {
 
 class AboutTile extends StatelessWidget {
   const AboutTile({super.key, required this.tileLabel, required this.tileContent, });
-  
+
   final String tileLabel;
   final String tileContent;
 
@@ -154,7 +167,7 @@ class AboutTile extends StatelessWidget {
         children: [
           /*======= Section heading ======*/
           Text(
-            tileLabel.toUpperCase(), 
+            tileLabel.toUpperCase(),
             style:  TextStyle(
               fontSize: 18,
               color:  lightColorScheme.primary,
@@ -162,12 +175,12 @@ class AboutTile extends StatelessWidget {
             ),
           ),
           SizedBox(height:10.0),
-          
+
           const SizedBox(height: spacePix), // space
 
           // Section content
           Text(
-            tileContent, 
+            tileContent,
             style: const TextStyle(
               fontSize: 16,
               color: Color(0xff2F3B4A),
@@ -176,7 +189,7 @@ class AboutTile extends StatelessWidget {
         ]
       )
     );
-  
+
   }
 }
 
