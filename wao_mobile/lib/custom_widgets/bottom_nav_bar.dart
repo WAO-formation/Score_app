@@ -8,6 +8,8 @@ import '../Theme/theme_data.dart';
 import '../screens/user/user_profile.dart';
 
 class BottomNavBar extends StatefulWidget{
+  const BottomNavBar({super.key});
+
   @override
   State<BottomNavBar> createState() => BottomNavBarState();
 
