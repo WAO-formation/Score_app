@@ -196,7 +196,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
 
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffffffff), // Background color of the button
+                    backgroundColor:lightColorScheme.surface, // Background color of the button
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0), // Border radius
                       side:  BorderSide(
@@ -380,10 +380,10 @@ class UpcomingMatchesTile extends StatelessWidget {
         /*======= Team 1 name ======*/
         Text(
           teamNames[0].toUpperCase(), 
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Colors.white70,
+            color: lightColorScheme.primary,
           ),
         ),
 
@@ -408,20 +408,20 @@ class UpcomingMatchesTile extends StatelessWidget {
             /*======= Match time ======*/
             Text(
               matchTime.toUpperCase(), 
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.white70,
+                color: lightColorScheme.surface,
               ),
             ),
 
             /*======= Match date ======*/
             Text(
               matchDate.toUpperCase(), 
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.white70,
+                color: lightColorScheme.surface,
               ),
             ),
           ],
@@ -445,9 +445,9 @@ class UpcomingMatchesTile extends StatelessWidget {
         /*======= Team 2 name ======*/
         Text(
           teamNames[1].toUpperCase(), 
-          style: const TextStyle(
+          style:  TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white70,
+            color: lightColorScheme.surface,
           ),
         ),
 

@@ -36,14 +36,15 @@ class _TeamsHomeState extends State<TeamsHome> {
     // than having to individually change instances of widgets.
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final woacolor = lightColorScheme;
     
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color
+      backgroundColor: lightColorScheme.surface, // Set the background color
       
       appBar: CustomAppBar(
         title: 'Team Details',
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+            icon:  Icon(Icons.arrow_back_rounded, color: woacolor.surface),
             onPressed: () {
               Navigator.pop(context);
             }
@@ -95,7 +96,7 @@ class _TeamsHomeState extends State<TeamsHome> {
                          child: Container(
                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
                            decoration: BoxDecoration(
-                             color: lightColorScheme.secondary,
+                             color: woacolor.secondary,
                              borderRadius: BorderRadius.circular(10.0),
                            ),
                            child:  Column(
@@ -103,15 +104,15 @@ class _TeamsHomeState extends State<TeamsHome> {
                                Text(
                                  "Goals",
                                  style: TextStyle(
-                                   color: lightColorScheme.primary,
+                                   color: woacolor.primary,
                                    fontSize: 13.0,
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               const Text(
+                                Text(
                                  "20",
                                  style: TextStyle(
-                                   color: Colors.white,
+                                   color: woacolor.surface,
                                    fontSize: 15.0,
                                    fontWeight: FontWeight.bold,
                                  ),
@@ -138,10 +139,10 @@ class _TeamsHomeState extends State<TeamsHome> {
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               const Text(
+                                Text(
                                  "4",
                                  style: TextStyle(
-                                   color: Colors.white,
+                                   color: lightColorScheme.surface,
                                    fontSize: 15.0,
                                    fontWeight: FontWeight.bold,
                                  ),
@@ -168,10 +169,10 @@ class _TeamsHomeState extends State<TeamsHome> {
                                    fontWeight: FontWeight.bold,
                                  ),
                                ),
-                               const Text(
+                                Text(
                                  "13",
                                  style: TextStyle(
-                                   color: Colors.white,
+                                   color: lightColorScheme.surface,
                                    fontSize: 15.0,
                                    fontWeight: FontWeight.bold,
                                  ),
@@ -271,7 +272,7 @@ class teamAnnouncement extends StatelessWidget{
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0),
         margin: const EdgeInsets.symmetric(horizontal: 10.0,),
         decoration: BoxDecoration(
-            color: const Color(0xffdee2e6),
+            color: lightColorScheme.primary,
             borderRadius: BorderRadius.circular(10.0)
         ),
       child:  Column(

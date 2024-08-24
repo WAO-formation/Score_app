@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/bottom_nav_bar.dart';
+import '../../shared/theme_data.dart';
 import 'login.dart';
 
 
@@ -68,12 +69,10 @@ class _SignupHomePageState extends State<SignupHomePage> {
     // than having to individually change instances of widgets.
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool _isRememberMeChecked = false;
-
 
 
     return Scaffold(
-      backgroundColor: const Color(0xff011638),// Set the background color
+      backgroundColor: lightColorScheme.secondary,// Set the background color
       body:  SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.only( top: 80.0),
@@ -103,24 +102,24 @@ class _SignupHomePageState extends State<SignupHomePage> {
                   //margin: const EdgeInsets.fromLTRB(100, 0, 100, 0),
                   width: 110.0,
                   height: 110.0,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
+                  decoration:  BoxDecoration(
+                    image: const DecorationImage(
                       image: AssetImage("assets/images/WAO_LOGO.jpg"),
                       fit: BoxFit.cover,
                       scale: 0.146,
                       filterQuality: FilterQuality.high,
                     ),
-                    color: Colors.white,
+                    color: lightColorScheme.surface,
                     borderRadius: BorderRadius.all(Radius.circular(60)),
                   ),
                 ),
 
                 /*======= Form heading ======*/
-                const Text(
+                 Text(
                     'WAO',
                     style: TextStyle(
                       fontSize: 35.0, fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 162, 170, 173),
+                      color: lightColorScheme.surface,
                     )
                 ),
 
@@ -129,8 +128,8 @@ class _SignupHomePageState extends State<SignupHomePage> {
                 Container(
                     height: screenHeight*0.75 ,
                     padding: const EdgeInsets.only( top: 70.0, left: 20.0, right:20.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration:  BoxDecoration(
+                      color: lightColorScheme.surface,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(100),
                       ),
@@ -139,33 +138,33 @@ class _SignupHomePageState extends State<SignupHomePage> {
                     child:  Column(
                         children:[
 
-                          const Text(
+                           Text(
                               'Login',
                               style: TextStyle(
                                 fontSize: 25.0, fontWeight: FontWeight.bold,
-                                color: Color(0xff011E41),
+                                color: lightColorScheme.secondary,
                               )
                           ),
                           const SizedBox(height: 35.0), // space
 
                           /*======= Email entry field ======*/
 
-                          const TextField(
+                           TextField(
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
                               labelText: 'Email',
-                              labelStyle:  TextStyle(color: Color(0xff011638),),
+                              labelStyle:  TextStyle(color: lightColorScheme.secondary,),
                               hintText: 'Enter your email',
                               hintStyle: TextStyle(color: Colors.grey),
                               suffixIcon: Icon(Icons.mail, color: Color(0xff333533),),
                               border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary,),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color:lightColorScheme.secondary,),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary,),
                               ),
                             ),
                           ),
@@ -174,22 +173,22 @@ class _SignupHomePageState extends State<SignupHomePage> {
 
                           /*======= Password entry field ======*/
 
-                          const TextField(
+                           TextField(
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              labelStyle:  TextStyle(color: Color(0xff011638),),
+                              labelStyle:  TextStyle(color: lightColorScheme.secondary,),
                               hintText: 'Enter your password',
                               hintStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.lock, color: Color(0xff333533),),
+                              suffixIcon: Icon(Icons.lock, color: lightColorScheme.secondary,),
                               border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary,),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary,),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary,),
                               ),
                             ),
                             style: TextStyle(
@@ -201,22 +200,22 @@ class _SignupHomePageState extends State<SignupHomePage> {
 
                           const SizedBox(height: 25.0), // space
 
-                    const TextField(
+                     TextField(
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle:  TextStyle(color: Color(0xff011638),),
+                        labelStyle:  TextStyle(color: lightColorScheme.secondary),
                         hintText: 'Enter your password',
                         hintStyle: TextStyle(color: Colors.grey),
-                        suffixIcon: Icon(Icons.lock, color: Color(0xff011E41),),
+                        suffixIcon: Icon(Icons.lock, color: lightColorScheme.secondary),
                         border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xff011638),),
+                          borderSide: BorderSide(color: lightColorScheme.secondary),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xff011638),),
+                          borderSide: BorderSide(color: lightColorScheme.secondary),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xff011638),),
+                          borderSide: BorderSide(color: lightColorScheme.secondary),
                         ),
                       ),
                       style: TextStyle(
@@ -236,11 +235,11 @@ class _SignupHomePageState extends State<SignupHomePage> {
                           /*======= Sign up button ======*/
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xffC10230), // Background color of the button
+                              backgroundColor:  lightColorScheme.primary, // Background color of the button
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0), // Border radius
-                                side: const BorderSide(
-                                  color:Color(0xffC10230), // Border color
+                                side:  BorderSide(
+                                  color: lightColorScheme.primary, // Border color
                                   width: 2.0, // Border width
                                 ),
                               ),
@@ -252,11 +251,11 @@ class _SignupHomePageState extends State<SignupHomePage> {
                                   MaterialPageRoute(builder: (context) =>  BottomNavBar())
                               );
                             },
-                            child: const Text(
+                            child:  Text(
                               'Signup',
                               style: TextStyle(
                                 fontSize: 15.0,
-                                color: Color(0xffffffff), // Text color
+                                color:lightColorScheme.surface, // Text color
                               ),
                             ),
                           ),
@@ -266,10 +265,10 @@ class _SignupHomePageState extends State<SignupHomePage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                               Text(
                                 'Already have an Account?',
                                 style: TextStyle(
-                                  color: Color(0xff011E41),
+                                  color:lightColorScheme.secondary,
                                 ),
                               ),
 
@@ -280,12 +279,12 @@ class _SignupHomePageState extends State<SignupHomePage> {
                                       MaterialPageRoute(builder: (context) => const LoginHomePage(title: '',))
                                   );
                                 },
-                                child: const Text(
+                                child:  Text(
                                   'Sign Up',
                                   style: TextStyle(
                                     decoration: TextDecoration.underline,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xffC10230),
+                                    color: lightColorScheme.primary,
                                   ),
                                 ),
                               ),

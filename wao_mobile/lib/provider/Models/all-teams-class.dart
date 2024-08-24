@@ -41,7 +41,7 @@ class TeamsCart extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: 10.0, vertical: 15.0),
             decoration: BoxDecoration(
-              color: const Color(0xffdee2e6),
+              color: lightColorScheme.surface,
               borderRadius: BorderRadius.circular(20.0),
             ),
             child: Column(
@@ -80,11 +80,11 @@ class TeamsCart extends StatelessWidget {
                                   title: '',
                                 )));
                   },
-                  child: const Text(
+                  child:  Text(
                     'View More',
                     style: TextStyle(
                       fontSize: 15.0,
-                      color: Colors.white,
+                      color: lightColorScheme.surface,
                     ),
                   ),
                 ),

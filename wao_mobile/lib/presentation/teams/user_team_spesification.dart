@@ -3,6 +3,7 @@ import 'package:wao_mobile/presentation/teams/teams_dashboard.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
 
 
 
@@ -18,11 +19,11 @@ class userTeamSpecificationState extends State<userTeamSpecification>{
   Widget build(BuildContext context) {
 
     return  Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: lightColorScheme.surface,
         appBar:  CustomAppBar(
           title: 'Teams Specification',
           leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              icon:  Icon(Icons.arrow_back_rounded, color: lightColorScheme.surface),
               onPressed: () {
                 Navigator.pop(context);
               }
@@ -130,7 +131,7 @@ class teamSpecification extends StatelessWidget{
       child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
           decoration: BoxDecoration(
-            color: const Color(0xffe9ecef),
+            color: lightColorScheme.surface,
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Center(
@@ -146,9 +147,9 @@ class teamSpecification extends StatelessWidget{
                     const SizedBox(height: 5.0),
                     Text(
                       TeamName,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 16,
-                        color: Color(0xff011638),
+                        color: lightColorScheme.secondary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -170,9 +171,9 @@ class teamSpecification extends StatelessWidget{
                   },
                   child:  Text(
                     ButtonName,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 15.0,
-                      color: Colors.white,
+                      color: lightColorScheme.surface,
                     ),
                   ),
                 ),
