@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/shared/theme_data.dart';
 
-import '../Theme/theme_data.dart';
-import '../screens/teams/teams_dashboard.dart';
+import '../presentation/teams/teams_dashboard.dart';
+
+
+
 
 class UpcomingMatches extends StatelessWidget {
   final String teamA;

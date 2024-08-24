@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/shared/theme_data.dart';
 
-import '../Theme/theme_data.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;

@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/registration%20and%20login/login.dart';
-import 'package:wao_mobile/screens/registration%20and%20login/signup.dart';
+
+import '../registration and login/login.dart';
+
+
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});

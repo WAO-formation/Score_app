@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/Theme/theme_data.dart';
-import 'package:wao_mobile/custom_widgets/Welcome_box.dart';
-import 'package:wao_mobile/custom_widgets/custom_appbar.dart';
+
+import '../../shared/Welcome_box.dart';
+import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
+
+
+
 
 class AboutHome extends StatefulWidget {
   const AboutHome({super.key, });

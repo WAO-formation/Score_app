@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/registration%20and%20login/signup.dart';
-
-import '../../custom_widgets/bottom_nav_bar.dart';
-import '../dashboard/dashboard.dart';
+import '../../shared/bottom_nav_bar.dart';
 import 'login.dart';
+
+
 
 
 void main() {

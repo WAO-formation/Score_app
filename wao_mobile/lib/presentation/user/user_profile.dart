@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/user/wao_privacy_policy.dart';
-import 'package:wao_mobile/screens/user/wao_rules.dart';
-import 'package:wao_mobile/Theme/theme_data.dart';
-import 'package:wao_mobile/custom_widgets/Welcome_box.dart';
-import 'package:wao_mobile/custom_widgets/custom_appbar.dart';
-import 'package:wao_mobile/screens/teams/user_team_spesification.dart';
-import 'package:wao_mobile/screens/user/about_dashboard.dart';
+import 'package:wao_mobile/presentation/user/wao_privacy_policy.dart';
+import 'package:wao_mobile/presentation/user/wao_rules.dart';
+
+import '../../shared/Welcome_box.dart';
+import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
+import '../teams/user_team_spesification.dart';
+import 'about_dashboard.dart';
+
+
 
 
 class UserProfile extends StatefulWidget {

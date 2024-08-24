@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:wao_mobile/screens/dashboard/dashboard.dart';
-import 'package:wao_mobile/screens/scores/livescore_dashboard.dart';
-import 'package:wao_mobile/screens/officiates/officiate_dashboard.dart';
+import 'package:wao_mobile/presentation/dashboard/dashboard.dart';
+import 'package:wao_mobile/presentation/scores/livescore_dashboard.dart';
+import 'package:wao_mobile/presentation/officiates/officiate_dashboard.dart';
 
-import '../Theme/theme_data.dart';
-import '../screens/user/user_profile.dart';
+import 'package:wao_mobile/shared/theme_data.dart';
+import '../presentation/user/user_profile.dart';
 
 class BottomNavBar extends StatefulWidget{
   const BottomNavBar({super.key});

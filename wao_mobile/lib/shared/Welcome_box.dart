@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../Theme/theme_data.dart';
+import 'package:wao_mobile/shared/theme_data.dart';
 
 
 

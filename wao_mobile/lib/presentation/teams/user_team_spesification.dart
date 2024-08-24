@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/presentation/teams/teams_dashboard.dart';
 
-import 'package:wao_mobile/custom_widgets/Welcome_box.dart';
-import 'package:wao_mobile/custom_widgets/custom_appbar.dart';
-import 'package:wao_mobile/screens/teams/teams_dashboard.dart';
+import '../../shared/Welcome_box.dart';
+import '../../shared/custom_appbar.dart';
+
+
 
 
 class userTeamSpecification extends StatefulWidget{

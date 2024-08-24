@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/dashboard/onboarding_screen.dart';
+import 'package:wao_mobile/presentation/dashboard/onboarding_screen.dart';
+
 
 void main() {
   runApp(

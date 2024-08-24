@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:wao_mobile/Theme/theme_data.dart';
-import '../../custom_widgets/Welcome_box.dart';
-import '../../custom_widgets/custom_appbar.dart';
-import '../dashboard/dashboard.dart';
+import '../../shared/Welcome_box.dart';
+import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
 
 
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/screens/teams/Models/teamModel.dart';
+import 'package:wao_mobile/provider/Models/teamModel.dart';
 
-import '../../../Theme/theme_data.dart';
-import '../teams_dashboard.dart';
+import '../../presentation/teams/teams_dashboard.dart';
+import '../../shared/theme_data.dart';
+
+
 
 class AllTeamsList extends StatelessWidget {
   const AllTeamsList({super.key});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/Theme/theme_data.dart';
-import '../../custom_widgets/Welcome_box.dart';
-import '../../custom_widgets/custom_appbar.dart';
-import '../../custom_widgets/up_coming _matches.dart';
-import '../teams/Models/teams-class.dart';
+import '../../provider/Models/teams-class.dart';
+import '../../shared/Welcome_box.dart';
+import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
+import '../../shared/up_coming _matches.dart';
 import '../teams/all_teams.dart';
 
 void main() {
@@ -193,7 +193,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                 ),
                 const SizedBox(height:20.0),
 
-                TopProductsList(),
+                TopTeamList(),
                 const SizedBox(height:20.0),
 
 
