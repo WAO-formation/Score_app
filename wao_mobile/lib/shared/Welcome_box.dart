@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
 
+import 'custom_text.dart';
+
 
 
 class WelcomeToWAO extends StatelessWidget{
@@ -47,11 +49,7 @@ class WelcomeToWAO extends StatelessWidget{
 
                Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color:  Colors.white70,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppStyles.informationText.copyWith(fontWeight: FontWeight.bold)
               ),
             ]
         )

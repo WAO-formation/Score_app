@@ -32,7 +32,7 @@ class BottomNavBarState extends State<BottomNavBar>{
         height: 80.0,
 
         child: BottomNavigationBar(
-            selectedItemColor: Colors.white ,
+            selectedItemColor: lightColorScheme.surface ,
             unselectedItemColor: const Color(0xffadb5bd),
             onTap: (index){
               setState((){

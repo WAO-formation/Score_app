@@ -68,7 +68,7 @@ class _OfficiateHomeState extends State<OfficiateHome> {
 
 
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color
+      backgroundColor: lightColorScheme.surface, // Set the background color
 
       appBar: CustomAppBar(title: 'Officials',),
 

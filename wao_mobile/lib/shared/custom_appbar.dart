@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
 
+import 'custom_text.dart';
+
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -24,13 +26,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading: leading,
         title: Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 20.0),
+          style: AppStyles.secondaryTitle.copyWith(color: lightColorScheme.surface),
         ),
         centerTitle: centerTitle,
         actions: [
           Container(
             padding: const EdgeInsets.only(right: 10.0),
-            child: const Icon(Icons.more_vert, color: Colors.white, size: 18.0),
+            child:  Icon(Icons.more_vert, color: lightColorScheme.surface, size: 18.0),
           ),
         ],
         backgroundColor: lightColorScheme.secondary,

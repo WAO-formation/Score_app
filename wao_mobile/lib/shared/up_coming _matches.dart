@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
 
 import '../presentation/teams/teams_dashboard.dart';
+import 'custom_text.dart';
 
 
 
@@ -54,11 +55,14 @@ class UpcomingMatches extends StatelessWidget {
                     const SizedBox(height: 5.0),
                     Text(
                       teamA,
-                      style: const TextStyle(color: Color(0xff011638), fontSize: 20.0),
+                      style: AppStyles.secondaryTitle,
                     ),
                   ],
                 ),
-                const Text('VS', style: TextStyle(color: Color(0xffC10230), fontSize: 25.0)),
+                 Text(
+                    'VS',
+                    style: AppStyles.primaryTitle.copyWith(fontSize: 25.0)
+                ),
                 Column(
                   children: [
                      CircleAvatar(
@@ -68,7 +72,7 @@ class UpcomingMatches extends StatelessWidget {
                     const SizedBox(height: 5.0),
                     Text(
                       teamB,
-                      style: const TextStyle(color: Color(0xff011638), fontSize: 20.0),
+                      style: AppStyles.secondaryTitle,
                     ),
                   ],
                 ),
@@ -77,7 +81,7 @@ class UpcomingMatches extends StatelessWidget {
             const SizedBox(height: 10.0),
             Text(
               "$date : $time",
-              style: const TextStyle(color: Color(0xffC10230), fontSize: 20.0),
+              style: AppStyles.primaryTitle.copyWith(fontSize: 20.0),
             )
           ],
         ),
@@ -88,24 +92,24 @@ class UpcomingMatches extends StatelessWidget {
 
 
 // here we have the widget to define the verious teams that are top in the competition
-class topTeams extends StatefulWidget{
+class TopTeams extends StatefulWidget{
   final String teamName;
   final String imagePath;
 
-  const topTeams({
+  const TopTeams({
     super.key,
     required this.teamName,
     required this.imagePath
   });
 
   @override
-  State<topTeams> createState() => topTeamsState();
+  State<TopTeams> createState() => TopTeamsState();
 }
 
 
 // this is for the best performing team in the game
 
-class topTeamsState extends State<topTeams> {
+class TopTeamsState extends State<TopTeams> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -131,11 +135,7 @@ class topTeamsState extends State<topTeams> {
             const SizedBox(height:10.0),
              Text(
               widget.teamName,
-              style:  TextStyle(
-                 backgroundColor: lightColorScheme.secondary,
-                  fontSize: 20.0,
-                fontWeight: FontWeight.bold
-              ),
+              style: AppStyles.secondaryTitle,
             ),
             const SizedBox(height:10.0),
             ElevatedButton(
@@ -152,12 +152,9 @@ class topTeamsState extends State<topTeams> {
                       MaterialPageRoute(builder: (context) => const TeamsHome(title: '',))
                   );
               },
-              child: const Text(
+              child:  Text(
                 'Visit Team',
-                style: TextStyle(
-                  fontSize: 15.0,
-                  color: Colors.white,
-                ),
+                style: AppStyles.informationText.copyWith(fontSize: 15.0),
               ),
             ),
             const SizedBox(height:5.0)
