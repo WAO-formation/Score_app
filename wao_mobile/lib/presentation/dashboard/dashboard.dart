@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../provider/Models/teams-class.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 import '../../shared/up_coming _matches.dart';
 import '../teams/all_teams.dart';
@@ -165,12 +166,9 @@ class _DashboardHomeState extends State<DashboardHome> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                         'Teams',
-                        style: TextStyle(
-                            fontSize:25.0,
-                            fontWeight: FontWeight.bold
-                        )
+                        style:AppStyles.secondaryTitle
                     ),
 
                     GestureDetector(
@@ -180,13 +178,9 @@ class _DashboardHomeState extends State<DashboardHome> {
                               MaterialPageRoute(builder: (context) =>  allTeams())
                           );
                         },
-                        child: const Text(
+                        child:  Text(
                             'See all',
-                            style: TextStyle(
-                                fontSize:20.0,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xffC10230)
-                            )
+                            style:AppStyles.secondaryTitle.copyWith( color: lightColorScheme.primary)
                         )
                     )
                   ],

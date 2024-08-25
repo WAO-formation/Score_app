@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -125,7 +126,7 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                   // More pdf download
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xffffffff), // Background color of the button
+                      backgroundColor: lightColorScheme.surface, // Background color of the button
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0), // Border radius
                         side:  BorderSide(
@@ -151,10 +152,7 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                     },
                     child:  Text(
                       'More',
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color:  lightColorScheme.primary, // Text color
-                      ),
+                      style:AppStyles.informationText.copyWith(color: lightColorScheme.primary, fontSize: 15.0)
                     ),
                   ),
 
@@ -172,12 +170,9 @@ class _OfficiateHomeState extends State<OfficiateHome> {
                       padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
                     ),
                     onPressed: () {},
-                    child: const Text(
+                    child:  Text(
                       'Register',
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color: Color(0xffffffff), // Text color
-                      ),
+                      style: AppStyles.informationText.copyWith(fontSize: 15.0)
                     ),
                   ),
 
@@ -215,11 +210,7 @@ class OfficiateTile extends StatelessWidget {
           /*======= Section heading ======*/
           Text(
             tileLabel.toUpperCase(), 
-            style:  TextStyle(
-              fontSize: 18,
-              color:  lightColorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppStyles.primaryTitle
           ),
           SizedBox(height:10.0),
           

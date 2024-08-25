@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/custom_text.dart';
+import '../../shared/theme_data.dart';
 import '../registration and login/login.dart';
 
 
@@ -55,16 +57,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: 20.0),
-                  const Padding(
+                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15.0),
                     child: Text(
                       "Welcome to the new era of digitised sports where technology meets skills, Wao!",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Color(0xffffffff),
-                        fontWeight: FontWeight.bold
-                      ),
+                      style: AppStyles.secondaryTitle.copyWith(color: lightColorScheme.surface)
                     ),
                   ),
 
@@ -72,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 1, 30, 65),
+                      backgroundColor:lightColorScheme.secondary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
@@ -84,12 +82,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         MaterialPageRoute(builder: (context) => const LoginHomePage(title: '')),
                       );
                     },
-                    child: const Text(
+                    child:  Text(
                       'Get Started',
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color: Color(0xffffffff),
-                      ),
+                      style: AppStyles.informationText.copyWith( fontSize: 15.0)
                     ),
                   ),
                 ],
