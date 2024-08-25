@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -287,10 +288,7 @@ class teamAnnouncement extends StatelessWidget{
           const SizedBox(height: 5.0),
           Text(
             Content,
-            style:  const TextStyle(
-              color: Color(0xff2F3B4A),
-              fontSize: 15.0,
-            ),
+            style:  AppStyles.informationText.copyWith(fontSize: 15.0)
           ),
         ]
       )

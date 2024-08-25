@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wao_mobile/provider/Models/teamModel.dart';
 
 import '../../presentation/teams/teams_dashboard.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -56,11 +57,7 @@ class TeamsCart extends StatelessWidget {
                 const SizedBox(height: 10.0),
                 Text(
                   teams.teamName,
-                  style: TextStyle(
-                    color: lightColorScheme.secondary,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppStyles.secondaryTitle
                 ),
                 const SizedBox(height: 10.0),
                 ElevatedButton(
@@ -82,10 +79,7 @@ class TeamsCart extends StatelessWidget {
                   },
                   child:  Text(
                     'View More',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: lightColorScheme.surface,
-                    ),
+                    style: AppStyles.informationText.copyWith(fontSize: 15.0)
                   ),
                 ),
                 const SizedBox(height: 5.0),

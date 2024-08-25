@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../provider/Models/all-teams-class.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/theme_data.dart';
 
 class allTeams extends StatefulWidget{
   @override
@@ -15,11 +15,15 @@ class allTeamsState extends State<allTeams>{
   Widget build(BuildContext context) {
 
     return  Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: lightColorScheme.surface,
         appBar:  CustomAppBar(
           title: 'All Teams',
           leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              icon:  Icon(
+                  Icons.arrow_back_rounded,
+                  color: lightColorScheme.surface
+              ),
+
               onPressed: () {
                 Navigator.pop(context);
               }

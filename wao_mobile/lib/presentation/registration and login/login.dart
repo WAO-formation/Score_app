@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wao_mobile/presentation/registration%20and%20login/signup.dart';
 
 import '../../shared/bottom_nav_bar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -118,10 +119,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                 /*======= Form heading ======*/
                  Text(
                     'WAO',
-                    style: TextStyle(
-                      fontSize: 35.0, fontWeight: FontWeight.bold,
-                      color: lightColorScheme.surface,
-                    )
+                    style: AppStyles.primaryTitle.copyWith(fontSize: 30.0, color: lightColorScheme.surface)
                 ),
 
                 const SizedBox(height: 20.0), // space
@@ -141,10 +139,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
 
                            Text(
                               'Login',
-                              style: TextStyle(
-                                fontSize: 25.0, fontWeight: FontWeight.bold,
-                                color: lightColorScheme.secondary,
-                              )
+                              style: AppStyles.secondaryTitle.copyWith(fontSize: 25.0)
                           ),
                           const SizedBox(height: 35.0), // space
 
@@ -180,10 +175,10 @@ class _LoginHomePageState extends State<LoginHomePage> {
                               labelText: 'Password',
                               labelStyle:  TextStyle(color: lightColorScheme.secondary),
                               hintText: 'Enter your password',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.lock, color: Color(0xff333533),),
+                              hintStyle: const TextStyle(color: Colors.grey),
+                              suffixIcon: const Icon(Icons.lock, color: Color(0xff333533),),
                               border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xff011638),),
+                                borderSide: BorderSide(color: lightColorScheme.secondary),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(color: lightColorScheme.secondary),
@@ -192,7 +187,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                                 borderSide: BorderSide(color: lightColorScheme.secondary),
                               ),
                             ),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.black, // Set your desired text color here
                             ),
                             obscureText: true,
@@ -206,33 +201,11 @@ class _LoginHomePageState extends State<LoginHomePage> {
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: <Widget>[
-                                    Checkbox(
-                                      value: isRememberMeChecked,
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          isRememberMeChecked = value ?? false;
-                                        });
-                                      },
-                                    ),
-                                     Text(
-                                      'Remember Me',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: lightColorScheme.secondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                                 TextButton(
                                   onPressed: () {},
                                   child:  Text(
                                     'Forgot Password?',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color:  lightColorScheme.primary,
-                                    ),
+                                    style: AppStyles.informationText.copyWith(color: lightColorScheme.primary)
                                   ),
                                 ),
 
@@ -262,10 +235,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                             },
                             child:  Text(
                               'Login',
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                color: lightColorScheme.surface, // Text color
-                              ),
+                              style: AppStyles.informationText.copyWith(fontSize: 15.0)
                             ),
                           ),
 
@@ -276,9 +246,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                             children: [
                                Text(
                                 'Don\'t have an Account?',
-                                style: TextStyle(
-                                  color: lightColorScheme.secondary,
-                                ),
+                                style: AppStyles.informationText.copyWith(color: lightColorScheme.secondary)
                               ),
 
                               TextButton(

@@ -3,6 +3,7 @@ import 'package:wao_mobile/presentation/teams/teams_dashboard.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -147,11 +148,7 @@ class teamSpecification extends StatelessWidget{
                     const SizedBox(height: 5.0),
                     Text(
                       TeamName,
-                      style:  TextStyle(
-                        fontSize: 16,
-                        color: lightColorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppStyles.informationText.copyWith(color: lightColorScheme.secondary)
                     ),
                   ]
                 ),
@@ -171,10 +168,7 @@ class teamSpecification extends StatelessWidget{
                   },
                   child:  Text(
                     ButtonName,
-                    style:  TextStyle(
-                      fontSize: 15.0,
-                      color: lightColorScheme.surface,
-                    ),
+                    style: AppStyles.informationText.copyWith(fontSize: 15.0)
                   ),
                 ),
               ]

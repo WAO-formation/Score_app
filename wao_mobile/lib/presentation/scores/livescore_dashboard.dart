@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
 
@@ -71,7 +72,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
 
 
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color
+      backgroundColor: lightColorScheme.surface, // Set the background color
 
       appBar: CustomAppBar(title: 'Live Score',),
 
@@ -107,9 +108,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                 /** Heading */
                  Text(
                   'Live Scores',
-                  style: TextStyle(
-                    fontSize: 25, fontWeight: FontWeight.bold, color: lightColorScheme.secondary,
-                  ),
+                  style: AppStyles.secondaryTitle.copyWith(fontSize: 25.0)
                 ),
                 SizedBox(height:10.0),
                 /*======= Score tile ======*/
@@ -125,13 +124,9 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                     mainAxisAlignment: MainAxisAlignment.center,
 
                     children: [
-                      const Text(
+                       Text(
                         'WAO Match',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style:AppStyles.informationText.copyWith(fontSize: 12.0)
                       ),
 
                       Row(
@@ -143,8 +138,8 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                             tileImage: "assets/images/team1.jpg",
                             tileWidth: screenWidth,
                             tileHeight: screenHeight,
-                            tileColor: Colors.white,
-                            textColor: Colors.white,
+                            tileColor: lightColorScheme.surface,
+                            textColor: lightColorScheme.surface,
                             isAway: true,
                           ),
 
@@ -154,23 +149,15 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                               Container(
                                 alignment: Alignment.center,
                                 height: screenHeight*0.1,
-                                child: const Text(
+                                child:  Text(
                                   '40 : 100',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                  style: AppStyles.informationText.copyWith(fontSize: 12.0)
                                 )
                               ),
 
-                              const Text(
+                               Text(
                                 "32 '",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                style: AppStyles.informationText.copyWith(fontSize: 12.0)
                               )
 
                             ],
@@ -181,8 +168,8 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                             tileImage: "assets/images/team2.jpg",
                             tileWidth: screenWidth,
                             tileHeight: screenHeight,
-                            tileColor: Colors.white,
-                            textColor: Colors.white,
+                            tileColor: lightColorScheme.surface,
+                            textColor: lightColorScheme.surface,
                             isAway: false,
                           ),
                         ],
@@ -209,10 +196,10 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
                   onPressed: () {},
                   child:  Text(
                     'Details',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color:  lightColorScheme.primary, // Text color
-                    ),
+                    style: AppStyles.informationText.copyWith(
+                      color: lightColorScheme.primary,
+                    fontSize: 15.0
+                    )
                   ),
                 ),
 
@@ -220,11 +207,7 @@ class _LiveScoresHomeState extends State<LiveScoresHome> {
 
                  Text(
                   'Up Coming Matches',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: lightColorScheme.secondary,
-                  ),
+                  style: AppStyles.secondaryTitle
                 ),
 
                 SizedBox(height: 20.0),
@@ -408,21 +391,17 @@ class UpcomingMatchesTile extends StatelessWidget {
             /*======= Match time ======*/
             Text(
               matchTime.toUpperCase(), 
-              style:  TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: lightColorScheme.surface,
-              ),
+              style: AppStyles.informationText.copyWith(
+                  fontSize: 12.0
+              )
             ),
 
             /*======= Match date ======*/
             Text(
               matchDate.toUpperCase(), 
-              style:  TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: lightColorScheme.surface,
-              ),
+              style: AppStyles.informationText.copyWith(
+                fontSize: 12.0
+              )
             ),
           ],
         ),
@@ -445,10 +424,7 @@ class UpcomingMatchesTile extends StatelessWidget {
         /*======= Team 2 name ======*/
         Text(
           teamNames[1].toUpperCase(), 
-          style:  TextStyle(
-            fontWeight: FontWeight.bold,
-            color: lightColorScheme.surface,
-          ),
+          style:  AppStyles.secondaryTitle.copyWith(color: lightColorScheme.surface)
         ),
 
       ]

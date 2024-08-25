@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/bottom_nav_bar.dart';
+import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 import 'login.dart';
 
@@ -117,10 +118,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                 /*======= Form heading ======*/
                  Text(
                     'WAO',
-                    style: TextStyle(
-                      fontSize: 35.0, fontWeight: FontWeight.bold,
-                      color: lightColorScheme.surface,
-                    )
+                    style: AppStyles.primaryTitle.copyWith(color: lightColorScheme.surface, fontSize:35.0)
                 ),
 
                 const SizedBox(height: 20.0), // space
@@ -140,10 +138,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
 
                            Text(
                               'Login',
-                              style: TextStyle(
-                                fontSize: 25.0, fontWeight: FontWeight.bold,
-                                color: lightColorScheme.secondary,
-                              )
+                              style: AppStyles.secondaryTitle.copyWith( fontSize: 25.0)
                           ),
                           const SizedBox(height: 35.0), // space
 
@@ -253,10 +248,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                             },
                             child:  Text(
                               'Signup',
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                color:lightColorScheme.surface, // Text color
-                              ),
+                              style: AppStyles.informationText.copyWith( fontSize: 15.0 )
                             ),
                           ),
 
@@ -267,9 +259,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                             children: [
                                Text(
                                 'Already have an Account?',
-                                style: TextStyle(
-                                  color:lightColorScheme.secondary,
-                                ),
+                                style: AppStyles.informationText.copyWith( color: lightColorScheme.secondary)
                               ),
 
                               TextButton(
