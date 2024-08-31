@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "633369671789",
-    "project_id": "wao-mobiel-app",
-    "storage_bucket": "wao-mobiel-app.appspot.com"
+    "project_number": "125606910018",
+    "project_id": "woa-mobile-application",
+    "storage_bucket": "woa-mobile-application.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:633369671789:android:871d7b1bfe4a1f30066764",
+        "mobilesdk_app_id": "1:125606910018:android:fb6245f251e7ed0fd2b5db",
         "android_client_info": {
           "package_name": "com.example.wao_mobile"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "633369671789-qqrr4anf5pelmnd1mdu5c6khg04r9t1r.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA-BzbjolKBkPAPGc3rsvAnut4eLmdOa-I"
+          "current_key": "AIzaSyBmvD6Mnc4WIoRCRwrRVyzLtjRbkZxakxQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "633369671789-qqrr4anf5pelmnd1mdu5c6khg04r9t1r.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

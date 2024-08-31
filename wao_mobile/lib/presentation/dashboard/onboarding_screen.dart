@@ -74,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 18.0),
                     ),
                     onPressed: () {
                       Navigator.pushReplacement(

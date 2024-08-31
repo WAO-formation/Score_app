@@ -1,11 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/presentation/dashboard/onboarding_screen.dart';
 
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(
-       MyApp(),
+       const MyApp(),
   );
+
+  Firebase.initializeApp( options: const FirebaseOptions(apiKey: 'AIzaSyCWXOZkHHkfwchh4j97LREKWtB67-IoKIY', appId: '1:125606910018:web:4b8c1234b094f7ddd2b5db', messagingSenderId: '125606910018', projectId: 'woa-mobile-application'));
 }
 
 class MyApp extends StatelessWidget {
