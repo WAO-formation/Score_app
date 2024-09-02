@@ -100,7 +100,6 @@ class LoginHomePageState extends State<LoginHomePage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isRememberMeChecked = false;
 
     return Scaffold(
       backgroundColor: lightColorScheme.secondary,
@@ -259,7 +258,7 @@ class LoginHomePageState extends State<LoginHomePage> {
                           ),
                           onPressed: login,
                           child: Text(
-                            'Login',
+                            'Register',
                             style: AppStyles.informationText
                                 .copyWith(fontSize: 15.0),
                           ),

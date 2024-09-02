@@ -209,7 +209,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                           children:[
 
                              Text(
-                                'Login',
+                                'Register',
                                 style: AppStyles.secondaryTitle.copyWith( fontSize: 25.0)
                             ),
                             const SizedBox(height: 35.0), //// space
@@ -245,7 +245,6 @@ class _SignupHomePageState extends State<SignupHomePage> {
                               style: const TextStyle(
                                 color: Colors.black, // Set your desired text color here
                               ),
-                              obscureText: true,
                             ),
 
                             const SizedBox(height: 25.0), // space
@@ -395,7 +394,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                                registration();
                               },
                               child:  Text(
-                                'Signup',
+                                'Register',
                                 style: AppStyles.informationText.copyWith( fontSize: 15.0 )
                               ),
                             ),
@@ -418,7 +417,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                                     );
                                   },
                                   child:  Text(
-                                    'Sign Up',
+                                    'Login',
                                     style: TextStyle(
                                       decoration: TextDecoration.underline,
                                       fontWeight: FontWeight.bold,
