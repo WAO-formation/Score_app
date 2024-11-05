@@ -243,7 +243,7 @@ class _SignupHomePageState extends State<SignupHomePage> {
                                 ),
                               ),
                               style: const TextStyle(
-                                color: Colors.black, // Set your desired text color here
+                                color: Colors.black,
                               ),
                             ),
 
