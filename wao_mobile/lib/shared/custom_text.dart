@@ -17,7 +17,7 @@ class AppStyles{
   );
 
   static TextStyle informationText =  TextStyle(
-    fontSize: 16,
+    fontSize: 14,
     color:  lightColorScheme.surface,
     fontWeight: FontWeight.w400,
     fontFamily: 'Bronzier medium',

@@ -94,83 +94,83 @@ class _GameRulesState extends State<GameRules> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height:10.0),
+                    const SizedBox(height:10.0),
 
-                    SizedBox(height:20.0),
-                    AboutTile(
+                    const SizedBox(height:20.0),
+                    const AboutTile(
                       tileContent: 'WAO is a 2-ball multiple-scoring contact sport played on a spherical pitch and thrives on technology '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'The object of the sport is to score a higher percentage sum of the opposing team',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'The object of the sport is to score a higher percentage sum of the opposing team',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(
+                    const SizedBox(height:10.0),
+                    const AboutTile(
                         tileContent: 'The four cardinal places to score points are Kingdom, Workout, Goalpost and Judges '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'A Team is made up of 7 Players plus 5 subs; thus 14 Players at each time on the WaoSphere. ',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'A Team is made up of 7 Players plus 5 subs; thus 14 Players at each time on the WaoSphere. ',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'We live on a spherical planet filled with continents; exactly as the WaoSphere, but this time the whole world-as-one WAO!',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'We live on a spherical planet filled with continents; exactly as the WaoSphere, but this time the whole world-as-one WAO!',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(
+                    const SizedBox(height:10.0),
+                    const AboutTile(
                         tileContent: 'Every part of WaoSphere is playable by all, any Player can score points anywhere with any ball.  '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'Handle and control ball by bouncing, dribbling, giving passes, displaying skills or movement in any direction. '
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'Handle and control ball by bouncing, dribbling, giving passes, displaying skills or movement in any direction. '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'Blocking is part of defense and to “kiss-a-crown” can be likened to “dunk”. ',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'Blocking is part of defense and to “kiss-a-crown” can be likened to “dunk”. ',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(
+                    const SizedBox(height:10.0),
+                    const AboutTile(
                         tileContent: 'A game starts with a maximum of 2 balls of different colours.  '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'Each team starts with 1 ball playing offence and defence at the same time. ',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'Each team starts with 1 ball playing offence and defence at the same time. ',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'Upon start tip off, each Team makes a long throw from Kingdom to Hi-Court, and then play on. Teams do not own a ball; anyone can play and score with any ball. ',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'Upon start tip off, each Team makes a long throw from Kingdom to Hi-Court, and then play on. Teams do not own a ball; anyone can play and score with any ball. ',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(
+                    const SizedBox(height:10.0),
+                    const AboutTile(
                         tileContent: 'Each Team is expected to score points with the ball at hand and at the same time compete for possession of the opponent\'s ball to score points with it.  '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'If 1 Player possesses the 2 balls, control balls in alternating bounce. '
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'If 1 Player possesses the 2 balls, control balls in alternating bounce. '
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'There is a maximum of 2-field Referees, each officiates interactions around the ball he wears its color.',
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'There is a maximum of 2-field Referees, each officiates interactions around the ball he wears its color.',
 
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(
+                    const SizedBox(height:10.0),
+                    const AboutTile(
                         tileContent: 'A panel of 6 Judges sit behind Hi-court areas in threesome apart to rule Hi-Court cases.'
                     ),
 
-                    SizedBox(height:10.0),
-                    AboutTile(tileContent: 'A game is played in 4 quarters; 1st 17 min. 2nd 17 min. 3rd 13 min, and 4th 13 min. for total time of 60 minutes, or play extra time if need be to break a tie.'
+                    const SizedBox(height:10.0),
+                    const AboutTile(tileContent: 'A game is played in 4 quarters; 1st 17 min. 2nd 17 min. 3rd 13 min, and 4th 13 min. for total time of 60 minutes, or play extra time if need be to break a tie.'
                     ),
                   ]
                 ),

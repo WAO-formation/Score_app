@@ -5,6 +5,8 @@ import '../../shared/custom_appbar.dart';
 import '../../shared/theme_data.dart';
 
 class allTeams extends StatefulWidget{
+  const allTeams({super.key});
+
   @override
   State<allTeams> createState() => allTeamsState();
 
