@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/presentation/dashboard/onboarding_screen.dart';
+import 'package:wao_mobile/presentation/registration%20and%20login/login.dart';
 
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,
-      home:  OnboardingScreen(),
+      home:  LoginHomePage(title: '',),
     );
   }
 }
