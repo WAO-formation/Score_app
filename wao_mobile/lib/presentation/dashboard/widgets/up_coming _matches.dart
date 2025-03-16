@@ -21,8 +21,7 @@ class UpcomingGamesCarousel extends StatelessWidget{
           );
         }),
         options: CarouselOptions(
-            height: 260,
-            //enlargeCenterPage: true,
+            height: 210,
             viewportFraction: 1,
             autoPlay: true
         ),
@@ -38,13 +37,12 @@ class UpcomingGames extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    //in this container we describe the container that will be used to display the upcoming matches in a slider
-    return Center(
+   return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
         decoration: BoxDecoration(
           color: const Color(0xffA7C8FE ),
-          borderRadius: BorderRadius.circular(20.0), // Adding border radius to the container
+          borderRadius: BorderRadius.circular(20.0),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

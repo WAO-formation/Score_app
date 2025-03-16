@@ -86,7 +86,7 @@ class _DashboardHomeState extends State<DashboardHome> {
       title: 'Dashboard',
     ),
       body:   SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               // Column is also a layout widget. It takes a list of children and
@@ -202,63 +202,4 @@ class _DashboardHomeState extends State<DashboardHome> {
   }
 }
 
-
-class DashboardTile extends StatelessWidget {
-  const DashboardTile({super.key, required this.tileLabel, required this.tileImage , required this.pageName});
-  
-  final String tileLabel;
-  final String tileImage;
-  final Widget pageName;
-
-  static const double spacePix = 20.0;// spacing pixel
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color:lightColorScheme.secondary,
-      padding: const EdgeInsets.symmetric(horizontal:10.0, vertical:15.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Tile image
-          Container(
-            width: 150.0,
-            height: 110,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(tileImage),
-                fit: BoxFit.cover,
-                scale: 0.146,
-                filterQuality: FilterQuality.high,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-            ),
-          ),
-
-          const SizedBox(height: spacePix), // space
-
-          /*======= Tile button ======*/
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => pageName)
-              );
-            },
-            label: Text(tileLabel, style: const TextStyle(fontSize: 15),),
-            backgroundColor: const Color.fromARGB(255, 193, 2, 48),
-            foregroundColor: Colors.white70,
-            hoverColor: Colors.black,
-            heroTag: Object(),
-          ),
-
-        ]
-
-      ),
-    );
-
-  
-  }
-}
 

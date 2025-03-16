@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../shared/custom_text.dart';
+import '../../scores/score_details.dart';
 
 
 class LiveMatchesCarousel extends StatelessWidget{
@@ -20,7 +21,7 @@ class LiveMatchesCarousel extends StatelessWidget{
           );
         }),
         options: CarouselOptions(
-          height: 260,
+          height: 235,
           //enlargeCenterPage: true,
           viewportFraction: 1,
           autoPlay: true
@@ -40,13 +41,12 @@ class LiveMatches extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    //in this container we describe the container that will be used to display the upcoming matches in a slider
-    return Center(
+  return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
         decoration: BoxDecoration(
           color: const Color(0xffA7C8FE ),
-          borderRadius: BorderRadius.circular(20.0), // Adding border radius to the container
+          borderRadius: BorderRadius.circular(20.0),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,15 +71,24 @@ class LiveMatches extends StatelessWidget {
                   ),
                 ),
 
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                  decoration: BoxDecoration(
-                      color: lightColorScheme.secondary,
-                      borderRadius: BorderRadius.circular(10.0)
-                  ),
-                  child: Text(
-                    'Details',
-                    style: AppStyles.informationText.copyWith(color: Colors.white),
+                GestureDetector(
+
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                    MaterialPageRoute(builder: (context) => const ScoreDetails())
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                        color: lightColorScheme.secondary,
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Text(
+                      'Details',
+                      style: AppStyles.informationText.copyWith(color: Colors.white),
+                    ),
                   ),
                 )
               ],
