@@ -26,13 +26,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading: leading,
         title: Text(
           title,
-          style: AppStyles.secondaryTitle.copyWith(color: lightColorScheme.surface),
+          style: AppStyles.secondaryTitle.copyWith(color: lightColorScheme.onPrimary),
         ),
         centerTitle: centerTitle,
         actions: [
           Container(
             padding: const EdgeInsets.only(right: 10.0),
-            child:  Icon(Icons.more_vert, color: lightColorScheme.surface, size: 18.0),
+            child:  Icon(Icons.more_vert, color: lightColorScheme.onPrimary, size: 18.0),
           ),
         ],
         backgroundColor: lightColorScheme.secondary,

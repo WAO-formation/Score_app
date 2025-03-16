@@ -19,22 +19,22 @@ class BottomNavBarState extends State<BottomNavBar>{
   int currentIndex = 0;
   List pages =  [
     const DashboardHome(title: '',),
-    const LiveScoresHome(title: '',),
     const OfficiateHome(title: '',),
     UserProfile()
   ];
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return  Scaffold(
 
       bottomNavigationBar: SizedBox(
         height: 80.0,
 
         child: BottomNavigationBar(
-            selectedItemColor: lightColorScheme.surface ,
+            selectedItemColor: lightColorScheme.onPrimary ,
             unselectedItemColor: const Color(0xffadb5bd),
-            onTap: (index){
+          backgroundColor: lightColorScheme.secondary,
+          onTap: (index){
               setState((){
                 currentIndex = index;
               });
@@ -42,9 +42,10 @@ class BottomNavBarState extends State<BottomNavBar>{
             currentIndex: currentIndex,items: [
               BottomNavigationBarItem(icon: const Icon(Icons.home, size:35.0), label: 'Home',
                 backgroundColor: lightColorScheme.secondary, ),
-              const BottomNavigationBarItem(icon: Icon(Icons.leaderboard,size:35.0), label: 'Score'),
-              const BottomNavigationBarItem(icon: Icon(Icons.supervisor_account, size:35.0), label:'Officiate'),
-          const BottomNavigationBarItem(icon: Icon(Icons.account_circle, size:35.0), label:' Score' ),
+
+          const BottomNavigationBarItem(icon: Icon(Icons.supervisor_account, size:35.0), label:'Officiate'),
+
+          const BottomNavigationBarItem(icon: Icon(Icons.account_circle, size:35.0), label:' Profile' ),
             ],
           ),
       ),
