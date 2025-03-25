@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/presentation/dashboard/widgets/liveMatches.dart';
+import 'package:wao_mobile/presentation/dashboard/widgets/ranking.dart';
 import '../../provider/Models/teams-class.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
-import '../../shared/up_coming _matches.dart';
+import 'widgets/up_coming _matches.dart';
 import '../teams/all_teams.dart';
 
 void main() {
@@ -78,14 +80,15 @@ class _DashboardHomeState extends State<DashboardHome> {
 
 
     return Scaffold(
-      backgroundColor: bgcolor, // Set the background color
+      //backgroundColor: bgcolor, // Set the background color
 
       appBar:  CustomAppBar(
       title: 'Dashboard',
     ),
       body:   SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               // Column is also a layout widget. It takes a list of children and
               // arranges them vertically. By default, it sizes itself to fit its
               // children horizontally, and tries to be as tall as its parent.
@@ -104,92 +107,90 @@ class _DashboardHomeState extends State<DashboardHome> {
 
               children: <Widget>[
 
-                /** Dashboard logo tile */
-                const WelcomeToWAO(title: 'Welcome to WAO',),
-                const SizedBox(height: 30.0),
+               // this section carries user profile and a punch line
 
-                /*======= Dahboard tiles ======*/
-
-                // ROW 1 TILES
-                const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      UpcomingMatches(
-                        teamA: 'Team A',
-                        teamB: 'Team B',
-                        date: 'June 20',
-                        time: '12:20',
-                        ImagePath1: 'assets/images/teams.jpg',
-                        ImagePath2: 'assets/images/officiate.jpg',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                          const CircleAvatar(
+                            radius: 30.0,
+                            backgroundImage: AssetImage("assets/images/teams.jpg") ,
+                          ),
+                    
+                        const SizedBox(width: 10.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                "Hi Afanyu",
+                                style: AppStyles.secondaryTitle.copyWith(fontSize: 18.0)
+                            ),
+                    
+                            const SizedBox(height: 5.0,),
+                            Text(
+                                'Lets Play WAO', style: AppStyles.informationText.copyWith(color: Colors.grey, fontSize: 14.0)
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white70,
+                        borderRadius: BorderRadius.circular(50)
                       ),
-                      SizedBox(width:20.0),
-                      UpcomingMatches(
-                        teamA: 'Team A',
-                        teamB: 'Team B',
-                        date: 'June 20',
-                        time: '12:20',
-                        ImagePath1: 'assets/images/teams.jpg',
-                        ImagePath2: 'assets/images/officiate.jpg',
-                      ),
-
-                      SizedBox(width:20.0),
-
-                      UpcomingMatches(
-                        teamA: 'Team A',
-                        teamB: 'Team B',
-                        date: 'June 20',
-                        time: '12:20',
-                        ImagePath1: 'assets/images/teams.jpg',
-                        ImagePath2: 'assets/images/officiate.jpg',
-                      ),
-
-                      SizedBox(width:20.0),
-
-                      UpcomingMatches(
-                        teamA: 'Team A',
-                        teamB: 'Team B',
-                        date: 'June 20',
-                        time: '12:20',
-                        ImagePath1: 'assets/images/teams.jpg',
-                        ImagePath2: 'assets/images/officiate.jpg',
-                      ),
-                      SizedBox(width:20.0),
-                    ],
-                  ),
+                      child: const Icon(Icons.notifications_active_outlined, color: Colors.grey,),
+                    )
+                  ],
                 ),
 
+                const SizedBox(height: 20.0),
+
+                // Quote Section
+
+
+
+                /// this section will be displaying all live matches
+
+                const LiveMatchesCarousel(),
+
                 const SizedBox(height: 30.0),
 
-                // ROW 2 TILES
+                /// upcoming games to be played
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                      Text(
-                        'Teams',
+                        'Upcoming Games',
                         style:AppStyles.secondaryTitle
                     ),
-
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>  allTeams())
-                          );
-                        },
-                        child:  Text(
-                            'See all',
-                            style:AppStyles.secondaryTitle.copyWith( color: lightColorScheme.primary)
-                        )
-                    )
                   ],
                 ),
-                const SizedBox(height:20.0),
+                const SizedBox(height:10.0),
 
-                TopTeamList(),
-                const SizedBox(height:20.0),
+                const UpcomingGamesCarousel(),
 
+                /// this section contain statistics of the past marches
+
+                const SizedBox(height: 30.0),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                        'Ranking',
+                        style:AppStyles.secondaryTitle
+                    ),
+                  ],
+                ),
+                const SizedBox(height:10.0),
+
+                const LeagueRanking()
 
               ],
             ),
@@ -201,63 +202,4 @@ class _DashboardHomeState extends State<DashboardHome> {
   }
 }
 
-
-class DashboardTile extends StatelessWidget {
-  const DashboardTile({super.key, required this.tileLabel, required this.tileImage , required this.pageName});
-  
-  final String tileLabel;
-  final String tileImage;
-  final Widget pageName;
-
-  static const double spacePix = 20.0;// spacing pixel
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color:lightColorScheme.secondary,
-      padding: const EdgeInsets.symmetric(horizontal:10.0, vertical:15.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Tile image
-          Container(
-            width: 150.0,
-            height: 110,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(tileImage),
-                fit: BoxFit.cover,
-                scale: 0.146,
-                filterQuality: FilterQuality.high,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-            ),
-          ),
-
-          const SizedBox(height: spacePix), // space
-
-          /*======= Tile button ======*/
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => pageName)
-              );
-            },
-            label: Text(tileLabel, style: const TextStyle(fontSize: 15),),
-            backgroundColor: const Color.fromARGB(255, 193, 2, 48),
-            foregroundColor: Colors.white70,
-            hoverColor: Colors.black,
-            heroTag: Object(),
-          ),
-
-        ]
-
-      ),
-    );
-
-  
-  }
-}
 
