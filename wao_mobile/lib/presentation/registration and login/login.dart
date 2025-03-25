@@ -217,7 +217,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
                           /*======= Sign up button ======*/
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: lightColorScheme.primary, // Background color of the button
+                              backgroundColor: lightColorScheme.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0), // Border radius
                                 side:  BorderSide(

@@ -1,38 +1,135 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
 
-class CustomButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-  final Color color;
-  final double fontSize;
-  final double borderRadius;
+class PrimaryButtonWidget extends StatelessWidget {
+  const PrimaryButtonWidget({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.width = 160,
+    this.color,
+    this.colorText,
+  });
 
-  const CustomButton({
-    Key? key,
-    required this.text,
-    required this.onPressed,
-    this.color = Colors.blue,
-    this.fontSize = 16.0,
-    this.borderRadius = 8.0,
-  }) : super(key: key);
+  final String label;
+  final VoidCallback onTap;
+  final double width;
+  final Color? color;
+  final Color? colorText;
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+    return InkWell(
+      onTap: onTap,
+      child: Center(
+        child: Container(
+          height: 40,
+          width: width,
+          decoration: BoxDecoration(
+            color: color ?? lightColorScheme.primary,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: colorText ?? Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),
-      onPressed: onPressed,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: fontSize,
-          color: lightColorScheme.surface,
+    );
+  }
+}
+
+class SecondaryButtonWidget extends StatelessWidget {
+  const SecondaryButtonWidget({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.width = 160,
+    this.color,
+    this.colorText,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final double width;
+  final Color? color;
+  final Color? colorText;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Center(
+        child: Container(
+          height: 40,
+          width: width,
+          decoration: BoxDecoration(
+            color: color ?? lightColorScheme.primary,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: lightColorScheme.primary),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: colorText ?? lightColorScheme.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CartButtonWidget extends StatelessWidget {
+  const CartButtonWidget({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.width = 130,
+    this.height = 30,
+    this.color,
+    this.colorText,
+  });
+
+  final String label;
+  final VoidCallback? onTap;
+  final double width;
+  final double height;
+  final Color? color;
+  final Color? colorText;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Center(
+        child: Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: color ?? lightColorScheme.primary,
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: colorText ?? Colors.white,
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              ),
+            ),
+          ),
         ),
       ),
     );
