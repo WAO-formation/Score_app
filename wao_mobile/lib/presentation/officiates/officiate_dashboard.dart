@@ -1,36 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
+import '../../shared/custom_buttons.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
-
-
-
-void main() {
-  runApp(const OfficiatePage());
-}
 
 class OfficiatePage extends StatelessWidget {
   const OfficiatePage({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'WAO Score App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         fontFamily: 'Bronzier medium',
-
       ),
       home: const OfficiateHome(title: 'Main Officiate'),
     );
@@ -40,15 +23,6 @@ class OfficiatePage extends StatelessWidget {
 class OfficiateHome extends StatefulWidget {
   const OfficiateHome({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -56,178 +30,140 @@ class OfficiateHome extends StatefulWidget {
 }
 
 class _OfficiateHomeState extends State<OfficiateHome> {
-// spacing pixel
+
+  final List<Map<String, dynamic>> guidelineData = const [
+    {
+      'title': "Referee's Call",
+      'content': [
+        "WAO fictions war, but death is ruled out. Opposing teams compete in an open field to outwit each other and prove supremacy by scoring. The One to police by rules and turn everything into showbiz is the Referee -without a competent Referee there will be chaos and no order to determine a winner."
+      ]
+    },
+    {
+      'title': "Referee's Purpose",
+      'content': [
+        "The purpose of WAO Referee is to officiate games fairly that even the losing team can say in all sincerity \"thank you Referee\"."
+      ]
+    },
+    {
+      'title': "Field Referees",
+      'content': [
+        "Maximum of 2 field referees, each responsible for one ball.",
+        "Referees wear the color of their assigned ball for distinction.",
+        "Oversee and rule on all interactions around their ball, ensuring rules are followed across the WaoSphere."
+      ]
+    },
+    {
+      'title': "1. Match Officials",
+      'content': [
+        "Field Referees:",
+        "• Maximum of 2 field referees, each responsible for one ball.",
+        "• Referees wear the color of their assigned ball for distinction.",
+        "• Oversee and rule on all interactions around their ball, ensuring rules are followed across the WaoSphere.",
+        "Hi-Court Judges:",
+        "• 6 Judges total – 3 per Hi-Court.",
+        "• Officiate Hi-Court cases, award Judges' points (10%), and evaluate skill displays.",
+        "• Judges take control when the ball enters the Hi-Court, replacing field referees' role."
+      ]
+    },
+    {
+      'title': "2. Game Duration",
+      'content': [
+        "The game is played in 4 quarters totaling 60 minutes:",
+        "• 1st Quarter – 17 mins",
+        "• 2nd Quarter – 17 mins",
+        "• 3rd Quarter – 13 mins",
+        "• 4th Quarter – 13 mins",
+        "Extra Time: Played only to break a tie."
+      ]
+    },
+    {
+      'title': "3. Scoring Supervision ",
+      'content': [
+        "The WaoScor App manages real-time score calculation based on:",
+        "• Kingdom – 30%",
+        "• Workout – 30%",
+        "• Goalpost – 30%",
+        "• Judges – 10%",
+        "Ensures fair and accurate scoring. Tracks fouls, cards, and assists in predicting Judges' scores with 80-100% accuracy."
+      ]
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _toggleTheme method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
-
     return Scaffold(
-      backgroundColor: lightColorScheme.surface, // Set the background color
-
-      appBar: CustomAppBar(title: 'Officials',),
-
-      body:  Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-
-        child: Container(
-
-          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 40.0),
-
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-            children: <Widget>[
-              /** Officiate logo tile */
-              const WelcomeToWAO(title: ' WAO Officials',),
-
-              const SizedBox(height: 80.0), // space
-
-              const OfficiateTile(
-                tileLabel: "Referee's Call",
-                tileContent: "WAO fictions war, but death is ruled out. Opposing teams compete in an open field to outwit each other and prove supremacy by scoring. The One to police by rules and turn everything into showbiz is the Referee -without a competent Referee there will be chaos and no order to determine a winner.",
-
+      appBar: CustomAppBar(title: 'Officiating Guideline'),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+              child: ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: guidelineData.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 20.0),
+                itemBuilder: (context, index) {
+                  return GuidelineSection(
+                    title: guidelineData[index]['title'],
+                    contentList: guidelineData[index]['content'],
+                  );
+                },
               ),
+            ),
 
-              const SizedBox(height: 40.0),
+            const SizedBox(height: 30.0,),
 
-              const OfficiateTile(
-                tileLabel: "Referee's Purpose",
-                tileContent: "The purpose of WAO Referee is to officiate games fairly that even the losing team can say in all sincerity \"thank you Referee\".",
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // CartButtonWidget(label: 'Register',  onTap: () {  },),
+                //
+                // SizedBox(width: 20.0,),
+                //
+                // CartButtonWidget(label: 'Download Guide', onTap: (){}, color: lightColorScheme.secondary,)
+              ],
+            ),
 
-              ),
 
-              const SizedBox(height: 50.0),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // More pdf download
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: lightColorScheme.surface, // Background color of the button
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0), // Border radius
-                        side:  BorderSide(
-                          color:  lightColorScheme.primary, // Border color
-                          width: 2.0, // Border width
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
-                    ),
-                    onPressed: () {
-                      const snackBar = SnackBar(
-                        duration: Duration(seconds: 5),
-                        content: Column(
-                          children: [
-                            Text('Downloading...'),
-                            SizedBox(width: 20),
-                            LinearProgressIndicator(),
-                          ],
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                    },
-                    child:  Text(
-                      'More',
-                      style:AppStyles.informationText.copyWith(color: lightColorScheme.primary, fontSize: 15.0)
-                    ),
-                  ),
-
-                  // Register button
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:  lightColorScheme.primary, // Background color of the button
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0), // Border radius
-                        side:  BorderSide(
-                          color:  lightColorScheme.primary, // Border color
-                          width: 2.0, // Border width
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 20.0),
-                    ),
-                    onPressed: () {},
-                    child:  Text(
-                      'Register',
-                      style: AppStyles.informationText.copyWith(fontSize: 15.0)
-                    ),
-                  ),
-
-                ],
-              )
-
-            ],
-          ),
+          ],
         ),
-
       ),
-      
     );
   }
 }
 
+class GuidelineSection extends StatelessWidget {
+  const GuidelineSection({
+    super.key,
+    required this.title,
+    required this.contentList,
+  });
 
-class OfficiateTile extends StatelessWidget {
-  const OfficiateTile({super.key, required this.tileLabel, required this.tileContent, });
-  
-  final String tileLabel;
-  final String tileContent;
-
-  static const double spacePix = 3.0; // spacing pixel 
+  final String title;
+  final List<String> contentList;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-      alignment: Alignment.center,
-      margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-      child: Column(
-        //mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          /*======= Section heading ======*/
-          Text(
-            tileLabel.toUpperCase(), 
-            style: AppStyles.primaryTitle
-          ),
-          SizedBox(height:10.0),
-          
-          const SizedBox(height: spacePix), // space
-
-          // Section content
-          Text(
-            tileContent, 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: AppStyles.primaryTitle,
+        ),
+        const SizedBox(height: 10.0),
+        ...contentList.map((content) => Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Text(
+            content,
             style: const TextStyle(
               fontSize: 16,
               color: Color(0xff2F3B4A),
             ),
-          )
-        ]
-      )
+          ),
+        )).toList(),
+      ],
     );
-  
   }
 }
-

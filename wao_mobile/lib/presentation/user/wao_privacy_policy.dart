@@ -1,49 +1,23 @@
 import 'package:flutter/material.dart';
-
+import 'package:wao_mobile/shared/custom_text.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
 import '../../shared/theme_data.dart';
 
-
-
 class PrivacyPolicy extends StatefulWidget {
-  const PrivacyPolicy({super.key, });
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-
+  const PrivacyPolicy({super.key});
 
   @override
   State<PrivacyPolicy> createState() => _PrivacyPolicyState();
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-// spacing pixel
-
-
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _toggleTheme method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
-
-
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color
-
-      appBar:  CustomAppBar(
-        title: 'Privacy Rules',
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Privacy Policy',
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
             onPressed: () {
@@ -51,148 +25,248 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
             }
         ),
       ),
-
-      body:  Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-
-        child: Container(
-          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 40.0),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //mainAxisAlignment: MainAxisAlignment.spaceAround,
-
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              /** About logo tile */
-              WelcomeToWAO(title: 'WAO Privacy Rules',),
+              // Welcome header
+              const WelcomeToWAO(title: 'WAO Privacy Policy'),
 
-              SizedBox(height:60.0),
+              const SizedBox(height: 40.0),
 
-              const AboutTile(
-                tileLabel: "About WAO",
-                tileContent: "WAO is a 2-ball multiple scoring sport played on a spherical pitch, and thrives on technology. (WAO is acronym for World As One)",
+              // Privacy Policy section
+              Text(
+                "PRIVACY POLICY",
+                  style: AppStyles.primaryTitle
+              ),
+              const SizedBox(height: 10.0),
+               Text(
+                "The sport is fully registered with the Copyright Office of Ghana since 2014, and the Registrar General of Ghana.\n\nTo use WAO Sport for any purpose, contact the WAO office for approval.",
+                  style: AppStyles.informationText
               ),
 
-              SizedBox(height:20.0),
-              const AboutTile(
-                tileLabel: "Vision",
-                tileContent: "To champion world oneness, pleasurably tell our stories and bring development through WAO!",
+              const SizedBox(height: 25.0),
 
+              // Scope of Policy section
+              Text(
+                "SCOPE OF POLICY",
+                  style: AppStyles.primaryTitle
+              ),
+              const SizedBox(height: 10.0),
+               Text(
+                "First, the policy applies to all forms of using of WAO sport, including athletes, coaches, staff, and spectators.",
+                  style: AppStyles.informationText
+              ),
+              const SizedBox(height: 12.0),
+               Text(
+                "Second, for using WAO Sport for Movie, Music and Entertainment productions.",
+                  style: AppStyles.informationText
+              ),
+              const SizedBox(height: 12.0),
+               Text(
+                "And third, flamboyant usage of WAO Sport paraphernalia for commercials and events organizations in the name of WAO Sport.",
+                  style: AppStyles.informationText
               ),
 
-              SizedBox(height:20.0),
-              const AboutTile(
-                tileLabel: "Mission",
-                tileContent: "Through organizing World-class edutainment, we empower WAO lovers to use our success in the Sport as a nucleus for success in other areas of life beyond WAO Sport.",
+              const SizedBox(height: 25.0),
 
+              // Rights section
+              Text(
+                "INTELLECTUAL PROPERTY RIGHTS",
+                  style: AppStyles.primaryTitle
+              ),
+              const SizedBox(height: 10.0),
+               Text(
+                "All right on the use of logo and emblems of WAO Sport is exclusively reserved to the organization. Any use without approval is prohibited and can lead to suffer of legal consequences.",
+                  style: AppStyles.informationText
+              ),
+
+              const SizedBox(height: 40.0),
+
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "CONTACT US",
+                      style: AppStyles.secondaryTitle
+                    ),
+                    const SizedBox(height: 16.0),
+
+                    // Website
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.public,
+                          size: 20.0,
+                          color: lightColorScheme.secondary,
+                        ),
+                        const SizedBox(width: 12.0),
+
+                         Text(
+                          "www.waosport.com",
+                          style: AppStyles.informationText
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12.0),
+
+                    // Email
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.email,
+                          size: 20.0,
+                          color: lightColorScheme.secondary,
+                        ),
+                        const SizedBox(width: 12.0),
+                         Text(
+                          "waosport@gmail.com",
+                            style: AppStyles.informationText
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12.0),
+
+                    // Phone
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.phone,
+                          size: 20.0,
+                          color: lightColorScheme.secondary,
+                        ),
+                        const SizedBox(width: 12.0),
+                         Text(
+                          "+233 242 786 261",
+                            style: AppStyles.informationText
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20.0),
+
+                    // Social Media Icons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Facebook
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 40.0,
+                            height: 40.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: lightColorScheme.secondary,
+                              )
+                            ),
+                            child: Icon(
+                              Icons.facebook,
+                              size: 20.0,
+                              color: lightColorScheme.secondary,
+                            ),
+                          ),
+                        ),
+
+                        // Twitter/X
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 40.0,
+                            height: 40.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: lightColorScheme.secondary,
+                                )
+                            ),
+                            child: Icon(
+                              Icons.sports_basketball,
+                              size: 20.0,
+                              color: lightColorScheme.secondary,
+                            ),
+                          ),
+                        ),
+
+                        // Instagram
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 40.0,
+                            height: 40.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: lightColorScheme.secondary,
+                                )
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 20.0,
+                              color: lightColorScheme.secondary,
+                            ),
+                          ),
+                        ),
+
+                        // YouTube
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 40.0,
+                            height: 40.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: lightColorScheme.secondary,
+                                )
+                            ),
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              size: 20.0,
+                              color: lightColorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 30.0),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: lightColorScheme.primary, // Background color of the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0), // Border radius
-                    side:  BorderSide(
-                      color: lightColorScheme.primary, // Border color
-                      width: 2.0, // Border width
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
-                ),
-                onPressed: () {
-                  const snackBar = SnackBar(
-                    duration: Duration(seconds: 5),
-                    content: Column(
-                      children: [
-                        Text('Downloading...'),
-                        SizedBox(width: 20),
-                        LinearProgressIndicator(),
-                      ],
-                    ),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                },
-                child: const Text(
-                  'More',
+              // Copyright notice
+              const Center(
+                child: Text(
+                  "© 2025 WAO Sport. All Rights Reserved.",
                   style: TextStyle(
-                    fontSize: 15.0,
-                    color: Color(0xffffffff), // Text color
+                    fontSize: 14.0,
+                    color: Color(0xFF757575),
                   ),
                 ),
               ),
 
+              const SizedBox(height: 16.0),
             ],
           ),
         ),
-
       ),
-
-
-
     );
   }
 }
-
-
-class AboutTile extends StatelessWidget {
-  const AboutTile({super.key, required this.tileLabel, required this.tileContent, });
-
-  final String tileLabel;
-  final String tileContent;
-
-
-  static const double spacePix = 3.0; // spacing pixel 
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        alignment: Alignment.center,
-        margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-        child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              /*======= Section heading ======*/
-              Text(
-                tileLabel.toUpperCase(),
-                style:  TextStyle(
-                  fontSize: 18,
-                  color:  lightColorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height:10.0),
-
-              const SizedBox(height: spacePix), // space
-
-              // Section content
-              Text(
-                tileContent,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Color(0xff2F3B4A),
-                ),
-              )
-            ]
-        )
-    );
-
-  }
-}
-

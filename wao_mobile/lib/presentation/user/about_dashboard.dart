@@ -1,199 +1,342 @@
 import 'package:flutter/material.dart';
-
-import '../../shared/Welcome_box.dart';
+import '../../shared/custom_text.dart';
+import '../../shared/welcome_box.dart';
 import '../../shared/custom_appbar.dart';
 import '../../shared/theme_data.dart';
 
-
-
-
-class AboutHome extends StatefulWidget {
-  const AboutHome({super.key, });
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-
-
-  @override
-  State<AboutHome> createState() => _AboutHomeState();
-}
-
-class _AboutHomeState extends State<AboutHome> {
-// spacing pixel
-
+class AboutPage extends StatelessWidget {
+  const AboutPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _toggleTheme method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
-
-
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color
-
-        appBar:  CustomAppBar(
-          title: 'About',
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'About',
         leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-    onPressed: () {
-    Navigator.pop(context);
-    }
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
-        ),
-
-      body:  Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-
-        child: Container(
-          padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 40.0),
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-            children: <Widget>[
-              /** About logo tile */
-              WelcomeToWAO(title: 'About WAO',),
-
-              SizedBox(height:60.0),
-
-              const AboutTile(
-                tileLabel: "About WAO",
-                tileContent: "WAO is a 2-ball multiple scoring sport played on a spherical pitch, and thrives on technology. (WAO is acronym for World As One)",
-              ),
-
-              SizedBox(height:20.0),
-              const AboutTile(
-                tileLabel: "Vision",
-                tileContent: "To champion world oneness, pleasurably tell our stories and bring development through WAO!",
-
-              ),
-
-              SizedBox(height:20.0),
-              const AboutTile(
-                tileLabel: "Mission",
-                tileContent: "Through organizing World-class edutainment, we empower WAO lovers to use our success in the Sport as a nucleus for success in other areas of life beyond WAO Sport.",
-
-              ),
-
-              const SizedBox(height: 30.0),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: lightColorScheme.primary, // Background color of the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0), // Border radius
-                    side:  BorderSide(
-                      color: lightColorScheme.primary, // Border color
-                      width: 2.0, // Border width
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10.0),
-                ),
-                onPressed: () {
-                  const snackBar = SnackBar(
-                    duration: Duration(seconds: 5),
-                    content: Column(
-                      children: [
-                        Text('Downloading...'),
-                        SizedBox(width: 20),
-                        LinearProgressIndicator(),
-                      ],
-                    ),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                },
-                child: const Text(
-                  'More',
-                  style: TextStyle(
-                    fontSize: 15.0,
-                    color: Color(0xffffffff), // Text color
-                  ),
-                ),
-              ),
-
-            ],
-          ),
-        ),
-
       ),
-
-
-
+      body: const AboutContent(),
     );
   }
 }
 
+class AboutContent extends StatelessWidget {
+  const AboutContent({Key? key}) : super(key: key);
 
-class AboutTile extends StatelessWidget {
-  const AboutTile({super.key, required this.tileLabel, required this.tileContent, });
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const WelcomeToWAO(title: 'About WAO'),
+            const SizedBox(height: 40),
 
-  final String tileLabel;
-  final String tileContent;
+            // Overview
+            const InfoSection(
+              title: "Overview",
+              content: "Founded in June 2012 by Solomon Kyei, Waoherds Limited is a pioneering force in the sports industry, introducing an innovative sport known as \"Wao!\" that blends physical gameplay with digital storytelling. Waoherds is committed to revolutionizing the sports landscape by integrating technology, community engagement, and entertainment to foster global unity and individual empowerment.",
+            ),
+            const SizedBox(height: 20),
+
+            // Vision
+            const InfoSection(
+              title: "Vision",
+              content: "To champion world oneness through innovative sports experiences that blend technology with traditional gameplay, creating a platform for personal and community development.",
+            ),
+            const SizedBox(height: 20),
+
+            // Mission
+            const InfoSection(
+              title: "Mission",
+              content: "Empowering individuals through world-class edutainment and sports development, leveraging Waoherd's success in sports as a catalyst for broader life achievements beyond the playing field.",
+            ),
+            const SizedBox(height: 20),
+
+            // Business Description
+            const InfoSection(
+              title: "Business Description",
+              content: "Waoherds has introduced \"WAO!\" – a two-ball hand-controlled multiple-scoring contact sport played on the unique WaoSphere, a digitized spherical pitch. This innovative sport allows players to engage in dynamic gameplay while integrating storytelling elements that resonate with global audiences. The sport encourages creativity, teamwork, and physical activity, appealing to a wide demographic from schools to professional leagues.",
+            ),
+            const SizedBox(height: 20),
+
+            // For Players
+            const InfoSection(
+              title: "For Players",
+              content: "Wao! is a sport of skills, critical thinking and strategy. Teams deploy different strategies in a single game in order to dominate the two balls and is interesting on its own. The competition is more and creativity is demanded of all Players. A Player has to demonstrate multitasking character and be at least two times smarter than one ball sport Player or single focus Athlete to be exceptional! There are many things to be happy about playing two balls concurrently on the same pitch -WaoSphere.",
+            ),
+            const SizedBox(height: 20),
+
+            // For Audience
+            const InfoSection(
+              title: "For Audience",
+              content: "\"Our eyes naturally want to survey several features at once.\" \"The brain can simultaneously keep track of two separate goals.\" -researchers have proved. So, playing 2 balls concurrently bring more fun, engagement and satisfaction. Wao! audience can enjoy multi-focusing on the 2 balls or can keep focus on the most critical interactions on a particular ball that s/he really enjoy at a juncture. Techthrills replays all catchy moments instantly on the WaoSphere all eyes are gazed watching the game in case you miss sight on anything wow. Playing 2 balls bring to the sport an unending shout of amazement; by the time shouting at an amazing display fades the other catches the fever! This is a multitasking mental exercise that trains both Players and Audience for life beyond the sport.",
+            ),
+            const SizedBox(height: 20),
+
+            // Products and Services
+            const InfoSection(
+              title: "Products and Services",
+              content: "• Wao Balls: High-quality sports equipment tailored for Wao gameplay\n\n• Wao Jerseys and Shoes: Branded merchandise sold through online and offline channels\n\n• Technological Equipment: Sales and leasing of digital equipment essential for Wao gameplay\n\n• Video Game Versions: Licensing and sales of digital adaptations of Wao for gaming platforms\n\n• Paraphernalia: Accessories such as bags, socks, and fashion items featuring the Waoherd logo\n\n• Sponsorship, Events, Tickets, Franchises, Membership Dues, and Donations",
+            ),
+            const SizedBox(height: 20),
+
+            // Achievements and Milestones
+            const InfoSection(
+              title: "Achievements and Milestones",
+              content: "• Developed and established Wao as a recognized sport in Ghana, gaining traction in schools and local communities\n\n• Received accolades for innovation in sports technology and community engagement\n\n• Expanded Waoherd's presence nationally, laying the groundwork for future international expansion",
+            ),
+            const SizedBox(height: 20),
+
+            // Market Position
+            const InfoSection(
+              title: "Market Position and Industry Impact",
+              content: "Waoherds has carved out a unique niche in the Ghanaian sports industry, combining physical sports with digital storytelling to attract a diverse audience. The company's innovative approach has sparked interest globally, positioning Waoherds as a leader in sports innovation and technology integration.",
+            ),
+            const SizedBox(height: 20),
+
+            // CSR
+            const InfoSection(
+              title: "Corporate Social Responsibility",
+              content: "Waoherds is committed to community development through sports, partnering with NGOs and educational institutions to promote physical fitness, teamwork, and leadership skills among youth. CSR initiatives focus on creating inclusive spaces for sports education and fostering local talent through grassroots programs.",
+            ),
+            const SizedBox(height: 20),
+
+            // Leadership
+            const InfoSection(
+              title: "Leadership and Team",
+              content: "Led by founder Solomon Kyei, Waoherds boasts a dedicated team of sports enthusiasts, technology innovators, and community advocates. The leadership team combines expertise in sports management, technology development, and business strategy to drive Waoherd's growth and impact.",
+            ),
+            const SizedBox(height: 20),
+
+            // Future Goals
+            const InfoSection(
+              title: "Future Goals and Expansion Plans",
+              content: "Waoherds aims to expand its footprint internationally, establishing Wao! as a global sport that bridges cultural divides and promotes unity. Future plans include launching digital enhancements to Wao gameplay, expanding merchandise lines, and scaling up event management capabilities to meet growing demand.",
+            ),
+
+            const SizedBox(height: 40.0),
 
 
-  static const double spacePix = 3.0; // spacing pixel 
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      "CONTACT US",
+                      style: AppStyles.secondaryTitle
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Website
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.public,
+                        size: 20.0,
+                        color: lightColorScheme.secondary,
+                      ),
+                      const SizedBox(width: 12.0),
+
+                      Text(
+                          "www.waosport.com",
+                          style: AppStyles.informationText
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12.0),
+
+                  // Email
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.email,
+                        size: 20.0,
+                        color: lightColorScheme.secondary,
+                      ),
+                      const SizedBox(width: 12.0),
+                      Text(
+                          "waosport@gmail.com",
+                          style: AppStyles.informationText
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12.0),
+
+                  // Phone
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone,
+                        size: 20.0,
+                        color: lightColorScheme.secondary,
+                      ),
+                      const SizedBox(width: 12.0),
+                      Text(
+                          "+233 242 786 261",
+                          style: AppStyles.informationText
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20.0),
+
+                  // Social Media Icons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Facebook
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: lightColorScheme.secondary,
+                              )
+                          ),
+                          child: Icon(
+                            Icons.facebook,
+                            size: 20.0,
+                            color: lightColorScheme.secondary,
+                          ),
+                        ),
+                      ),
+
+                      // Twitter/X
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: lightColorScheme.secondary,
+                              )
+                          ),
+                          child: Icon(
+                            Icons.sports_basketball,
+                            size: 20.0,
+                            color: lightColorScheme.secondary,
+                          ),
+                        ),
+                      ),
+
+                      // Instagram
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: lightColorScheme.secondary,
+                              )
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 20.0,
+                            color: lightColorScheme.secondary,
+                          ),
+                        ),
+                      ),
+
+                      // YouTube
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: lightColorScheme.secondary,
+                              )
+                          ),
+                          child: Icon(
+                            Icons.play_circle_fill,
+                            size: 20.0,
+                            color: lightColorScheme.secondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InfoSection extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const InfoSection({
+    Key? key,
+    required this.title,
+    required this.content,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-      alignment: Alignment.center,
-      margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
       child: Column(
-        //mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /*======= Section heading ======*/
           Text(
-            tileLabel.toUpperCase(),
-            style:  TextStyle(
+            title.toUpperCase(),
+            style: TextStyle(
               fontSize: 18,
-              color:  lightColorScheme.primary,
+              color: lightColorScheme.secondary,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height:10.0),
-
-          const SizedBox(height: spacePix), // space
-
-          // Section content
+          const SizedBox(height: 12),
           Text(
-            tileContent,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xff2F3B4A),
-            ),
-          )
-        ]
-      )
+            content,
+            style: AppStyles.informationText
+          ),
+        ],
+      ),
     );
-
   }
 }
-
