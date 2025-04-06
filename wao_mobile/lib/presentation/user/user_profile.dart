@@ -28,7 +28,7 @@ class UserProfileState extends State<UserProfile> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
           child: Column(
             children: <Widget>[
 

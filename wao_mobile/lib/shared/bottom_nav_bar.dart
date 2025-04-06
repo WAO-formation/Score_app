@@ -18,7 +18,7 @@ class BottomNavBarState extends State<BottomNavBar>{
   int currentIndex = 0;
   List pages =  [
     const DashboardHome(title: '',),
-    const OfficiateHome(title: '',),
+    const OfficiateHome(),
     UserProfile()
   ];
   @override

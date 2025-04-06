@@ -12,7 +12,7 @@ const ColorScheme lightColorScheme = ColorScheme(
   onSurface: Colors.black,
   onBackground: Colors.black,
   onError: Colors.white,
-  tertiary: Color(0xFFE6B200),
+  tertiary: Color(0xFFFFC600),
 );
 
 
