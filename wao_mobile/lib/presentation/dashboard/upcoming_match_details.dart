@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/presentation/dashboard/widgets/ranking.dart';
 import 'package:wao_mobile/shared/custom_appbar.dart';
 
 import '../../../shared/custom_text.dart';
@@ -550,8 +551,24 @@ class GameDetailsPage extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Last 5 games visualization
+          /// Last 5 games visualization
           _buildLastGamesVisualization(),
+
+          const SizedBox(height: 20.0),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                  'Ranking',
+                  style:AppStyles.secondaryTitle
+              ),
+            ],
+          ),
+          const SizedBox(height:10.0),
+
+          const LeagueRanking()
+
         ],
       ),
     );
