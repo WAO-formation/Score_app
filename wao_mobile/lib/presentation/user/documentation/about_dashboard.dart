@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../shared/custom_text.dart';
-import '../../shared/welcome_box.dart';
-import '../../shared/custom_appbar.dart';
-import '../../shared/theme_data.dart';
+import '../../../shared/custom_text.dart';
+import '../../../shared/welcome_box.dart';
+import '../../../shared/custom_appbar.dart';
+import '../../../shared/theme_data.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({Key? key}) : super(key: key);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/shared/custom_text.dart';
-import '../../shared/Welcome_box.dart';
-import '../../shared/custom_appbar.dart';
-import '../../shared/theme_data.dart';
+import '../../../shared/Welcome_box.dart';
+import '../../../shared/custom_appbar.dart';
+import '../../../shared/theme_data.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});
@@ -154,97 +154,45 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                       ],
                     ),
 
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 40.0),
 
                     // Social Media Icons
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Facebook
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: lightColorScheme.secondary,
-                              )
-                            ),
-                            child: Icon(
-                              Icons.facebook,
-                              size: 20.0,
-                              color: lightColorScheme.secondary,
-                            ),
-                          ),
+                        _buildSocialIcon(
+                          imagePath: 'assets/socials/facebook.png',
+                          shadowColor: const Color(0xFF1877F2),
+                          onTap: () {
+                            print('Facebook icon tapped');
+                          },
+                        ),
+                        _buildSocialIcon(
+                          imagePath: 'assets/socials/instagram.png',
+                          shadowColor: const Color(0xFFE4405F),
+                          onTap: () {
+                            print('Instagram  icon tapped');
+                          },
+                        ),
+                        _buildSocialIcon(
+                          imagePath: 'assets/socials/tiktok.png',
+                          shadowColor: const Color(0xFF000000),
+                          onTap: () {
+                            print('tiktok icon tapped');
+                          },
                         ),
 
-                        // Twitter/X
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: lightColorScheme.secondary,
-                                )
-                            ),
-                            child: Icon(
-                              Icons.sports_basketball,
-                              size: 20.0,
-                              color: lightColorScheme.secondary,
-                            ),
-                          ),
-                        ),
-
-                        // Instagram
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: lightColorScheme.secondary,
-                                )
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 20.0,
-                              color: lightColorScheme.secondary,
-                            ),
-                          ),
-                        ),
-
-                        // YouTube
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: lightColorScheme.secondary,
-                                )
-                            ),
-                            child: Icon(
-                              Icons.play_circle_fill,
-                              size: 20.0,
-                              color: lightColorScheme.secondary,
-                            ),
-                          ),
+                        _buildSocialIcon(
+                          imagePath: 'assets/socials/X.png',
+                          shadowColor: const Color(0xFF1DA1F2),
+                          onTap: () {
+                            print('Facebook icon tapped');
+                          },
                         ),
                       ],
                     ),
+                    const SizedBox(height: 40),
+
                   ],
                 ),
               ),
@@ -269,4 +217,37 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       ),
     );
   }
+
+
+  Widget _buildSocialIcon({
+    required String imagePath,
+    required Color shadowColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipOval(
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+            )),
+      ),
+    );
+  }
+
 }

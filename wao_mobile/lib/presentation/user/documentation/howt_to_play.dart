@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../shared/Welcome_box.dart';
-import '../../shared/custom_appbar.dart';
-import '../../shared/custom_text.dart';
-import '../../shared/theme_data.dart';
+import '../../../shared/Welcome_box.dart';
+import '../../../shared/custom_appbar.dart';
+import '../../../shared/custom_text.dart';
+import '../../../shared/theme_data.dart';
 
 class HowToPlayWAO extends StatefulWidget {
   const HowToPlayWAO({super.key});
