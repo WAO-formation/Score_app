@@ -41,6 +41,8 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_launcher_icons: ^0.13.1
   carousel_slider: ^5.0.0
+  font_awesome_flutter: ^10.7.0
+
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/socials/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

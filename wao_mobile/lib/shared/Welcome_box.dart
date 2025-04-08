@@ -22,7 +22,7 @@ class WelcomeToWAO extends StatelessWidget{
         margin: EdgeInsets.symmetric(horizontal: screenWidth*0.02, vertical: screenHeight*0.005),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         decoration:   BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
           color:  lightColorScheme.secondary,
         ),
 
@@ -49,7 +49,7 @@ class WelcomeToWAO extends StatelessWidget{
 
                Text(
                 title,
-                style: AppStyles.informationText.copyWith(fontWeight: FontWeight.bold)
+                style: AppStyles.informationText.copyWith(color: lightColorScheme.onPrimary)
               ),
             ]
         )
