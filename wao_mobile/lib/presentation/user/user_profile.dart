@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wao_mobile/presentation/authentication/login.dart';
 import 'package:wao_mobile/presentation/user/documentation/howt_to_play.dart';
 import 'package:wao_mobile/presentation/user/profile/edit_profile.dart';
 import 'package:wao_mobile/presentation/user/documentation/wao_privacy_policy.dart';
 import 'package:wao_mobile/presentation/user/documentation/wao_rules.dart';
+import 'package:wao_mobile/presentation/user/teams/models/teams_provider.dart';
+import 'package:wao_mobile/presentation/user/teams/teams.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_text.dart';
@@ -37,7 +40,7 @@ class UserProfileState extends State<UserProfile> {
   }
 
   void _onScroll() {
-    // Show title in AppBar when scrolled past 140 pixels
+
     if (_scrollController.offset > 140 && !_showAppBarTitle) {
       setState(() => _showAppBarTitle = true);
     } else if (_scrollController.offset <= 140 && _showAppBarTitle) {
@@ -236,8 +239,14 @@ class UserProfileState extends State<UserProfile> {
                     title: 'Teams',
                     subtitle: 'See your favourite team',
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const AboutPage()));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChangeNotifierProvider(
+                            create: (_) => TeamProvider(),
+                            child: const TeamsPage(),
+                          ),
+                        ),
+                      );
                     },
                   ),
 

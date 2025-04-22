@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/presentation/onboarding/onboarding_screen.dart';
-import 'package:wao_mobile/shared/bottom_nav_bar.dart';
+import 'package:wao_mobile/presentation/user/teams/models/teams_provider.dart';
+import 'package:provider/provider.dart';
 
 
 void main() {
   runApp(
-       MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TeamProvider()),
+      ],
+      child: MyApp(),
+    ),
   );
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
