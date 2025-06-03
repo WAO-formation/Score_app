@@ -96,7 +96,7 @@ class GamePerformance {
 }
 
 // Player Event Model (was missing in the original code)
-enum EventType { kingdom, workout, goalpost, foul }
+enum EventType { kingdom, workout, goalpost, foul, substitution, skillShow, injury, timeout, bounce }
 
 class PlayerEvent {
   final int? playerId;
@@ -118,7 +118,7 @@ class PlayerEvent {
   });
 }
 
-// models/team_model.dart
+// models/live_score.dart
 class TeamModel {
   final int id;
   final String name;
@@ -128,15 +128,32 @@ class TeamModel {
   final String? ownerName;
   final String? phone;
 
+  // Additional properties needed for TeamListItem
+  final String region;
+  final int totalGames;
+  final double totalScore;
+  final DateTime lastMatchDate;
+  final int tablePosition;
+  final String status;
+
   TeamModel({
     required this.id,
     required this.name,
     required this.logo,
-    this.ownerName,
-    this.email,
-    this.phone,
     this.password,
-  });
+    this.email,
+    this.ownerName,
+    this.phone,
+    this.region = 'Unknown Region',
+    this.totalGames = 0,
+    this.totalScore = 0.0,
+    DateTime? lastMatchDate,
+    this.tablePosition = 1,
+    this.status = 'Active',
+  }) : lastMatchDate = lastMatchDate ?? DateTime.now();
+
+
+  String get logoUrl => logo;
 }
 
 

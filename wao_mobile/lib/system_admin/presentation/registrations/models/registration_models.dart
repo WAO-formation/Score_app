@@ -1,5 +1,5 @@
 
-// models/team_model.dart
+// models/live_score.dart
 import 'dart:ui';
 
 class TeamModel {
