@@ -1,5 +1,7 @@
-
+// live_score_model.dart
 import 'package:wao_mobile/system_admin/presentation/Teams/model/team_model.dart';
+
+
 
 enum MatchStatus { upcoming, live, paused, ended, extraTime, finished, halftime, scheduled }
 enum Quarter { first, second, third, fourth, extraTime }
@@ -135,45 +137,6 @@ class LiveMatch {
     );
   }
 
-  // JSON serialization methods
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'teamA': teamA.toJson(),
-      'teamB': teamB.toJson(),
-      'status': status.name,
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime?.toIso8601String(),
-      'currentQuarter': currentQuarter.name,
-      'currentTime': currentTime.inMilliseconds,
-      'extraTime': extraTime?.inMilliseconds,
-      'teamAScore': teamAScore.toJson(),
-      'teamBScore': teamBScore.toJson(),
-      'events': events.map((e) => e.toJson()).toList(),
-      'fouls': fouls.map((f) => f.toJson()).toList(),
-    };
-  }
-
-  factory LiveMatch.fromJson(Map<String, dynamic> json) {
-    return LiveMatch(
-      id: json['id'],
-      title: json['title'],
-      teamA: Teams.fromJson(json['teamA']),
-      teamB: Teams.fromJson(json['teamB']),
-      status: MatchStatus.values.firstWhere((e) => e.name == json['status']),
-      startTime: DateTime.parse(json['startTime']),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
-      currentQuarter: Quarter.values.firstWhere((e) => e.name == json['currentQuarter']),
-      currentTime: Duration(milliseconds: json['currentTime']),
-      extraTime: json['extraTime'] != null ? Duration(milliseconds: json['extraTime']) : null,
-      teamAScore: LiveScore.fromJson(json['teamAScore']),
-      teamBScore: LiveScore.fromJson(json['teamBScore']),
-      events: (json['events'] as List).map((e) => MatchEvent.fromJson(e)).toList(),
-      fouls: (json['fouls'] as List).map((f) => PlayerFoul.fromJson(f)).toList(),
-    );
-  }
-
   // Static method for sample live matches
   static List<LiveMatch> getSampleLiveMatches() {
     List<Teams> teams = Teams.getSampleTeams();
@@ -190,7 +153,7 @@ class LiveMatch {
         currentTime: const Duration(minutes: 1, seconds: 45),
         teamAScore: LiveScore(
           teamId: teams[0].id,
-          kingdom: 0,
+          kingdom:0,
           workout: 0,
           goalpost: 0,
           judges: 0,
@@ -331,39 +294,6 @@ class LiveScore {
       goalSettings: goalSettings ?? this.goalSettings,
     );
   }
-
-  // JSON serialization methods
-  Map<String, dynamic> toJson() {
-    return {
-      'teamId': teamId,
-      'kingdom': kingdom,
-      'workout': workout,
-      'goalpost': goalpost,
-      'judges': judges,
-      'bounces': bounces,
-      'workoutSeconds': workoutSeconds,
-      'goals': goals,
-      'sacrifices3pt': sacrifices3pt,
-      'sacrifices33pt': sacrifices33pt,
-      'goalSettings': goalSettings,
-    };
-  }
-
-  factory LiveScore.fromJson(Map<String, dynamic> json) {
-    return LiveScore(
-      teamId: json['teamId'],
-      kingdom: json['kingdom'].toDouble(),
-      workout: json['workout'].toDouble(),
-      goalpost: json['goalpost'].toDouble(),
-      judges: json['judges'].toDouble(),
-      bounces: json['bounces'],
-      workoutSeconds: json['workoutSeconds'],
-      goals: json['goals'],
-      sacrifices3pt: json['sacrifices3pt'],
-      sacrifices33pt: json['sacrifices33pt'],
-      goalSettings: json['goalSettings'],
-    );
-  }
 }
 
 enum EventType { bounce, skillShow, goal, sacrifice, goalSetting, foul, timeout, substitution, injury }
@@ -412,35 +342,6 @@ class MatchEvent {
       matchTime: matchTime ?? this.matchTime,
       description: description ?? this.description,
       data: data ?? this.data,
-    );
-  }
-
-  // JSON serialization methods
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'type': type.name,
-      'teamId': teamId,
-      'playerId': playerId,
-      'timestamp': timestamp.toIso8601String(),
-      'quarter': quarter.name,
-      'matchTime': matchTime.inMilliseconds,
-      'description': description,
-      'data': data,
-    };
-  }
-
-  factory MatchEvent.fromJson(Map<String, dynamic> json) {
-    return MatchEvent(
-      id: json['id'],
-      type: EventType.values.firstWhere((e) => e.name == json['type']),
-      teamId: json['teamId'],
-      playerId: json['playerId'],
-      timestamp: DateTime.parse(json['timestamp']),
-      quarter: Quarter.values.firstWhere((e) => e.name == json['quarter']),
-      matchTime: Duration(milliseconds: json['matchTime']),
-      description: json['description'],
-      data: json['data'],
     );
   }
 }
@@ -497,39 +398,6 @@ class PlayerFoul {
       description: description ?? this.description,
       isCardGiven: isCardGiven ?? this.isCardGiven,
       cardType: cardType ?? this.cardType,
-    );
-  }
-
-  // JSON serialization methods
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'playerId': playerId,
-      'playerName': playerName,
-      'teamId': teamId,
-      'foulType': foulType,
-      'timestamp': timestamp.toIso8601String(),
-      'quarter': quarter.name,
-      'matchTime': matchTime.inMilliseconds,
-      'description': description,
-      'isCardGiven': isCardGiven,
-      'cardType': cardType,
-    };
-  }
-
-  factory PlayerFoul.fromJson(Map<String, dynamic> json) {
-    return PlayerFoul(
-      id: json['id'],
-      playerId: json['playerId'],
-      playerName: json['playerName'],
-      teamId: json['teamId'],
-      foulType: json['foulType'],
-      timestamp: DateTime.parse(json['timestamp']),
-      quarter: Quarter.values.firstWhere((e) => e.name == json['quarter']),
-      matchTime: Duration(milliseconds: json['matchTime']),
-      description: json['description'],
-      isCardGiven: json['isCardGiven'],
-      cardType: json['cardType'],
     );
   }
 }
@@ -599,3 +467,4 @@ class ScoreCalculator {
     );
   }
 }
+

@@ -34,6 +34,51 @@ class Teams {
 
   double get totalScore => kingdom + workout + goalpost + judges;
 
+  // JSON serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'logoUrl': logoUrl,
+      'region': region,
+      'status': status,
+      'tablePosition': tablePosition,
+      'totalGames': totalGames,
+      'lastMatchDate': lastMatchDate.toIso8601String(),
+      'kingdom': kingdom,
+      'workout': workout,
+      'goalpost': goalpost,
+      'judges': judges,
+      'players': players.map((player) => player.toJson()).toList(),
+      'matches': matches.map((match) => match.toJson()).toList(),
+    };
+  }
+
+  factory Teams.fromJson(Map<String, dynamic> json) {
+    return Teams(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      logoUrl: json['logoUrl'] ?? '',
+      region: json['region'] ?? '',
+      status: json['status'] ?? 'active',
+      tablePosition: json['tablePosition'] ?? 0,
+      totalGames: json['totalGames'] ?? 0,
+      lastMatchDate: json['lastMatchDate'] != null
+          ? DateTime.parse(json['lastMatchDate'])
+          : DateTime.now(),
+      kingdom: (json['kingdom'] ?? 0.0).toDouble(),
+      workout: (json['workout'] ?? 0.0).toDouble(),
+      goalpost: (json['goalpost'] ?? 0.0).toDouble(),
+      judges: (json['judges'] ?? 0.0).toDouble(),
+      players: json['players'] != null
+          ? (json['players'] as List).map((playerJson) => Player.fromJson(playerJson)).toList()
+          : [],
+      matches: json['matches'] != null
+          ? (json['matches'] as List).map((matchJson) => MatchRecord.fromJson(matchJson)).toList()
+          : [],
+    );
+  }
+
   // Static method for creating sample teams
   static List<Teams> getSampleTeams() {
     return [
@@ -198,6 +243,31 @@ class Player {
     required this.status,
   });
 
+  // JSON serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'role': role,
+      'gamesPlayed': gamesPlayed,
+      'fouls': fouls,
+      'performanceScore': performanceScore,
+      'status': status,
+    };
+  }
+
+  factory Player.fromJson(Map<String, dynamic> json) {
+    return Player(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      role: json['role'] ?? '',
+      gamesPlayed: json['gamesPlayed'] ?? 0,
+      fouls: json['fouls'] ?? 0,
+      performanceScore: (json['performanceScore'] ?? 0.0).toDouble(),
+      status: json['status'] ?? 'active',
+    );
+  }
+
   // Static method for creating sample players
   static List<Player> getSamplePlayers() {
     return [
@@ -316,6 +386,35 @@ class MatchRecord {
 
   double get totalScore => kingdom + workout + goalpost + judges;
 
+  // JSON serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'matchId': matchId,
+      'opponent': opponent,
+      'date': date.toIso8601String(),
+      'result': result,
+      'kingdom': kingdom,
+      'workout': workout,
+      'goalpost': goalpost,
+      'judges': judges,
+    };
+  }
+
+  factory MatchRecord.fromJson(Map<String, dynamic> json) {
+    return MatchRecord(
+      matchId: json['matchId'] ?? '',
+      opponent: json['opponent'] ?? '',
+      date: json['date'] != null
+          ? DateTime.parse(json['date'])
+          : DateTime.now(),
+      result: json['result'] ?? 'pending',
+      kingdom: (json['kingdom'] ?? 0.0).toDouble(),
+      workout: (json['workout'] ?? 0.0).toDouble(),
+      goalpost: (json['goalpost'] ?? 0.0).toDouble(),
+      judges: (json['judges'] ?? 0.0).toDouble(),
+    );
+  }
+
   // Static method for creating sample match records
   static List<MatchRecord> getSampleMatches() {
     return [
@@ -418,7 +517,7 @@ class MatchRecord {
   int get hashCode => matchId.hashCode;
 }
 
-// Example usage and testing
+// Example usage and testing with JSON serialization
 void main() {
   // Get sample teams
   List<Teams> sampleTeams = Teams.getSampleTeams();
@@ -431,27 +530,38 @@ void main() {
     print('');
   }
 
-  // Create a new match record
-  MatchRecord newMatch = MatchRecord.create(
-    matchId: 'match_new_001',
-    opponent: 'Golden Dragons',
-    date: DateTime.now(),
-    result: 'pending',
-  );
+  // Test JSON serialization
+  Teams firstTeam = sampleTeams.first;
 
-  // Update the match with scores
-  MatchRecord completedMatch = newMatch.copyWith(
-    result: 'won',
-    kingdom: 87.5,
-    workout: 90.2,
-    goalpost: 84.8,
-    judges: 89.1,
-  );
+  // Convert to JSON
+  Map<String, dynamic> teamJson = firstTeam.toJson();
+  print('Team JSON:');
+  print(teamJson);
+  print('');
 
-  print('New Match Record:');
-  print('Match ID: ${completedMatch.matchId}');
-  print('Opponent: ${completedMatch.opponent}');
-  print('Result: ${completedMatch.result}');
-  print('Total Score: ${completedMatch.totalScore.toStringAsFixed(1)}');
-  print('Date: ${completedMatch.date.toString().split(' ')[0]}');
+  // Convert back from JSON
+  Teams reconstructedTeam = Teams.fromJson(teamJson);
+  print('Reconstructed Team:');
+  print('Name: ${reconstructedTeam.name}');
+  print('Total Score: ${reconstructedTeam.totalScore}');
+  print('Players Count: ${reconstructedTeam.players.length}');
+  print('Matches Count: ${reconstructedTeam.matches.length}');
+  print('');
+
+  // Test individual player JSON
+  Player samplePlayer = Player.getSamplePlayers().first;
+  Map<String, dynamic> playerJson = samplePlayer.toJson();
+  Player reconstructedPlayer = Player.fromJson(playerJson);
+  print('Player JSON Test:');
+  print('Original: ${samplePlayer.name} - ${samplePlayer.performanceScore}');
+  print('Reconstructed: ${reconstructedPlayer.name} - ${reconstructedPlayer.performanceScore}');
+  print('');
+
+  // Test match record JSON
+  MatchRecord sampleMatch = MatchRecord.getSampleMatches().first;
+  Map<String, dynamic> matchJson = sampleMatch.toJson();
+  MatchRecord reconstructedMatch = MatchRecord.fromJson(matchJson);
+  print('Match JSON Test:');
+  print('Original: ${sampleMatch.opponent} - ${sampleMatch.result} - ${sampleMatch.totalScore}');
+  print('Reconstructed: ${reconstructedMatch.opponent} - ${reconstructedMatch.result} - ${reconstructedMatch.totalScore}');
 }
