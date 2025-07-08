@@ -682,7 +682,7 @@ class _ScoreBoardState extends State<ScoreBoard>
     );
   }
 
-  Widget _buildTeamInfo(Teams team, bool isTeamA) {
+  Widget _buildTeamInfo(LiveScore.Teams team, bool isTeamA) {
     final score = isTeamA ? currentMatch.teamAScore : currentMatch.teamBScore;
     return Column(
       children: [

@@ -1,6 +1,8 @@
 // live_score_model.dart
 import 'package:wao_mobile/system_admin/presentation/Teams/model/team_model.dart';
 
+import 'live_score.dart';
+
 
 
 enum MatchStatus { upcoming, live, paused, ended, extraTime, finished, halftime, scheduled }
