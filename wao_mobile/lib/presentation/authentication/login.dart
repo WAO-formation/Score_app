@@ -7,6 +7,7 @@ import 'package:wao_mobile/shared/theme_data.dart';
 import '../../shared/bottom_nav_bar.dart';
 import '../../shared/custom_buttons.dart';
 import '../../shared/custom_text.dart';
+import '../../system_admin/presentation/admin_bottom_nav.dart';
 import 'forgot_password.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -78,10 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
         const SnackBar(content: Text('Processing login...')),
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavBar()),
-      );
+      if(_rememberMe == true){
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminBottomNavBar()),
+        );
+      }else{
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BottomNavBar()),
+        );
+      }
+
     }
   }
 
@@ -254,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      'Remember me',
+                      'I\'m a staff',
                       style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ],

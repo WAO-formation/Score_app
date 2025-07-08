@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wao_mobile/presentation/authentication/login.dart';
 import 'package:wao_mobile/presentation/user/documentation/howt_to_play.dart';
 import 'package:wao_mobile/presentation/user/profile/edit_profile.dart';
 import 'package:wao_mobile/presentation/user/documentation/wao_privacy_policy.dart';
 import 'package:wao_mobile/presentation/user/documentation/wao_rules.dart';
+import 'package:wao_mobile/presentation/user/teams/models/teams_provider.dart';
+import 'package:wao_mobile/presentation/user/teams/teams.dart';
 
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_text.dart';
@@ -37,7 +40,7 @@ class UserProfileState extends State<UserProfile> {
   }
 
   void _onScroll() {
-    // Show title in AppBar when scrolled past 140 pixels
+
     if (_scrollController.offset > 140 && !_showAppBarTitle) {
       setState(() => _showAppBarTitle = true);
     } else if (_scrollController.offset <= 140 && _showAppBarTitle) {
@@ -54,14 +57,14 @@ class UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         elevation: _showAppBarTitle ? 2 : 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _showAppBarTitle ? Colors.white : Colors.transparent,
+        backgroundColor: _showAppBarTitle ? lightColorScheme.secondary : Colors.transparent,
         title: AnimatedOpacity(
           opacity: _showAppBarTitle ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 250),
           child: Text(
             'Profile',
             style: TextStyle(
-              color: lightColorScheme.secondary,
+              color: lightColorScheme.onPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -122,9 +125,9 @@ class UserProfileState extends State<UserProfile> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Username
+
                   Text(
-                    'WAO Sport',
+                    'John Doe',
                     style: TextStyle(
                       color: lightColorScheme.onPrimary,
                       fontSize: 22,
@@ -132,6 +135,41 @@ class UserProfileState extends State<UserProfile> {
                     ),
                   ),
 
+                  Text(
+                    'johndoe@gmail.com',
+                    style: TextStyle(
+                      color: lightColorScheme.onPrimary.withOpacity(0.8),
+                      fontSize: 16,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20.0,),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircleAvatar(
+                          radius: 14.0,
+                          backgroundImage: AssetImage("assets/images/WAO_LOGO.jpg"),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Team A",
+                          style: AppStyles.informationText.copyWith(
+                            color: lightColorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 ],
               ),
@@ -197,6 +235,25 @@ class UserProfileState extends State<UserProfile> {
                   _buildDivider(),
 
                   _buildProfileItem(
+                    icon: Icons.people,
+                    title: 'Teams',
+                    subtitle: 'See your favourite team',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChangeNotifierProvider(
+                            create: (_) => TeamProvider(),
+                            child: const TeamsPage(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+
+                  _buildDivider(),
+
+                  _buildProfileItem(
                     icon: Icons.book_rounded,
                     title: 'About',
                     subtitle: 'Learn about WAO',
@@ -205,6 +262,8 @@ class UserProfileState extends State<UserProfile> {
                           MaterialPageRoute(builder: (context) => const AboutPage()));
                     },
                   ),
+
+
                   _buildDivider(),
 
                   _buildProfileItem(

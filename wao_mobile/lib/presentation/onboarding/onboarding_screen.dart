@@ -28,7 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
       curve: Curves.easeInOut,
     );
 
-    Timer(const Duration(seconds: 20), () {
+    Timer(const Duration(seconds: 15), () {
       Navigator.pushReplacement(context, 
       MaterialPageRoute(builder: (context) => const SplashScreen()));
     });
