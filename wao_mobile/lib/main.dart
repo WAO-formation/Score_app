@@ -6,6 +6,8 @@ import 'package:wao_mobile/system_admin/presentation/Teams/model/state_managemen
 import 'package:wao_mobile/system_admin/presentation/score_board/view/live_score.dart';
 import 'package:wao_mobile/system_admin/presentation/admin_bottom_nav.dart';
 
+import 'Team_Owners/Home/home_screen.dart';
+
 
 void main() {
   runApp(
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,
-      home:  AdminBottomNavBar()
+      home:  TeamCoachHome()
     );
   }
 }
