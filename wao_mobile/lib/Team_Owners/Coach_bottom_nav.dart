@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
-
-import 'package:wao_mobile/presentation/dashboard/dashboard.dart';
-import 'package:wao_mobile/presentation/officiates/officiate_dashboard.dart';
-
+import 'package:wao_mobile/Team_Owners/profile/profile.dart';
+import 'package:wao_mobile/Team_Owners/team_members/team_members.dart';
 import 'package:wao_mobile/shared/theme_data.dart';
-import 'package:wao_mobile/system_admin/presentation/registrations/Officials-and-teams.dart';
-
-import 'score_board/view/live_score.dart';
-import 'dasboard/dashboard.dart';
-import 'match_sheduling/match_sheduling.dart';
+import 'Home/home_screen.dart';
+import 'chats/chats_list.dart';
 
 
-class AdminBottomNavBar extends StatefulWidget{
-  const AdminBottomNavBar({super.key});
+
+class CoachBottomNavBar extends StatefulWidget{
+  const CoachBottomNavBar({super.key});
 
   @override
-  State<AdminBottomNavBar> createState() => AdminBottomNavBarState();
+  State<CoachBottomNavBar> createState() => CoachBottomNavBarState();
 
 }
 
-class AdminBottomNavBarState extends State<AdminBottomNavBar>{
+class CoachBottomNavBarState extends State<CoachBottomNavBar>{
   int currentIndex = 0;
   List pages =  [
-    const AdminDashboard(title: '',),
-    const MatchManagement(),
-    const LiveScoresPage(),
-    const OfficialsAndTeams(),
+    const TeamCoachHome(),
+    const TeamManagementScreen(),
+    const ChatListScreen(),
+    const CoachProfilePage(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -58,16 +54,16 @@ class AdminBottomNavBarState extends State<AdminBottomNavBar>{
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.sports_basketball_rounded, size: 30.0),
-                label: 'Games',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.gamepad_outlined, size: 30.0),
-                label: 'Live',
-              ),
-              BottomNavigationBarItem(
                 icon: Icon(Icons.people_alt, size: 30.0),
-                label: 'Officials',
+                label: 'Players',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble, size: 30.0),
+                label: 'Chats',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person, size: 30.0),
+                label: 'Profile',
               ),
             ],
           ),
