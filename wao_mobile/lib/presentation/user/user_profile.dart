@@ -8,9 +8,11 @@ import 'package:wao_mobile/presentation/user/documentation/wao_rules.dart';
 import 'package:wao_mobile/presentation/user/teams/models/teams_provider.dart';
 import 'package:wao_mobile/presentation/user/teams/teams.dart';
 
+import '../../Team_Owners/Coach_bottom_nav.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
+import '../../system_admin/presentation/admin_bottom_nav.dart';
 import '../teams/user_team_spesification.dart';
 import 'documentation/about_dashboard.dart';
 import 'contact_us/contact_us.dart';
@@ -309,6 +311,32 @@ class UserProfileState extends State<UserProfile> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const ContactUsPage()));
+                    },
+                  ),
+
+                  _buildDivider(),
+                  _buildProfileItem(
+                    icon: Icons.play_lesson_rounded,
+                    title: 'Coaches Page',
+                    subtitle: 'Call us for any worries',
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const CoachBottomNavBar()));
+                    },
+                  ),
+
+                  _buildDivider(),
+                  _buildProfileItem(
+                    icon: Icons.call,
+                    title: 'Admin Page',
+                    subtitle: 'Call us for any worries',
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AdminBottomNavBar()));
                     },
                   ),
                 ],

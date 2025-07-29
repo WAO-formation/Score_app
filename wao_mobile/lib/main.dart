@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,
-      home:  BottomNavBar()
+      home:  OnboardingScreen()
     );
   }
 }
