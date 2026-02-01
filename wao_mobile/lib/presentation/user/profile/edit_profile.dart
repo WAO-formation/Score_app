@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../../../shared/custom_buttons.dart';
 import '../../../shared/theme_data.dart';
-import '../../authentication/signup.dart';
+import '../../authentication/UI/signup.dart';
+
 
 
 class EditProfileScreen extends StatefulWidget {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wao_mobile/presentation/authentication/reset_password.dart';
+import 'package:wao_mobile/presentation/authentication/UI/reset_password.dart';
 
-import '../../shared/custom_buttons.dart';
-import '../../shared/custom_text.dart';
-import '../../shared/theme_data.dart';
+import '../../../shared/custom_buttons.dart';
+import '../../../shared/custom_text.dart';
+import '../../../shared/theme_data.dart';
+
 
 class ForgotPasswordOtpScreen extends StatefulWidget {
   final String email;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wao_mobile/presentation/authentication/login.dart';
 import 'package:wao_mobile/presentation/user/documentation/howt_to_play.dart';
 import 'package:wao_mobile/presentation/user/profile/edit_profile.dart';
 import 'package:wao_mobile/presentation/user/documentation/wao_privacy_policy.dart';
@@ -11,6 +10,7 @@ import 'package:wao_mobile/presentation/user/teams/teams.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
+import '../authentication/UI/login.dart';
 import '../teams/user_team_spesification.dart';
 import 'documentation/about_dashboard.dart';
 import 'contact_us/contact_us.dart';

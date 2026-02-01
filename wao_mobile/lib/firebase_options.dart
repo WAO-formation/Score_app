@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -44,13 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC1LvmPUXkOL6K-E191ACeWF0CXKQqryPg',
-    appId: '1:633369671789:web:86f58e3b9e804e1a066764',
-    messagingSenderId: '633369671789',
-    projectId: 'wao-mobiel-app',
-    authDomain: 'wao-mobiel-app.firebaseapp.com',
-    storageBucket: 'wao-mobiel-app.appspot.com',
-    measurementId: 'G-81X7HTKJC8',
+    apiKey: 'AIzaSyA4RJGHTtbNA2TDjjaL2sN_1sA8qL5tQWg',
+    appId: '1:746661776065:web:4abda7cda55d37b4c7e240',
+    messagingSenderId: '746661776065',
+    projectId: 'wao-app-28d4f',
+    authDomain: 'wao-app-28d4f.firebaseapp.com',
+    storageBucket: 'wao-app-28d4f.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -72,12 +68,21 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAtKceb1ePFDG400tjDHZU6eo_8QSVgd1k',
-    appId: '1:633369671789:ios:d591337eb07a42a8066764',
-    messagingSenderId: '633369671789',
-    projectId: 'wao-mobiel-app',
-    storageBucket: 'wao-mobiel-app.appspot.com',
-    iosClientId: '633369671789-antufu0i6b82i39ohfc5afv49ip4fe8a.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA3isalGYjfH6U4Y8xmfKy255vK5gpj-Rw',
+    appId: '1:746661776065:ios:a9b82a221a912ee5c7e240',
+    messagingSenderId: '746661776065',
+    projectId: 'wao-app-28d4f',
+    storageBucket: 'wao-app-28d4f.firebasestorage.app',
     iosBundleId: 'com.example.waoMobile',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyA4RJGHTtbNA2TDjjaL2sN_1sA8qL5tQWg',
+    appId: '1:746661776065:web:97e3ecd681565069c7e240',
+    messagingSenderId: '746661776065',
+    projectId: 'wao-app-28d4f',
+    authDomain: 'wao-app-28d4f.firebaseapp.com',
+    storageBucket: 'wao-app-28d4f.firebasestorage.app',
+  );
+
 }

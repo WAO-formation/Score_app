@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/presentation/authentication/login.dart';
 import 'package:wao_mobile/shared/custom_text.dart';
 
 import '../../shared/custom_buttons.dart';
+import '../authentication/UI/login.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
