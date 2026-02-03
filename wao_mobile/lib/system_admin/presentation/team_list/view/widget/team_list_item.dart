@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../presentation/user/teams/models/teams_models.dart';
-import '../../../score_board/model/live_score.dart';
 import '../../../Teams/model/team_model.dart';
-import '../../../match_sheduling/models/match_models.dart';
 
 class TeamListItem extends StatelessWidget {
   final Teams teams;

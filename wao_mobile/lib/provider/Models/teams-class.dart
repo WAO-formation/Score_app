@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/provider/Models/teamModel.dart';
 
-import '../../presentation/teams/teams_dashboard.dart';
+import '../../View/teams/teams_dashboard.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 

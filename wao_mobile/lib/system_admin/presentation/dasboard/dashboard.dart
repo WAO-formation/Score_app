@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/presentation/dashboard/widgets/liveMatches.dart';
-import 'package:wao_mobile/presentation/dashboard/widgets/ranking.dart';
+import 'package:wao_mobile/View/dashboard/widgets/liveMatches.dart';
+import 'package:wao_mobile/View/dashboard/widgets/ranking.dart';
 
-import '../../../presentation/dashboard/widgets/up_coming _matches.dart';
+import '../../../View/dashboard/widgets/up_coming _matches.dart';
 import '../../../shared/custom_appbar.dart';
 import '../../../shared/custom_text.dart';
-import '../../../shared/theme_data.dart';
-import '../score_board/model/live_score.dart';
 import '../Teams/model/team_model.dart';
 import '../Teams/view/teams_details.dart';
-import '../match_sheduling/models/match_models.dart';
-import '../team_list/view/team_list.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key, required this.title,  this.teamValue});

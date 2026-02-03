@@ -19,7 +19,7 @@ class _MatchManagementState extends State<MatchManagement> {
   final ScrollController _scrollController = ScrollController();
   bool _showAppBarTitle = false;
 
-  /// Lists of data
+  /// Lists of Model
   List<MatchModel> _matches = [];
   final List<TeamModel> _teams = [];
   final List<RefereeModel> _referees = [];
@@ -49,7 +49,7 @@ class _MatchManagementState extends State<MatchManagement> {
     }
   }
 
-  /// Initialize sample data
+  /// Initialize sample Model
   void _loadData() {
     // Load teams
     _teams.addAll([

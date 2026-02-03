@@ -6,7 +6,7 @@ import '../model/live_score.dart';
 class SampleLiveMatchGenerator {
   static final Random _random = Random();
 
-  // Create a sample live match with realistic data
+  // Create a sample live match with realistic Model
   static LiveMatch createSampleLiveMatch({
     String? matchId,
     Teams? teamA,
@@ -284,7 +284,7 @@ class SampleLiveMatchGenerator {
     );
   }
 
-  // Helper methods for generating realistic data
+  // Helper methods for generating realistic Model
   static MatchStatus _getRandomMatchStatus() {
     final statuses = [MatchStatus.live, MatchStatus.paused, MatchStatus.ended];
     return statuses[_random.nextInt(statuses.length)];

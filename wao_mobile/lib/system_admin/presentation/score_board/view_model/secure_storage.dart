@@ -9,7 +9,7 @@ class SecureStorageService {
     ),
   );
 
-  // Keys for different data types
+  // Keys for different Model types
   static const String _matchesKey = 'stored_matches';
   static const String _activeMatchKey = 'active_match';
   static const String _matchEventsKey = 'match_events';
@@ -104,12 +104,12 @@ class SecureStorageService {
     return null;
   }
 
-  // Clear all stored data
+  // Clear all stored Model
   static Future<void> clearAllData() async {
     await _storage.deleteAll();
   }
 
-  // Clear specific match data
+  // Clear specific match Model
   static Future<void> clearMatchData(String matchId) async {
     await _storage.delete(key: '${_matchEventsKey}_$matchId');
     await _storage.delete(key: '${_timerStateKey}_$matchId');

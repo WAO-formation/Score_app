@@ -48,7 +48,7 @@ class _OfficialsAndTeamsState extends State<OfficialsAndTeams> {
     }
   }
 
-  /// Initialize sample data
+  /// Initialize sample Model
   void _loadData() {
     // Load teams
     _teams = [

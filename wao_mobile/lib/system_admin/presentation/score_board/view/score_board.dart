@@ -52,7 +52,7 @@ class _ScoreBoardState extends State<ScoreBoard>
     if (match != null) {
       currentMatch = match;
     } else {
-      // Fallback to sample data if not found
+      // Fallback to sample Model if not found
       currentMatch = LiveScore.LiveMatch.getSampleLiveMatches().firstWhere(
             (m) => m.id == widget.matchId,
         orElse: () => throw Exception('Match not found'),
@@ -524,7 +524,7 @@ class _ScoreBoardState extends State<ScoreBoard>
           onPressed: () async {
             await SecureStorageService.storeMatches([currentMatch]);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Match data saved securely')),
+              const SnackBar(content: Text('Match Model saved securely')),
             );
           },
         ),
@@ -912,7 +912,7 @@ class _ScoreBoardState extends State<ScoreBoard>
     );
   }
 
-  // UPDATED: Match controls with specific button logic
+  // UPDATED: Match controls with specific button ViewModel
   Widget _buildMatchControls() {
     Duration remaining = _remainingTime;
     bool isTimeUp = remaining.inSeconds <= 0;
@@ -1066,7 +1066,7 @@ class _ScoreBoardState extends State<ScoreBoard>
                     await SecureStorageService.storeMatches([currentMatch]);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Match data saved securely'),
+                        content: Text('Match Model saved securely'),
                         backgroundColor: Colors.green,
                       ),
                     );

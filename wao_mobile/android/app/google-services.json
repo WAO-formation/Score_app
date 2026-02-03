@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "746661776065",
-    "project_id": "wao-app-28d4f",
-    "storage_bucket": "wao-app-28d4f.firebasestorage.app"
+    "project_number": "556690053319",
+    "project_id": "wao-mobile-app-7e3c9",
+    "storage_bucket": "wao-mobile-app-7e3c9.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:746661776065:android:92c6489a0602db11c7e240",
+        "mobilesdk_app_id": "1:556690053319:android:956074f6b660baa8c3c6e2",
         "android_client_info": {
           "package_name": "com.example.wao_mobile"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDEjAhQ7QaGyh9SKpIDzk4Q29Oq4aPewGk"
+          "current_key": "AIzaSyCT_u-dFJofcgvkVLJoOEvEEo5ig-mksJA"
         }
       ],
       "services": {
