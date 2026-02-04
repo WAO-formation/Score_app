@@ -6,7 +6,6 @@ import 'package:wao_mobile/Model/teams_games/wao_match.dart';
 class MatchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Fetch all matches
   Stream<List<WaoMatch>> getAllMatches() {
     return _db
         .collection('matches')
@@ -17,8 +16,6 @@ class MatchService {
         .toList());
   }
 
-  // Fetch matches by status - OPTIMIZED VERSION
-  // This version fetches by status only, then sorts in-memory to avoid composite index
   Stream<List<WaoMatch>> getMatchesByStatus(MatchStatus status) {
     return _db
         .collection('matches')
@@ -29,34 +26,28 @@ class MatchService {
           .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
           .toList();
 
-      // Sort in-memory instead of using orderBy in Firestore
-      // This avoids the need for a composite index
       if (status == MatchStatus.finished) {
-        matches.sort((a, b) => b.startTime.compareTo(a.startTime)); // descending
+        matches.sort((a, b) => b.startTime.compareTo(a.startTime));
       } else {
-        matches.sort((a, b) => a.startTime.compareTo(b.startTime)); // ascending
+        matches.sort((a, b) => a.startTime.compareTo(b.startTime));
       }
 
       return matches;
     });
   }
 
-  // Fetch live matches
   Stream<List<WaoMatch>> getLiveMatches() {
     return getMatchesByStatus(MatchStatus.live);
   }
 
-  // Fetch upcoming matches
   Stream<List<WaoMatch>> getUpcomingMatches() {
     return getMatchesByStatus(MatchStatus.upcoming);
   }
 
-  // Fetch finished matches
   Stream<List<WaoMatch>> getFinishedMatches() {
     return getMatchesByStatus(MatchStatus.finished);
   }
 
-  // Fetch matches by type - OPTIMIZED VERSION
   Stream<List<WaoMatch>> getMatchesByType(MatchType type) {
     return _db
         .collection('matches')
@@ -67,13 +58,11 @@ class MatchService {
           .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
           .toList();
 
-      // Sort in-memory
       matches.sort((a, b) => b.startTime.compareTo(a.startTime));
       return matches;
     });
   }
 
-  // Fetch matches for a specific team
   Stream<List<WaoMatch>> getTeamMatches(String teamId) {
     return _db
         .collection('matches')
@@ -99,7 +88,6 @@ class MatchService {
     });
   }
 
-  // Fetch matches for a specific championship
   Stream<List<WaoMatch>> getChampionshipMatches(String championshipId) {
     return _db
         .collection('matches')
@@ -110,13 +98,11 @@ class MatchService {
           .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
           .toList();
 
-      // Sort in-memory
       matches.sort((a, b) => a.startTime.compareTo(b.startTime));
       return matches;
     });
   }
 
-  // Create a new match
   Future<String> createMatch({
     required String teamAId,
     required String teamBId,
@@ -124,6 +110,7 @@ class MatchService {
     required String teamBName,
     required MatchType type,
     required DateTime startTime,
+    DateTime? scheduledDate,
     required String venue,
     String? championshipId,
   }) async {
@@ -138,6 +125,9 @@ class MatchService {
         'status': MatchStatus.upcoming.name,
         'type': type.name,
         'startTime': Timestamp.fromDate(startTime),
+        'scheduledDate': scheduledDate != null
+            ? Timestamp.fromDate(scheduledDate)
+            : null,
         'venue': venue,
         'championshipId': championshipId,
       }).timeout(const Duration(seconds: 5));
@@ -149,7 +139,6 @@ class MatchService {
     }
   }
 
-  // Update match score
   Future<void> updateScore(String matchId, int scoreA, int scoreB) async {
     try {
       await _db
@@ -166,7 +155,6 @@ class MatchService {
     }
   }
 
-  // Update match status
   Future<void> updateMatchStatus(String matchId, MatchStatus status) async {
     try {
       await _db
@@ -180,17 +168,14 @@ class MatchService {
     }
   }
 
-  // Start a match (set to live)
   Future<void> startMatch(String matchId) async {
     await updateMatchStatus(matchId, MatchStatus.live);
   }
 
-  // End a match (set to finished)
   Future<void> endMatch(String matchId) async {
     await updateMatchStatus(matchId, MatchStatus.finished);
   }
 
-  // Delete a match
   Future<void> deleteMatch(String matchId) async {
     try {
       await _db
@@ -204,12 +189,10 @@ class MatchService {
     }
   }
 
-  // Seed sample matches - 3 LIVE MATCHES
   Future<void> seedMatches() async {
     final now = DateTime.now();
 
     final List<Map<String, dynamic>> sampleMatches = [
-      // === 3 LIVE MATCHES ===
       {
         'teamAId': 'ug_warriors',
         'teamBId': 'knust_stars',
@@ -220,6 +203,7 @@ class MatchService {
         'status': MatchStatus.live.name,
         'type': MatchType.championship.name,
         'startTime': Timestamp.fromDate(now.subtract(const Duration(minutes: 30))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(minutes: 30))),
         'venue': 'Legon Sports Complex',
         'championshipId': null,
       },
@@ -233,6 +217,7 @@ class MatchService {
         'status': MatchStatus.live.name,
         'type': MatchType.friendly.name,
         'startTime': Timestamp.fromDate(now.subtract(const Duration(minutes: 45))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(minutes: 45))),
         'venue': 'Cape Coast Arena',
         'championshipId': null,
       },
@@ -246,11 +231,10 @@ class MatchService {
         'status': MatchStatus.live.name,
         'type': MatchType.championship.name,
         'startTime': Timestamp.fromDate(now.subtract(const Duration(hours: 1))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(hours: 1))),
         'venue': 'WaoSphere',
         'championshipId': null,
       },
-
-      // === FINISHED MATCHES ===
       {
         'teamAId': 'ug_warriors',
         'teamBId': 'ucc_titans',
@@ -261,6 +245,7 @@ class MatchService {
         'status': MatchStatus.finished.name,
         'type': MatchType.championship.name,
         'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
         'venue': 'University Gym',
         'championshipId': null,
       },
@@ -274,11 +259,10 @@ class MatchService {
         'status': MatchStatus.finished.name,
         'type': MatchType.friendly.name,
         'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 7))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 7))),
         'venue': 'KNUST Sports Stadium',
         'championshipId': null,
       },
-
-      // === UPCOMING MATCHES ===
       {
         'teamAId': 'upsa_eagles',
         'teamBId': 'ug_warriors',
@@ -289,6 +273,7 @@ class MatchService {
         'status': MatchStatus.upcoming.name,
         'type': MatchType.championship.name,
         'startTime': Timestamp.fromDate(now.add(const Duration(days: 3))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 14))),
         'venue': 'UPSA Arena',
         'championshipId': null,
       },
@@ -302,7 +287,36 @@ class MatchService {
         'status': MatchStatus.upcoming.name,
         'type': MatchType.campusInternal.name,
         'startTime': Timestamp.fromDate(now.add(const Duration(days: 5))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 5, hours: 16, minutes: 30))),
         'venue': 'WaoSphere',
+        'championshipId': null,
+      },
+      {
+        'teamAId': 'knust_stars',
+        'teamBId': 'upsa_eagles',
+        'teamAName': 'KNUST Stars',
+        'teamBName': 'UPSA Eagles',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.friendly.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(hours: 6))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(hours: 6))),
+        'venue': 'KNUST Sports Stadium',
+        'championshipId': null,
+      },
+      {
+        'teamAId': 'ug_warriors',
+        'teamBId': 'wao_all_stars',
+        'teamAName': 'UG Warriors',
+        'teamBName': 'WAO All-Stars',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.championship.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 1))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 18))),
+        'venue': 'Legon Sports Complex',
         'championshipId': null,
       },
     ];
@@ -314,14 +328,13 @@ class MatchService {
             .add(match)
             .timeout(const Duration(seconds: 5));
       }
-      print('✅ Matches seeded successfully');
+      print('Matches seeded successfully');
     } catch (e) {
-      print('❌ Error seeding matches: $e');
+      print('Error seeding matches: $e');
       rethrow;
     }
   }
 
-  // Get team statistics
   Future<Map<String, dynamic>> getTeamStats(String teamId) async {
     try {
       final matches = await _db
@@ -375,7 +388,6 @@ class MatchService {
     }
   }
 
-  // Check if matches collection is empty
   Future<bool> isMatchesEmpty() async {
     try {
       final snapshot = await _db.collection('matches').limit(1).get();

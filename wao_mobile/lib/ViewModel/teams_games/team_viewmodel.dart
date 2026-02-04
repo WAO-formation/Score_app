@@ -1,11 +1,70 @@
-// team_viewmodel.dart
 import 'package:flutter/material.dart';
+import 'package:wao_mobile/View/user/teams/models/teams_models.dart';
 import '../../Model/teams_games/team_service.dart';
 import '../../Model/teams_games/wao_team.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class TeamViewModel extends ChangeNotifier {
   final TeamService _teamService = TeamService();
+  final TeamService _followService = TeamService();
+
+  // Cache for followed team IDs
+  Set<String> _followedTeamIds = {};
+  String? _currentUserId;
+
+  Set<String> get followedTeamIds => _followedTeamIds;
+
+  // Initialize with user ID and load followed teams
+  void initialize(String userId) {
+    _currentUserId = userId;
+    _loadFollowedTeams();
+  }
+
+  // Load followed teams for the current user
+  void _loadFollowedTeams() {
+    if (_currentUserId == null) return;
+
+    _followService.getFollowedTeamIds(_currentUserId!).listen((teamIds) {
+      _followedTeamIds = teamIds.toSet();
+      notifyListeners();
+    });
+  }
+
+  // Check if user is following a specific team
+  bool isFollowingTeam(String teamId) {
+    return _followedTeamIds.contains(teamId);
+  }
+
+  // Toggle follow status for a team
+  Future<void> toggleFollowTeam(String teamId) async {
+    if (_currentUserId == null) {
+      print('Error: User ID not set');
+      return;
+    }
+
+    try {
+      final nowFollowing = await _followService.toggleFollowTeam(_currentUserId!, teamId);
+
+      // Update local cache immediately for better UX
+      if (nowFollowing) {
+        _followedTeamIds.add(teamId);
+      } else {
+        _followedTeamIds.remove(teamId);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error toggling follow: $e');
+      rethrow;
+    }
+  }
+
+  // Get follower count for a team
+  Future<int> getTeamFollowerCount(String teamId) async {
+    return await _followService.getTeamFollowerCount(teamId);
+  }
 
   // Fetch all teams under a specific category (General or Campus)
   Stream<List<WaoTeam>> getTeamsByCategory(TeamCategory category) {
@@ -44,6 +103,10 @@ class TeamViewModel extends ChangeNotifier {
   Future<void> deleteTeam(String teamId) async {
     await _teamService.deleteTeam(teamId);
     notifyListeners();
+  }
+
+  Stream<List<WaoTeam>> getTopTeams({int limit = 5}) {
+    return _teamService.getTopTeams(limit: limit);
   }
 
   // Seed teams

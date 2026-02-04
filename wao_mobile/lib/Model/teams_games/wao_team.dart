@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum TeamCategory { general, campus }
 
 class WaoTeam {
@@ -10,6 +12,9 @@ class WaoTeam {
   final String director;
   final int squadSize;
   final String logoUrl;
+  final bool isTopTeam;        // NEW: Mark as top team
+  final int ranking;           // NEW: For ordering top teams
+  final DateTime? createdAt;   // NEW: Useful for sorting
 
   WaoTeam({
     required this.id,
@@ -21,6 +26,9 @@ class WaoTeam {
     required this.director,
     this.squadSize = 13,
     required this.logoUrl,
+    this.isTopTeam = false,    // Default to false
+    this.ranking = 0,          // Default ranking
+    this.createdAt,
   });
 
   // Convert Firestore Document to Model
@@ -35,6 +43,11 @@ class WaoTeam {
       director: data['director'] ?? '',
       squadSize: data['squadSize'] ?? 13,
       logoUrl: data['logoUrl'] ?? '',
+      isTopTeam: data['isTopTeam'] ?? false,
+      ranking: data['ranking'] ?? 0,
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -49,6 +62,40 @@ class WaoTeam {
       'director': director,
       'squadSize': squadSize,
       'logoUrl': logoUrl,
+      'isTopTeam': isTopTeam,
+      'ranking': ranking,
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
     };
+  }
+
+  // Helper method to create a copy with updated fields
+  WaoTeam copyWith({
+    String? id,
+    String? name,
+    TeamCategory? category,
+    String? campusId,
+    String? coach,
+    String? secretary,
+    String? director,
+    int? squadSize,
+    String? logoUrl,
+    bool? isTopTeam,
+    int? ranking,
+    DateTime? createdAt,
+  }) {
+    return WaoTeam(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      campusId: campusId ?? this.campusId,
+      coach: coach ?? this.coach,
+      secretary: secretary ?? this.secretary,
+      director: director ?? this.director,
+      squadSize: squadSize ?? this.squadSize,
+      logoUrl: logoUrl ?? this.logoUrl,
+      isTopTeam: isTopTeam ?? this.isTopTeam,
+      ranking: ranking ?? this.ranking,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }

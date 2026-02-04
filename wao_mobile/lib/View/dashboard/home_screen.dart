@@ -3,13 +3,42 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/View/dashboard/widgets/LiveMatchesCarousel.dart';
+import 'package:wao_mobile/View/dashboard/widgets/team_card.dart';
+import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
 import 'package:wao_mobile/core/theme/app_typography.dart';
-
+import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/match_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
+import '../../core/theme/app_colors.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeViewModel();
+  }
+
+  void _initializeViewModel() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
+          teamViewModel.initialize(user.uid);
+          print('TeamViewModel initialized with user ID: ${user.uid}');
+        }
+      });
+    } else {
+      print('Warning: No user logged in');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +51,7 @@ class HomeScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,43 +110,252 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 25.0),
 
-                // promo card
                 const LiveMatchesCarousel(),
 
                 const SizedBox(height: 25.0),
 
-                // upcoming matches
+                _buildTopTeamsSection(context, isDarkMode),
 
-                // Add this button to seed data
-                ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      // Seed teams first
-                      await context.read<TeamViewModel>().seedWaoTeams();
+                const SizedBox(height: 25.0),
 
-                      // Then seed matches
-                      await context.read<MatchViewModel>().seedMatches();
+                Text(
+                  'Upcoming Matches',
+                  style: TextStyle(
+                    fontSize: AppTypography.h2,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
+                  ),
+                ),
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('✅ Database seeded successfully!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('❌ Error: $e'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Seed Database'),
-                )
+                const SizedBox(height: 10.0),
+
+                const UpcomingMatchesCarousel(),
+
+                const SizedBox(height: 25.0),
+
+                Text(
+                  'WAO News',
+                  style: TextStyle(
+                    fontSize: AppTypography.h2,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
+                  ),
+                ),
+
+                const SizedBox(height: 10.0,),
+
+                _buildSeedButton(context),
+
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopTeamsSection(BuildContext context, bool isDarkMode) {
+    return Consumer<TeamViewModel>(
+      builder: (context, teamViewModel, child) {
+        return StreamBuilder<List<WaoTeam>>(
+          stream: teamViewModel.getTopTeams(limit: 5),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'Error loading teams',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final teams = snapshot.data ?? [];
+
+            if (teams.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Top Teams',
+                      style: TextStyle(
+                        fontSize: AppTypography.h2,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        print('See all teams tapped');
+                      },
+                      child: const Text(
+                        'See All',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 20,
+                          color: AppColors.waoYellow,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                SizedBox(
+                  height: 168,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: teams.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final team = teams[index];
+                      final isFollowing = teamViewModel.isFollowingTeam(team.id);
+
+                      return TeamCard(
+                        team: team,
+                        isFollowing: isFollowing,
+                        onTap: () => _handleTeamTap(context, team),
+                        onFollowToggle: () async {
+                          try {
+                            await teamViewModel.toggleFollowTeam(team.id);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isFollowing
+                                        ? 'Unfollowed ${team.name}'
+                                        : 'Following ${team.name}',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: isFollowing
+                                      ? Colors.grey[700]
+                                      : const Color(0xFFFFC600),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            print('Error toggling follow: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to update follow status: $e'),
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _handleTeamTap(BuildContext context, WaoTeam team) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${team.name} - Coach: ${team.coach}'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.blue.shade700,
+      ),
+    );
+  }
+
+  Widget _buildSeedButton(BuildContext context) {
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () async {
+          try {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text('Seeding database...'),
+                  ],
+                ),
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            await context.read<TeamViewModel>().seedWaoTeams();
+            await context.read<MatchViewModel>().seedMatches();
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text('Database seeded successfully!'),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text('Error: $e')),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.cloud_upload),
+        label: const Text('Seed Database'),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
     );

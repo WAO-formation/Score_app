@@ -57,7 +57,7 @@ class LiveMatchesCarousel extends StatelessWidget {
             height: 180,
             autoPlay: true,
             autoPlayInterval: const Duration(seconds: 5),
-            autoPlayAnimationDuration: const Duration(milliseconds: 1000),
+            autoPlayAnimationDuration: const Duration(milliseconds: 1500),
             autoPlayCurve: Curves.fastOutSlowIn,
             enlargeCenterPage: true,
             viewportFraction: 1.03,

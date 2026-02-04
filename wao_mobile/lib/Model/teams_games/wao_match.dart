@@ -15,6 +15,7 @@ class WaoMatch {
   final MatchStatus status;
   final MatchType type;
   final DateTime startTime;
+  final DateTime? scheduledDate; // NEW: For upcoming matches
   final String venue;
   final String? championshipId;
 
@@ -29,6 +30,7 @@ class WaoMatch {
     required this.status,
     required this.type,
     required this.startTime,
+    this.scheduledDate, // NEW: Optional scheduled date
     required this.venue,
     this.championshipId,
   });
@@ -46,6 +48,9 @@ class WaoMatch {
       status: MatchStatus.values.byName(data['status'] ?? 'upcoming'),
       type: MatchType.values.byName(data['type'] ?? 'friendly'),
       startTime: (data['startTime'] as Timestamp).toDate(),
+      scheduledDate: data['scheduledDate'] != null
+          ? (data['scheduledDate'] as Timestamp).toDate()
+          : null, // NEW
       venue: data['venue'] ?? 'WaoSphere',
       championshipId: data['championshipId'],
     );
@@ -63,6 +68,9 @@ class WaoMatch {
       'status': status.name,
       'type': type.name,
       'startTime': Timestamp.fromDate(startTime),
+      'scheduledDate': scheduledDate != null
+          ? Timestamp.fromDate(scheduledDate!)
+          : null, // NEW
       'venue': venue,
       'championshipId': championshipId,
     };
@@ -88,6 +96,7 @@ class WaoMatch {
     MatchStatus? status,
     MatchType? type,
     DateTime? startTime,
+    DateTime? scheduledDate, // NEW
     String? venue,
     String? championshipId,
   }) {
@@ -102,6 +111,7 @@ class WaoMatch {
       status: status ?? this.status,
       type: type ?? this.type,
       startTime: startTime ?? this.startTime,
+      scheduledDate: scheduledDate ?? this.scheduledDate, // NEW
       venue: venue ?? this.venue,
       championshipId: championshipId ?? this.championshipId,
     );

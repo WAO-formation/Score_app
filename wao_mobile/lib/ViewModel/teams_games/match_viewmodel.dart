@@ -46,6 +46,7 @@ class MatchViewModel extends ChangeNotifier {
     required String teamBName,
     required MatchType type,
     required DateTime startTime,
+    DateTime? scheduledDate,
     required String venue,
     String? championshipId,
   }) async {
@@ -56,6 +57,7 @@ class MatchViewModel extends ChangeNotifier {
       teamBName: teamBName,
       type: type,
       startTime: startTime,
+      scheduledDate: scheduledDate,
       venue: venue,
       championshipId: championshipId,
     );
