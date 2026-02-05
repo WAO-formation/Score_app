@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../Model/auth/auth_serivce.dart';
+import '../../core/services/auth_service/auth_serivce.dart';
 
 
 class LoginController extends ChangeNotifier {

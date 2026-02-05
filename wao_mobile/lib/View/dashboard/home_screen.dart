@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/View/dashboard/widgets/LiveMatchesCarousel.dart';
+import 'package:wao_mobile/View/dashboard/widgets/news.dart';
 import 'package:wao_mobile/View/dashboard/widgets/team_card.dart';
 import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
 import 'package:wao_mobile/core/theme/app_typography.dart';
 import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/match_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
+import '../../core/services/news/news_service.dart';
 import '../../core/theme/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -144,7 +146,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 10.0,),
 
+                NewsSection(isDarkMode: isDarkMode),
+
+                const SizedBox(height: 25.0,),
+
+
+
                 _buildSeedButton(context),
+
+                _buildSeedNewsButton(context)
 
               ],
             ),
@@ -410,6 +420,76 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       )
           : null,
+    );
+  }
+
+  Widget _buildSeedNewsButton(BuildContext context) {
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () async {
+          try {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text('Adding sample news...'),
+                  ],
+                ),
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            final newsService = NewsService();
+            await newsService.addSampleNews();
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text('Sample news added successfully!'),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text('Error: $e')),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.newspaper),
+        label: const Text('Seed News'),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ),
+      ),
     );
   }
 }

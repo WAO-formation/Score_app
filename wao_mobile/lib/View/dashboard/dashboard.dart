@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/View/dashboard/widgets/liveMatches.dart';
 import 'package:wao_mobile/View/dashboard/widgets/ranking.dart';
+import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
 import '../../provider/Models/teams-class.dart';
 import '../../shared/Welcome_box.dart';
 import '../../shared/custom_appbar.dart';
@@ -143,7 +144,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                 ),
                 const SizedBox(height:10.0),
 
-                const UpcomingGamesCarousel(),
+                const UpcomingMatchesCarousel(),
 
                 /// this section contain statistics of the past marches
 

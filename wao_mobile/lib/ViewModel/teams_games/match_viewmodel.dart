@@ -1,6 +1,6 @@
 // match_viewmodel.dart
 import 'package:flutter/material.dart';
-import '../../Model/teams_games/match_service.dart';
+import '../../core/services/match_team_service/match_service.dart';
 import '../../Model/teams_games/wao_match.dart';
 
 

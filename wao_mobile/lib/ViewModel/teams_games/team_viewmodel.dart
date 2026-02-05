@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/View/user/teams/models/teams_models.dart';
-import '../../Model/teams_games/team_service.dart';
+import '../../core/services/match_team_service/team_service.dart';
 import '../../Model/teams_games/wao_team.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
