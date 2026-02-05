@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 
+import '../../Model/teams_games/team/wao_player.dart';
 import '../../Model/teams_games/wao_match.dart';
+import '../../Model/teams_games/wao_team.dart';
+import '../../ViewModel/teams_games/player_viewmodel.dart';
+import '../../ViewModel/teams_games/team_viewmodel.dart';
 import '../../core/theme/app_typography.dart';
 
 class LiveGamesDetails extends StatefulWidget {
@@ -22,7 +27,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Add listener to rebuild when tab changes
     _tabController.addListener(() {
       setState(() {});
     });
@@ -46,7 +50,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
             children: [
               Stack(
                 children: [
-                  // header bg image
                   const SizedBox(
                     width: double.infinity,
                     height: 330,
@@ -116,7 +119,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
               const SizedBox(height: 25),
 
-              // Tab Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Container(
@@ -157,16 +159,12 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
 
-              // Tab Content - CORRECTED
-              IndexedStack(
-                index: _tabController.index,
-                children: [
-                  _buildGameStatisticsTab(),
-                  _buildTeamPlayersTab(),
-                ],
-              ),
+              if (_tabController.index == 0)
+                _buildGameStatisticsTab()
+              else
+                _buildTeamPlayersTab(),
 
               const SizedBox(height: 20),
             ],
@@ -176,10 +174,13 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  // Rest of your code remains the same...
-  // Game Statistics Tab Content
   Widget _buildGameStatisticsTab() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final kingdomPercentages = widget.match.getKingdomPercentages();
+    final workoutPercentages = widget.match.getWorkoutPercentages();
+    final goalSettingPercentages = widget.match.getGoalSettingPercentages();
+    final judgesPercentages = widget.match.getJudgesPercentages();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -192,33 +193,33 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
         child: Column(
           children: [
             _buildStatItem(
-              label: 'Kingdom',
-              teamAPercentage: 65,
-              teamBPercentage: 35,
+              label: 'Kingdom (30%)',
+              teamAPercentage: kingdomPercentages['teamA']!.round(),
+              teamBPercentage: kingdomPercentages['teamB']!.round(),
               teamAName: widget.match.teamAName,
               teamBName: widget.match.teamBName,
             ),
             const SizedBox(height: 20),
             _buildStatItem(
-              label: 'Workout',
-              teamAPercentage: 45,
-              teamBPercentage: 55,
+              label: 'Workout (30%)',
+              teamAPercentage: workoutPercentages['teamA']!.round(),
+              teamBPercentage: workoutPercentages['teamB']!.round(),
               teamAName: widget.match.teamAName,
               teamBName: widget.match.teamBName,
             ),
             const SizedBox(height: 20),
             _buildStatItem(
-              label: 'Goal Setting',
-              teamAPercentage: 70,
-              teamBPercentage: 30,
+              label: 'Goal Setting (30%)',
+              teamAPercentage: goalSettingPercentages['teamA']!.round(),
+              teamBPercentage: goalSettingPercentages['teamB']!.round(),
               teamAName: widget.match.teamAName,
               teamBName: widget.match.teamBName,
             ),
             const SizedBox(height: 20),
             _buildStatItem(
-              label: 'Judges',
-              teamAPercentage: 40,
-              teamBPercentage: 60,
+              label: 'Judges (10%)',
+              teamAPercentage: judgesPercentages['teamA']!.round(),
+              teamBPercentage: judgesPercentages['teamB']!.round(),
               teamAName: widget.match.teamAName,
               teamBName: widget.match.teamBName,
             ),
@@ -241,7 +242,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
     return Column(
       children: [
-        // Label
         Text(
           label,
           style: TextStyle(
@@ -252,10 +252,8 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
         ),
         const SizedBox(height: 12),
 
-        // Progress bars with percentages
         Row(
           children: [
-            // Team A Percentage
             SizedBox(
               width: 35,
               child: Text(
@@ -271,11 +269,9 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
             const SizedBox(width: 10),
 
-            // Progress Bars - SEPARATED
             Expanded(
               child: Row(
                 children: [
-                  // Team A Progress Bar
                   Expanded(
                     flex: teamAPercentage,
                     child: Container(
@@ -297,9 +293,8 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                     ),
                   ),
 
-                  const SizedBox(width: 4), // Gap between bars
+                  const SizedBox(width: 4),
 
-                  // Team B Progress Bar
                   Expanded(
                     flex: teamBPercentage,
                     child: Container(
@@ -326,7 +321,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
             const SizedBox(width: 10),
 
-            // Team B Percentage
             SizedBox(
               width: 35,
               child: Text(
@@ -344,7 +338,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
         const SizedBox(height: 8),
 
-        // Team Names
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -378,14 +371,11 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  // Team Players Tab Content
-// Team Players Tab Content
   Widget _buildTeamPlayersTab() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
-        // Team Selector with dots
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
           child: Row(
@@ -400,57 +390,32 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
         const SizedBox(height: 20),
 
-
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6, // Dynamic height or remove this
-          child: PageView(
-            controller: _teamPageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentTeamIndex = index;
-              });
-            },
-            children: [
-              SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(), // Disable inner scroll
-                child: _buildTeamRoster(widget.match.teamAName, isDarkMode),
-              ),
-              SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(), // Disable inner scroll
-                child: SizedBox(
-                    child: _buildTeamRoster(widget.match.teamBName, isDarkMode)),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 20),
+        _currentTeamIndex == 0
+            ? _buildTeamRosterFromDatabase(widget.match.teamAId, widget.match.teamAName, isDarkMode)
+            : _buildTeamRosterFromDatabase(widget.match.teamBId, widget.match.teamBName, isDarkMode),
       ],
     );
   }
-
 
   Widget _buildTeamDot(int index, String teamName, bool isDarkMode) {
     final isSelected = _currentTeamIndex == index;
 
     return GestureDetector(
       onTap: () {
-        _teamPageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        setState(() {
+          _currentTeamIndex = index;
+        });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF011B3B),
               Color(0xFFD30336),
+              Color(0xFFFF6B35),
             ],
           )
               : null,
@@ -469,73 +434,251 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildTeamRoster(String teamName, bool isDarkMode) {
-    // TODO: Replace with actual team data
-    final roles = [
-      {'role': 'Coach', 'count': 1},
-      {'role': 'Kings', 'count': 2},
-      {'role': 'Workers', 'count': 2},
-      {'role': 'Protraque', 'count': 2},
-      {'role': 'Antaque', 'count': 2},
-      {'role': 'Warriors', 'count': 2},
-      {'role': 'Sacrificers', 'count': 2},
-      {'role': 'Servitors', 'count': 1},
-    ];
+  Widget _buildTeamRosterFromDatabase(String teamId, String teamName, bool isDarkMode) {
+    return FutureBuilder<WaoTeam?>(
+      future: Provider.of<TeamViewModel>(context, listen: false).getTeamById(teamId),
+      builder: (context, teamSnapshot) {
+        if (teamSnapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: CircularProgressIndicator(
+                color: isDarkMode ? const Color(0xFFFFC600) : const Color(0xFF011B3B),
+              ),
+            ),
+          );
+        }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Team Name Header
-            Center(
+        if (teamSnapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Error loading team',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (!teamSnapshot.hasData || teamSnapshot.data == null) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
               child: Text(
-                teamName,
+                'Team not found',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                  fontSize: 14,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+          );
+        }
 
-            // Roles and Players
-            ...roles.map((roleData) {
-              return Column(
-                children: [
-                  _buildRoleSection(
-                    role: roleData['role'] as String,
-                    playerCount: roleData['count'] as int,
-                    isDarkMode: isDarkMode,
+        final team = teamSnapshot.data!;
+        return _buildTeamRosterWithPlayers(team, isDarkMode);
+      },
+    );
+  }
+
+  Widget _buildTeamRosterWithPlayers(WaoTeam team, bool isDarkMode) {
+    return FutureBuilder<List<WaoPlayer>>(
+      future: _getTeamPlayers(team.roster),
+      builder: (context, playersSnapshot) {
+        if (playersSnapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: CircularProgressIndicator(
+                color: isDarkMode ? const Color(0xFFFFC600) : const Color(0xFF011B3B),
+              ),
+            ),
+          );
+        }
+
+        final players = playersSnapshot.data ?? [];
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Team Header
+                Center(
+                  child: Column(
+                    children: [
+                      if (team.logoUrl.isNotEmpty)
+                        ClipOval(
+                          child: Image.network(
+                            team.logoUrl,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildTeamLogoPlaceholder(isDarkMode);
+                            },
+                          ),
+                        )
+                      else
+                        _buildTeamLogoPlaceholder(isDarkMode),
+                      const SizedBox(height: 12),
+                      Text(
+                        team.name,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Coach: ${team.coach}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 15),
-                ],
-              );
-            }).toList(),
+                ),
+                const SizedBox(height: 20),
 
-            SizedBox(height: 20.0,)
-          ],
-        ),
+                // Coach Section
+                _buildRoleSectionWithPlayers(
+                  role: 'Coach',
+                  players: [team.coach],
+                  isDarkMode: isDarkMode,
+                  isCoach: true,
+                ),
+                const SizedBox(height: 15),
+
+                // Kings
+                _buildRoleSectionWithPlayers(
+                  role: 'Kings',
+                  players: _getPlayersByRole(players, team.roster.kingIds),
+                  isDarkMode: isDarkMode,
+                ),
+                const SizedBox(height: 15),
+
+                // Workers
+                _buildRoleSectionWithPlayers(
+                  role: 'Workers',
+                  players: _getPlayersByRole(players, team.roster.workerIds),
+                  isDarkMode: isDarkMode,
+                ),
+                const SizedBox(height: 15),
+
+                // Protagues
+                _buildRoleSectionWithPlayers(
+                  role: 'Protagues',
+                  players: _getPlayersByRole(players, team.roster.protagueIds),
+                  isDarkMode: isDarkMode,
+                ),
+                const SizedBox(height: 15),
+
+                // Antagues
+                _buildRoleSectionWithPlayers(
+                  role: 'Antagues',
+                  players: _getPlayersByRole(players, team.roster.antagueIds),
+                  isDarkMode: isDarkMode,
+                ),
+                const SizedBox(height: 15),
+
+                // Warriors
+                _buildRoleSectionWithPlayers(
+                  role: 'Warriors',
+                  players: _getPlayersByRole(players, team.roster.warriorIds),
+                  isDarkMode: isDarkMode,
+                ),
+                const SizedBox(height: 15),
+
+                // Sacrificers
+                _buildRoleSectionWithPlayers(
+                  role: 'Sacrificers',
+                  players: _getPlayersByRole(players, team.roster.sacrificerIds),
+                  isDarkMode: isDarkMode,
+                ),
+
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Helper method to get team players
+  Future<List<WaoPlayer>> _getTeamPlayers(TeamRoster roster) async {
+    final playerService = PlayerService();
+    final List<WaoPlayer> players = [];
+
+    final allPlayerIds = roster.getAllPlayerIds();
+
+    for (final playerId in allPlayerIds) {
+      final player = await playerService.getPlayerById(playerId);
+      if (player != null) {
+        players.add(player);
+      }
+    }
+
+    return players;
+  }
+
+// Helper method to filter players by role
+  List<WaoPlayer> _getPlayersByRole(List<WaoPlayer> allPlayers, List<String> rolePlayerIds) {
+    return allPlayers.where((player) => rolePlayerIds.contains(player.id)).toList();
+  }
+
+  Widget _buildTeamLogoPlaceholder(bool isDarkMode) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.shield,
+        color: Colors.white,
+        size: 30,
       ),
     );
   }
 
-  Widget _buildRoleSection({
+  Widget _buildRoleSectionWithPlayers({
     required String role,
-    required int playerCount,
+    required List<dynamic> players, // Can be List<WaoPlayer> or List<String> for coach
     required bool isDarkMode,
+    bool isCoach = false,
   }) {
+    if (players.isEmpty) {
+      return const SizedBox.shrink(); // Don't show empty roles
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Role Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
@@ -549,35 +692,122 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(
-            role,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                role,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${players.length}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),
 
-        // Players List
-        ...List.generate(playerCount, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: _buildPlayerCard(
-              playerName: 'Player ${index + 1}', // TODO: Replace with actual player name
-              playerNumber: '${10 + index}', // TODO: Replace with actual player number
-              isDarkMode: isDarkMode,
-            ),
-          );
-        }),
+        if (isCoach)
+          _buildCoachCard(players[0] as String, isDarkMode)
+        else
+          ...players.map((player) {
+            final waoPlayer = player as WaoPlayer;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: _buildPlayerCardWithData(
+                player: waoPlayer,
+                isDarkMode: isDarkMode,
+              ),
+            );
+          }).toList(),
       ],
     );
   }
 
-  Widget _buildPlayerCard({
-    required String playerName,
-    required String playerNumber,
+  Widget _buildCoachCard(String coachName, bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withOpacity(0.08) : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.sports,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  coachName,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                Text(
+                  'Head Coach',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDarkMode ? Colors.white54 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Icon(
+            Icons.verified,
+            size: 20,
+            color: const Color(0xFFFFC600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerCardWithData({
+    required WaoPlayer player,
     required bool isDarkMode,
   }) {
     return Container(
@@ -593,54 +823,147 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
       child: Row(
         children: [
           // Player Avatar
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
-              shape: BoxShape.circle,
+          player.profileImageUrl != null && player.profileImageUrl!.isNotEmpty
+              ? ClipOval(
+            child: Image.network(
+              player.profileImageUrl!,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildPlayerAvatar(player.name, isDarkMode);
+              },
             ),
-            child: Center(
-              child: Text(
-                playerNumber,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-            ),
-          ),
+          )
+              : _buildPlayerAvatar(player.name, isDarkMode),
           const SizedBox(width: 12),
 
-          // Player Name
+          // Player Info
           Expanded(
-            child: Text(
-              playerName,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  player.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    // Status badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(player.status).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: _getStatusColor(player.status),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        player.status.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: _getStatusColor(player.status),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Stats
+                    Text(
+                      '${player.gamesPlayed} games • ${player.goalsScored} goals',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDarkMode ? Colors.white54 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
 
-          // Player Icon
-          Icon(
-            Icons.person,
-            size: 20,
-            color: isDarkMode ? Colors.white38 : Colors.black38,
-          ),
+          // Player role icon
+          _getRoleIcon(player.role, isDarkMode),
         ],
       ),
     );
   }
 
+  Widget _buildPlayerAvatar(String name, bool isDarkMode) {
+    String initial = name.isNotEmpty ? name[0].toUpperCase() : 'P';
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initial,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white70 : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(PlayerStatus status) {
+    switch (status) {
+      case PlayerStatus.active:
+        return Colors.green;
+      case PlayerStatus.inactive:
+        return Colors.orange;
+      case PlayerStatus.suspended:
+        return Colors.red;
+    }
+  }
+
+  Widget _getRoleIcon(PlayerRole role, bool isDarkMode) {
+    IconData iconData;
+
+    switch (role) {
+      case PlayerRole.king:
+        iconData = Icons.emoji_events;
+        break;
+      case PlayerRole.worker:
+        iconData = Icons.work;
+        break;
+      case PlayerRole.protague:
+        iconData = Icons.shield;
+        break;
+      case PlayerRole.antague:
+        iconData = Icons.security;
+        break;
+      case PlayerRole.warrior:
+        iconData = Icons.sports_martial_arts;
+        break;
+      case PlayerRole.sacrificer:
+        iconData = Icons.favorite;
+        break;
+    }
+
+    return Icon(
+      iconData,
+      size: 20,
+      color: isDarkMode ? Colors.white38 : Colors.black38,
+    );
+  }
+
   Widget _buildLiveMatchCard(WaoMatch match, bool isDarkMode, bool useRedYellow, context) {
     return GestureDetector(
-      onTap: () {
-        // Removed navigation since we're already on the details page
-      },
+      onTap: () {},
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -666,7 +989,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
           borderRadius: BorderRadius.circular(25),
           child: Stack(
             children: [
-              // Background ball pattern
               Positioned(
                 bottom: -80,
                 right: -80,
@@ -687,11 +1009,9 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // LIVE indicator and venue
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Venue
                         Expanded(
                           child: Row(
                             children: [
@@ -717,7 +1037,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // LIVE badge with pulsing animation
                         _buildLiveBadge(),
                       ],
                     ),
@@ -727,7 +1046,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        // Team A
                         Expanded(
                           child: Column(
                             children: [
@@ -755,7 +1073,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              // Team A Name
                               Text(
                                 match.teamAName,
                                 textAlign: TextAlign.center,
@@ -772,7 +1089,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                           ),
                         ),
 
-                        // Score Display
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
@@ -812,11 +1128,9 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                           ),
                         ),
 
-                        // Team B
                         Expanded(
                           child: Column(
                             children: [
-                              // Team B Logo
                               Container(
                                 width: 45,
                                 height: 45,
@@ -841,7 +1155,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              // Team B Name
                               Text(
                                 match.teamBName,
                                 textAlign: TextAlign.center,
@@ -862,7 +1175,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
                     const SizedBox(height: 12),
 
-                    // Match type badge
                     Text(
                       match.type.name.toUpperCase(),
                       style: TextStyle(
@@ -875,7 +1187,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
                     const SizedBox(height: 12),
 
-                    // Time and Quarter Section
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
@@ -888,7 +1199,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                       ),
                       child: Column(
                         children: [
-                          // Time Display
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
@@ -924,7 +1234,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
                           const SizedBox(height: 8),
 
-                          // Quarter Display
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -1030,7 +1339,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
   }
 }
 
-// Pulsing dot animation for LIVE badge
 class _PulsingDot extends StatefulWidget {
   @override
   State<_PulsingDot> createState() => _PulsingDotState();

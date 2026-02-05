@@ -10,6 +10,7 @@ import 'package:wao_mobile/core/theme/app_typography.dart';
 import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/match_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
+import '../../core/services/Seeding_service.dart';
 import '../../core/services/news/news_service.dart';
 import '../../core/theme/app_colors.dart';
 
@@ -149,12 +150,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 NewsSection(isDarkMode: isDarkMode),
 
                 const SizedBox(height: 25.0,),
-
-
-
-                _buildSeedButton(context),
-
-                _buildSeedNewsButton(context)
 
               ],
             ),
@@ -303,70 +298,226 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSeedButton(BuildContext context) {
     return Center(
-      child: ElevatedButton.icon(
-        onPressed: () async {
-          try {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Row(
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton.icon(
+            onPressed: () async {
+              // Show confirmation dialog
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Seed Database'),
+                  content: const Text(
+                    'This will populate the database with sample teams, players, and game data. Continue?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
                     ),
-                    SizedBox(width: 12),
-                    Text('Seeding database...'),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Seed'),
+                    ),
                   ],
                 ),
-                duration: Duration(seconds: 2),
-              ),
-            );
+              );
 
-            await context.read<TeamViewModel>().seedWaoTeams();
-            await context.read<MatchViewModel>().seedMatches();
+              if (confirmed != true || !context.mounted) return;
 
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.white),
-                      SizedBox(width: 12),
-                      Text('Database seeded successfully!'),
-                    ],
+              try {
+                // Show loading indicator
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text('Seeding database... This may take a moment.'),
+                      ],
+                    ),
+                    duration: Duration(seconds: 5),
                   ),
-                  backgroundColor: Colors.green,
-                  duration: Duration(seconds: 3),
+                );
+
+                // Initialize seeding service
+                final seedingService = SeedingService();
+
+                // Seed all data
+                await seedingService.seedAll();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Database seeded successfully! Players, teams, and games added.',
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 4),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.error, color: Colors.white),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text('Seeding failed: $e')),
+                        ],
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 5),
+                    ),
+                  );
+                }
+                print('Seeding error: $e');
+              }
+            },
+            icon: const Icon(Icons.cloud_upload),
+            label: const Text('Seed Database'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Optional: Add a clear database button
+          TextButton.icon(
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Clear Database'),
+                  content: const Text(
+                    'This will delete all teams, players, and statistics. This action cannot be undone. Continue?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      child: const Text('Clear All'),
+                    ),
+                  ],
                 ),
               );
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.error, color: Colors.white),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text('Error: $e')),
-                    ],
+
+              if (confirmed != true || !context.mounted) return;
+
+              try {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text('Clearing database...'),
+                      ],
+                    ),
+                    duration: Duration(seconds: 3),
                   ),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            }
-          }
-        },
-        icon: const Icon(Icons.cloud_upload),
-        label: const Text('Seed Database'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
+                );
+
+                final seedingService = SeedingService();
+                await seedingService.clearAll();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white),
+                          SizedBox(width: 12),
+                          Text('Database cleared successfully!'),
+                        ],
+                      ),
+                      backgroundColor: Colors.orange,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.error, color: Colors.white),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text('Clear failed: $e')),
+                        ],
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.delete_forever, color: Colors.red),
+            label: const Text(
+              'Clear Database',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Optional: Database status check button
+          OutlinedButton.icon(
+            onPressed: () async {
+              try {
+                final seedingService = SeedingService();
+                await seedingService.checkDatabaseStatus();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Check console for database status'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              } catch (e) {
+                print('Error checking status: $e');
+              }
+            },
+            icon: const Icon(Icons.info_outline),
+            label: const Text('Check Status'),
+          ),
+        ],
       ),
     );
   }

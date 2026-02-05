@@ -1,7 +1,6 @@
-// services/match_service.dart
+// match_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wao_mobile/Model/teams_games/wao_match.dart';
-
 
 class MatchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -130,6 +129,14 @@ class MatchService {
             : null,
         'venue': venue,
         'championshipId': championshipId,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
       }).timeout(const Duration(seconds: 5));
 
       return docRef.id;
@@ -151,6 +158,42 @@ class MatchService {
           .timeout(const Duration(seconds: 5));
     } catch (e) {
       print('Error updating score: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateCategoryScores({
+    required String matchId,
+    int? teamAKingdom,
+    int? teamBKingdom,
+    int? teamAWorkout,
+    int? teamBWorkout,
+    int? teamAGoalSetting,
+    int? teamBGoalSetting,
+    int? teamAJudges,
+    int? teamBJudges,
+  }) async {
+    try {
+      Map<String, dynamic> updates = {};
+
+      if (teamAKingdom != null) updates['teamAKingdom'] = teamAKingdom;
+      if (teamBKingdom != null) updates['teamBKingdom'] = teamBKingdom;
+      if (teamAWorkout != null) updates['teamAWorkout'] = teamAWorkout;
+      if (teamBWorkout != null) updates['teamBWorkout'] = teamBWorkout;
+      if (teamAGoalSetting != null) updates['teamAGoalSetting'] = teamAGoalSetting;
+      if (teamBGoalSetting != null) updates['teamBGoalSetting'] = teamBGoalSetting;
+      if (teamAJudges != null) updates['teamAJudges'] = teamAJudges;
+      if (teamBJudges != null) updates['teamBJudges'] = teamBJudges;
+
+      if (updates.isNotEmpty) {
+        await _db
+            .collection('matches')
+            .doc(matchId)
+            .update(updates)
+            .timeout(const Duration(seconds: 5));
+      }
+    } catch (e) {
+      print('Error updating category scores: $e');
       rethrow;
     }
   }
@@ -206,6 +249,14 @@ class MatchService {
         'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(minutes: 30))),
         'venue': 'Legon Sports Complex',
         'championshipId': null,
+        'teamAKingdom': 120,
+        'teamBKingdom': 95,
+        'teamAWorkout': 85,
+        'teamBWorkout': 110,
+        'teamAGoalSetting': 100,
+        'teamBGoalSetting': 88,
+        'teamAJudges': 45,
+        'teamBJudges': 38,
       },
       {
         'teamAId': 'ucc_titans',
@@ -220,6 +271,14 @@ class MatchService {
         'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(minutes: 45))),
         'venue': 'Cape Coast Arena',
         'championshipId': null,
+        'teamAKingdom': 90,
+        'teamBKingdom': 105,
+        'teamAWorkout': 92,
+        'teamBWorkout': 88,
+        'teamAGoalSetting': 78,
+        'teamBGoalSetting': 95,
+        'teamAJudges': 52,
+        'teamBJudges': 55,
       },
       {
         'teamAId': 'wao_all_stars',
@@ -234,34 +293,14 @@ class MatchService {
         'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(hours: 1))),
         'venue': 'WaoSphere',
         'championshipId': null,
-      },
-      {
-        'teamAId': 'ug_warriors',
-        'teamBId': 'ucc_titans',
-        'teamAName': 'UG Warriors',
-        'teamBName': 'UCC Titans',
-        'scoreA': 78,
-        'scoreB': 72,
-        'status': MatchStatus.finished.name,
-        'type': MatchType.championship.name,
-        'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
-        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
-        'venue': 'University Gym',
-        'championshipId': null,
-      },
-      {
-        'teamAId': 'knust_stars',
-        'teamBId': 'national_champions',
-        'teamAName': 'KNUST Stars',
-        'teamBName': 'National Champions',
-        'scoreA': 65,
-        'scoreB': 70,
-        'status': MatchStatus.finished.name,
-        'type': MatchType.friendly.name,
-        'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 7))),
-        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 7))),
-        'venue': 'KNUST Sports Stadium',
-        'championshipId': null,
+        'teamAKingdom': 115,
+        'teamBKingdom': 108,
+        'teamAWorkout': 102,
+        'teamBWorkout': 98,
+        'teamAGoalSetting': 110,
+        'teamBGoalSetting': 95,
+        'teamAJudges': 67,
+        'teamBJudges': 63,
       },
       {
         'teamAId': 'upsa_eagles',
@@ -276,48 +315,14 @@ class MatchService {
         'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 14))),
         'venue': 'UPSA Arena',
         'championshipId': null,
-      },
-      {
-        'teamAId': 'wao_all_stars',
-        'teamBId': 'ucc_titans',
-        'teamAName': 'WAO All-Stars',
-        'teamBName': 'UCC Titans',
-        'scoreA': 0,
-        'scoreB': 0,
-        'status': MatchStatus.upcoming.name,
-        'type': MatchType.campusInternal.name,
-        'startTime': Timestamp.fromDate(now.add(const Duration(days: 5))),
-        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 5, hours: 16, minutes: 30))),
-        'venue': 'WaoSphere',
-        'championshipId': null,
-      },
-      {
-        'teamAId': 'knust_stars',
-        'teamBId': 'upsa_eagles',
-        'teamAName': 'KNUST Stars',
-        'teamBName': 'UPSA Eagles',
-        'scoreA': 0,
-        'scoreB': 0,
-        'status': MatchStatus.upcoming.name,
-        'type': MatchType.friendly.name,
-        'startTime': Timestamp.fromDate(now.add(const Duration(hours: 6))),
-        'scheduledDate': Timestamp.fromDate(now.add(const Duration(hours: 6))),
-        'venue': 'KNUST Sports Stadium',
-        'championshipId': null,
-      },
-      {
-        'teamAId': 'ug_warriors',
-        'teamBId': 'wao_all_stars',
-        'teamAName': 'UG Warriors',
-        'teamBName': 'WAO All-Stars',
-        'scoreA': 0,
-        'scoreB': 0,
-        'status': MatchStatus.upcoming.name,
-        'type': MatchType.championship.name,
-        'startTime': Timestamp.fromDate(now.add(const Duration(days: 1))),
-        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 18))),
-        'venue': 'Legon Sports Complex',
-        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
       },
     ];
 
@@ -350,23 +355,24 @@ class MatchService {
 
       for (var doc in matches.docs) {
         final match = WaoMatch.fromFirestore(doc.data(), doc.id);
+        final finalScores = match.getFinalScores();
 
         if (match.teamAId == teamId) {
-          totalPoints += match.scoreA;
-          totalConceded += match.scoreB;
-          if (match.scoreA > match.scoreB) {
+          totalPoints += finalScores['teamA']!.round();
+          totalConceded += finalScores['teamB']!.round();
+          if (finalScores['teamA']! > finalScores['teamB']!) {
             wins++;
-          } else if (match.scoreA < match.scoreB) {
+          } else if (finalScores['teamA']! < finalScores['teamB']!) {
             losses++;
           } else {
             draws++;
           }
         } else if (match.teamBId == teamId) {
-          totalPoints += match.scoreB;
-          totalConceded += match.scoreA;
-          if (match.scoreB > match.scoreA) {
+          totalPoints += finalScores['teamB']!.round();
+          totalConceded += finalScores['teamA']!.round();
+          if (finalScores['teamB']! > finalScores['teamA']!) {
             wins++;
-          } else if (match.scoreB < match.scoreA) {
+          } else if (finalScores['teamB']! < finalScores['teamA']!) {
             losses++;
           } else {
             draws++;

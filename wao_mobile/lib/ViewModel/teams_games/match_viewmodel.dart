@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/services/match_team_service/match_service.dart';
 import '../../Model/teams_games/wao_match.dart';
 
-
 class MatchViewModel extends ChangeNotifier {
   final MatchService _matchService = MatchService();
 
@@ -67,6 +66,31 @@ class MatchViewModel extends ChangeNotifier {
 
   Future<void> updateScore(String matchId, int scoreA, int scoreB) async {
     await _matchService.updateScore(matchId, scoreA, scoreB);
+    notifyListeners();
+  }
+
+  Future<void> updateCategoryScores({
+    required String matchId,
+    int? teamAKingdom,
+    int? teamBKingdom,
+    int? teamAWorkout,
+    int? teamBWorkout,
+    int? teamAGoalSetting,
+    int? teamBGoalSetting,
+    int? teamAJudges,
+    int? teamBJudges,
+  }) async {
+    await _matchService.updateCategoryScores(
+      matchId: matchId,
+      teamAKingdom: teamAKingdom,
+      teamBKingdom: teamBKingdom,
+      teamAWorkout: teamAWorkout,
+      teamBWorkout: teamBWorkout,
+      teamAGoalSetting: teamAGoalSetting,
+      teamBGoalSetting: teamBGoalSetting,
+      teamAJudges: teamAJudges,
+      teamBJudges: teamBJudges,
+    );
     notifyListeners();
   }
 
