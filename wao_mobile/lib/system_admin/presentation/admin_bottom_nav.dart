@@ -20,7 +20,6 @@ class AdminBottomNavBarState extends State<AdminBottomNavBar>{
   int currentIndex = 0;
   List pages =  [
     const AdminDashboard(title: '',),
-    const MatchManagement(),
     const LiveScoresPage(),
     const OfficialsAndTeams(),
   ];

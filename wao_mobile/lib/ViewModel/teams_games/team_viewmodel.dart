@@ -239,6 +239,8 @@ class TeamViewModel extends ChangeNotifier {
     }
   }
 
+
+
   // ==================== UTILITY FUNCTIONS ====================
 
   /// Check if teams exist

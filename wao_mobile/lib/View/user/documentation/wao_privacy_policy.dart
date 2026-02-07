@@ -1,253 +1,151 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/shared/custom_text.dart';
-import '../../../shared/Welcome_box.dart';
-import '../../../shared/custom_appbar.dart';
-import '../../../shared/theme_data.dart';
 
-class PrivacyPolicy extends StatefulWidget {
-  const PrivacyPolicy({super.key});
+import '../../../shared/app_bar.dart';
 
-  @override
-  State<PrivacyPolicy> createState() => _PrivacyPolicyState();
-}
+class PrivacyPolicyPage extends StatelessWidget {
+  const PrivacyPolicyPage({super.key});
 
-class _PrivacyPolicyState extends State<PrivacyPolicy> {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(
+
+      appBar: const CustomAppBar(
         title: 'Privacy Policy',
-        leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            }
-        ),
+        showBackButton: true,
+        showNotification: true,
+        hasNotificationDot: true,
       ),
+
+
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Welcome header
-              const WelcomeToWAO(title: 'WAO Privacy Policy'),
-
-              const SizedBox(height: 40.0),
-
-              // Privacy Policy section
-              Text(
-                "PRIVACY POLICY",
-                  style: AppStyles.primaryTitle
-              ),
-              const SizedBox(height: 10.0),
-               Text(
-                "The sport is fully registered with the Copyright Office of Ghana since 2014, and the Registrar General of Ghana.\n\nTo use WAO Sport for any purpose, contact the WAO office for approval.",
-                  style: AppStyles.informationText
-              ),
-
-              const SizedBox(height: 25.0),
-
-              // Scope of Policy section
-              Text(
-                "SCOPE OF POLICY",
-                  style: AppStyles.primaryTitle
-              ),
-              const SizedBox(height: 10.0),
-               Text(
-                "First, the policy applies to all forms of using of WAO sport, including athletes, coaches, staff, and spectators.",
-                  style: AppStyles.informationText
-              ),
-              const SizedBox(height: 12.0),
-               Text(
-                "Second, for using WAO Sport for Movie, Music and Entertainment productions.",
-                  style: AppStyles.informationText
-              ),
-              const SizedBox(height: 12.0),
-               Text(
-                "And third, flamboyant usage of WAO Sport paraphernalia for commercials and events organizations in the name of WAO Sport.",
-                  style: AppStyles.informationText
-              ),
-
-              const SizedBox(height: 25.0),
-
-              // Rights section
-              Text(
-                "INTELLECTUAL PROPERTY RIGHTS",
-                  style: AppStyles.primaryTitle
-              ),
-              const SizedBox(height: 10.0),
-               Text(
-                "All right on the use of logo and emblems of WAO Sport is exclusively reserved to the organization. Any use without approval is prohibited and can lead to suffer of legal consequences.",
-                  style: AppStyles.informationText
-              ),
-
-              const SizedBox(height: 40.0),
-
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
+        child: Column(
+          children: [
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "CONTACT US",
-                      style: AppStyles.secondaryTitle
-                    ),
-                    const SizedBox(height: 16.0),
-
-                    // Website
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.public,
-                          size: 20.0,
-                          color: lightColorScheme.secondary,
-                        ),
-                        const SizedBox(width: 12.0),
-
-                         Text(
-                          "www.waosport.com",
-                          style: AppStyles.informationText
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12.0),
-
-                    // Email
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.email,
-                          size: 20.0,
-                          color: lightColorScheme.secondary,
-                        ),
-                        const SizedBox(width: 12.0),
-                         Text(
-                          "waosport@gmail.com",
-                            style: AppStyles.informationText
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12.0),
-
-                    // Phone
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.phone,
-                          size: 20.0,
-                          color: lightColorScheme.secondary,
-                        ),
-                        const SizedBox(width: 12.0),
-                         Text(
-                          "+233 242 786 261",
-                            style: AppStyles.informationText
-                        ),
-                      ],
+                      'Last Updated: February 7, 2026',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDarkMode ? Colors.white54 : Colors.black54,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
 
-                    const SizedBox(height: 40.0),
+                    const SizedBox(height: 24),
 
-                    // Social Media Icons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildSocialIcon(
-                          imagePath: 'assets/socials/facebook.png',
-                          shadowColor: const Color(0xFF1877F2),
-                          onTap: () {
-                            print('Facebook icon tapped');
-                          },
-                        ),
-                        _buildSocialIcon(
-                          imagePath: 'assets/socials/instagram.png',
-                          shadowColor: const Color(0xFFE4405F),
-                          onTap: () {
-                            print('Instagram  icon tapped');
-                          },
-                        ),
-                        _buildSocialIcon(
-                          imagePath: 'assets/socials/tiktok.png',
-                          shadowColor: const Color(0xFF000000),
-                          onTap: () {
-                            print('tiktok icon tapped');
-                          },
-                        ),
-
-                        _buildSocialIcon(
-                          imagePath: 'assets/socials/X.png',
-                          shadowColor: const Color(0xFF1DA1F2),
-                          onTap: () {
-                            print('Facebook icon tapped');
-                          },
-                        ),
-                      ],
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '1. Information We Collect',
+                      content:
+                      'We collect information you provide directly to us, including:\n\n• Account information (name, email, password)\n• Profile information\n• Team preferences and favorites\n• Match engagement data\n• Device information and usage statistics',
                     ),
-                    const SizedBox(height: 40),
 
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '2. How We Use Your Information',
+                      content:
+                      'We use the information we collect to:\n\n• Provide and improve our services\n• Personalize your experience\n• Send you notifications about matches and updates\n• Analyze usage patterns\n• Ensure security and prevent fraud',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '3. Information Sharing',
+                      content:
+                      'We do not sell your personal information. We may share your information with:\n\n• Service providers who assist us\n• With your consent\n• To comply with legal obligations',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '4. Data Security',
+                      content:
+                      'We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '5. Your Rights',
+                      content:
+                      'You have the right to:\n\n• Access your personal data\n• Correct inaccurate data\n• Request deletion of your data\n• Opt-out of marketing communications\n• Export your data',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '6. Cookies and Tracking',
+                      content:
+                      'We use cookies and similar tracking technologies to collect usage information and improve our services. You can control cookies through your browser settings.',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '7. Children\'s Privacy',
+                      content:
+                      'Our service is not directed to children under 13. We do not knowingly collect personal information from children under 13.',
+                    ),
+
+                    _buildSection(
+                      isDarkMode: isDarkMode,
+                      title: '8. Contact Us',
+                      content:
+                      'If you have any questions about this Privacy Policy, please contact us at:\n\nprivacy@wao.com',
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    Center(
+                      child: Text(
+                        '© 2026 WAO Sports. All rights reserved.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode ? Colors.white38 : Colors.black38,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 30.0),
-
-              // Copyright notice
-              const Center(
-                child: Text(
-                  "© 2025 WAO Sport. All Rights Reserved.",
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: Color(0xFF757575),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16.0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildSocialIcon({
-    required String imagePath,
-    required Color shadowColor,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            )),
       ),
     );
   }
 
+  Widget _buildSection({
+    required bool isDarkMode,
+    required String title,
+    required String content,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.6,
+              color: isDarkMode ? Colors.white70 : Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

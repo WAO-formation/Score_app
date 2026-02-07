@@ -4,13 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:wao_mobile/core/theme/app_theme.dart';
 import 'package:wao_mobile/core/theme/theme_provider.dart';
 import 'package:wao_mobile/system_admin/presentation/Teams/model/state_management.dart';
-
-
-import 'View/user/teams/models/teams_provider.dart';
+import 'Model/user_provider.dart';
+import 'ViewModel/news_viewmodel/news_viewmodel.dart';
 import 'ViewModel/teams_games/championship_viewmodel.dart';
 import 'ViewModel/teams_games/match_viewmodel.dart';
 import 'ViewModel/teams_games/team_viewmodel.dart';
 import 'core/auth_rouths/auth_gate.dart';
+import 'core/services/news/news_service.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -23,11 +23,12 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => TeamProvider()),
         ChangeNotifierProvider(create: (_) => LiveScoreProvider()),
         ChangeNotifierProvider(create: (_) => MatchViewModel()),
         ChangeNotifierProvider(create: (_) => TeamViewModel()),
         ChangeNotifierProvider(create: (_) => ChampionshipViewModel()),
+        ChangeNotifierProvider(create: (_) => NewsViewModel(NewsService())),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
     ),
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
 
     return  MaterialApp(
       themeMode: themeProvider.themeMode,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,

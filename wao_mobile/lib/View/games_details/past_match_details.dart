@@ -8,17 +8,18 @@ import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/player_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
 import '../../core/theme/app_typography.dart';
+import 'package:intl/intl.dart';
 
-class LiveGamesDetails extends StatefulWidget {
+class PastMatchDetails extends StatefulWidget {
   final WaoMatch match;
 
-  const LiveGamesDetails({super.key, required this.match});
+  const PastMatchDetails({super.key, required this.match});
 
   @override
-  State<LiveGamesDetails> createState() => _LiveGamesDetailsState();
+  State<PastMatchDetails> createState() => _PastMatchDetailsState();
 }
 
-class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerProviderStateMixin {
+class _PastMatchDetailsState extends State<PastMatchDetails> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final PageController _teamPageController = PageController();
   int _currentTeamIndex = 0;
@@ -65,54 +66,59 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                   ),
 
                   Positioned(
-                      child: Container(
-                        width: double.infinity,
-                        height: 210,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                        ),
-                      )),
+                    child: Container(
+                      width: double.infinity,
+                      height: 210,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
 
                   Positioned(
-                      top: 15,
-                      left: 15,
-                      right: 15,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.arrow_back,
-                                      color: Colors.white,
-                                    ))),
-
-                            Text(
-                              widget.match.type.name.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
+                    top: 15,
+                    left: 15,
+                    right: 15,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
                             ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
 
-                            _buildNotificationBell(isDarkMode),
-                          ])),
+                        Text(
+                          widget.match.type.name.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+
+                        _buildNotificationBell(isDarkMode),
+                      ],
+                    ),
+                  ),
 
                   Positioned(
                     top: 85,
                     left: 15,
                     right: 15,
-                    child: _buildLiveMatchCard(widget.match, true, true, context),
+                    child: _buildPastMatchCard(widget.match, isDarkMode, context),
                   ),
                 ],
               ),
@@ -152,7 +158,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                       fontWeight: FontWeight.w500,
                     ),
                     tabs: const [
-                      Tab(text: 'Game Statistics'),
+                      Tab(text: 'Match Summary'),
                       Tab(text: 'Team Players'),
                     ],
                   ),
@@ -162,7 +168,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
               const SizedBox(height: 30),
 
               if (_tabController.index == 0)
-                _buildGameStatisticsTab()
+                _buildMatchSummaryTab()
               else
                 _buildTeamPlayersTab(),
 
@@ -174,58 +180,252 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildGameStatisticsTab() {
+  Widget _buildMatchSummaryTab() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final finalScores = widget.match.getFinalScores();
+    final winner = widget.match.getWinner();
 
     final kingdomPercentages = widget.match.getKingdomPercentages();
     final workoutPercentages = widget.match.getWorkoutPercentages();
     final goalSettingPercentages = widget.match.getGoalSettingPercentages();
     final judgesPercentages = widget.match.getJudgesPercentages();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(15),
+    return Column(
+      children: [
+        // Winner Banner
+        if (winner != null && winner != 'Draw')
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFD30336),
+                    Color(0xFFFF6B35),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.emoji_events,
+                    color: AppColors.waoYellow,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Text(
+                      '$winner Won!',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else if (winner == 'Draw')
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: AppColors.waoYellow,
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.handshake,
+                    color: AppColors.waoYellow,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Match Ended in a Draw',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        const SizedBox(height: 20),
+
+        // Final Scores
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Final Scores',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            widget.match.teamAName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white70 : Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            finalScores['teamA']!.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: winner == widget.match.teamAName
+                                  ? const Color(0xFFD30336)
+                                  : (isDarkMode ? Colors.white : Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        '-',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white54 : Colors.black54,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            widget.match.teamBName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white70 : Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            finalScores['teamB']!.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: winner == widget.match.teamBName
+                                  ? const Color(0xFFD30336)
+                                  : (isDarkMode ? Colors.white : Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Column(
-          children: [
-            _buildStatItem(
-              label: 'Kingdom (30%)',
-              teamAPercentage: kingdomPercentages['teamA']!.round(),
-              teamBPercentage: kingdomPercentages['teamB']!.round(),
-              teamAName: widget.match.teamAName,
-              teamBName: widget.match.teamBName,
+
+        const SizedBox(height: 20),
+
+        // Game Statistics
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(height: 20),
-            _buildStatItem(
-              label: 'Workout (30%)',
-              teamAPercentage: workoutPercentages['teamA']!.round(),
-              teamBPercentage: workoutPercentages['teamB']!.round(),
-              teamAName: widget.match.teamAName,
-              teamBName: widget.match.teamBName,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Category Breakdown',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildStatItem(
+                  label: 'Kingdom (30%)',
+                  teamAPercentage: kingdomPercentages['teamA']!.round(),
+                  teamBPercentage: kingdomPercentages['teamB']!.round(),
+                  teamAName: widget.match.teamAName,
+                  teamBName: widget.match.teamBName,
+                ),
+                const SizedBox(height: 20),
+                _buildStatItem(
+                  label: 'Workout (30%)',
+                  teamAPercentage: workoutPercentages['teamA']!.round(),
+                  teamBPercentage: workoutPercentages['teamB']!.round(),
+                  teamAName: widget.match.teamAName,
+                  teamBName: widget.match.teamBName,
+                ),
+                const SizedBox(height: 20),
+                _buildStatItem(
+                  label: 'Goal Setting (30%)',
+                  teamAPercentage: goalSettingPercentages['teamA']!.round(),
+                  teamBPercentage: goalSettingPercentages['teamB']!.round(),
+                  teamAName: widget.match.teamAName,
+                  teamBName: widget.match.teamBName,
+                ),
+                const SizedBox(height: 20),
+                _buildStatItem(
+                  label: 'Judges (10%)',
+                  teamAPercentage: judgesPercentages['teamA']!.round(),
+                  teamBPercentage: judgesPercentages['teamB']!.round(),
+                  teamAName: widget.match.teamAName,
+                  teamBName: widget.match.teamBName,
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            _buildStatItem(
-              label: 'Goal Setting (30%)',
-              teamAPercentage: goalSettingPercentages['teamA']!.round(),
-              teamBPercentage: goalSettingPercentages['teamB']!.round(),
-              teamAName: widget.match.teamAName,
-              teamBName: widget.match.teamBName,
-            ),
-            const SizedBox(height: 20),
-            _buildStatItem(
-              label: 'Judges (10%)',
-              teamAPercentage: judgesPercentages['teamA']!.round(),
-              teamBPercentage: judgesPercentages['teamB']!.round(),
-              teamAName: widget.match.teamAName,
-              teamBName: widget.match.teamBName,
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -273,7 +473,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
               child: Row(
                 children: [
                   Expanded(
-                    flex: teamAPercentage,
+                    flex: teamAPercentage == 0 ? 1 : teamAPercentage,
                     child: Container(
                       height: 8,
                       decoration: BoxDecoration(
@@ -296,7 +496,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                   const SizedBox(width: 4),
 
                   Expanded(
-                    flex: teamBPercentage,
+                    flex: teamBPercentage == 0 ? 1 : teamBPercentage,
                     child: Container(
                       height: 8,
                       decoration: BoxDecoration(
@@ -628,7 +828,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-// Helper method to get team players
+  // Helper method to get team players
   Future<List<WaoPlayer>> _getTeamPlayers(TeamRoster roster) async {
     final playerService = PlayerService();
     final List<WaoPlayer> players = [];
@@ -645,7 +845,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     return players;
   }
 
-// Helper method to filter players by role
+  // Helper method to filter players by role
   List<WaoPlayer> _getPlayersByRole(List<WaoPlayer> allPlayers, List<String> rolePlayerIds) {
     return allPlayers.where((player) => rolePlayerIds.contains(player.id)).toList();
   }
@@ -668,12 +868,12 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
 
   Widget _buildRoleSectionWithPlayers({
     required String role,
-    required List<dynamic> players, // Can be List<WaoPlayer> or List<String> for coach
+    required List<dynamic> players,
     required bool isDarkMode,
     bool isCoach = false,
   }) {
     if (players.isEmpty) {
-      return const SizedBox.shrink(); // Don't show empty roles
+      return const SizedBox.shrink();
     }
 
     return Column(
@@ -757,8 +957,8 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
               ),
               shape: BoxShape.circle,
@@ -796,10 +996,10 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
             ),
           ),
 
-          Icon(
+          const Icon(
             Icons.verified,
             size: 20,
-            color: const Color(0xFFFFC600),
+            color: Color(0xFFFFC600),
           ),
         ],
       ),
@@ -885,17 +1085,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  Color _getStatusColor(PlayerStatus status) {
-    switch (status) {
-      case PlayerStatus.active:
-        return Colors.green;
-      case PlayerStatus.inactive:
-        return Colors.orange;
-      case PlayerStatus.suspended:
-        return Colors.red;
-    }
-  }
-
   Widget _getRoleIcon(PlayerRole role, bool isDarkMode) {
     IconData iconData;
 
@@ -927,7 +1116,9 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildLiveMatchCard(WaoMatch match, bool isDarkMode, bool useRedYellow, context) {
+  Widget _buildPastMatchCard(WaoMatch match, bool isDarkMode, BuildContext context) {
+    final winner = match.getWinner();
+
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -1003,7 +1194,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _buildLiveBadge(),
+                        _buildFinishedBadge(),
                       ],
                     ),
 
@@ -1051,6 +1242,14 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                                   height: 1.2,
                                 ),
                               ),
+                              if (winner == match.teamAName) ...[
+                                const SizedBox(height: 4),
+                                const Icon(
+                                  Icons.emoji_events,
+                                  color: AppColors.waoYellow,
+                                  size: 16,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -1133,6 +1332,14 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                                   height: 1.2,
                                 ),
                               ),
+                              if (winner == match.teamBName) ...[
+                                const SizedBox(height: 4),
+                                const Icon(
+                                  Icons.emoji_events,
+                                  color: AppColors.waoYellow,
+                                  size: 16,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -1154,7 +1361,7 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                     const SizedBox(height: 12),
 
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -1163,74 +1370,22 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
                           width: 1,
                         ),
                       ),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                '23:34',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.waoYellow,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  '+3:00',
-                                  style: TextStyle(
-                                    color: Color(0xFF011B3B),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.0,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const Icon(
+                            Icons.calendar_today,
+                            color: Colors.white70,
+                            size: 12,
                           ),
-
-                          const SizedBox(height: 8),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.waoYellow,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '2nd Quarter',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.waoYellow,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat('MMM dd, yyyy • HH:mm').format(match.startTime),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -1245,26 +1400,30 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildLiveBadge() {
+  Widget _buildFinishedBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFC600).withOpacity(0.2),
+        color: Colors.green.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFFC600),
+          color: Colors.green,
           width: 1,
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PulsingDot(),
-          const SizedBox(width: 6),
-          const Text(
-            "LIVE",
+          Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 12,
+          ),
+          SizedBox(width: 4),
+          Text(
+            "FINISHED",
             style: TextStyle(
-              color: Color(0xFFFFC600),
+              color: Colors.green,
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
@@ -1301,50 +1460,6 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PulsingDot extends StatefulWidget {
-  @override
-  State<_PulsingDot> createState() => _PulsingDotState();
-}
-
-class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: Container(
-        width: 6,
-        height: 6,
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFC600),
-          shape: BoxShape.circle,
-        ),
-      ),
     );
   }
 }

@@ -18,6 +18,7 @@ class WaoMatch {
   final DateTime? scheduledDate;
   final String venue;
   final String? championshipId;
+  final bool isFavorite;
 
   // New scoring fields
   final int teamAKingdom;
@@ -51,6 +52,7 @@ class WaoMatch {
     this.teamBGoalSetting = 0,
     this.teamAJudges = 0,
     this.teamBJudges = 0,
+    this.isFavorite = false,
   });
 
   // Calculate percentage for a category
@@ -143,6 +145,7 @@ class WaoMatch {
       teamBGoalSetting: data['teamBGoalSetting'] ?? 0,
       teamAJudges: data['teamAJudges'] ?? 0,
       teamBJudges: data['teamBJudges'] ?? 0,
+      isFavorite: data['isFavorite'] ?? false,
     );
   }
 
@@ -170,6 +173,7 @@ class WaoMatch {
       'teamBGoalSetting': teamBGoalSetting,
       'teamAJudges': teamAJudges,
       'teamBJudges': teamBJudges,
+      'isFavorite': isFavorite,
     };
   }
 
@@ -203,6 +207,7 @@ class WaoMatch {
     int? teamBGoalSetting,
     int? teamAJudges,
     int? teamBJudges,
+    bool? isFavorite,
   }) {
     return WaoMatch(
       id: id ?? this.id,
@@ -226,6 +231,7 @@ class WaoMatch {
       teamBGoalSetting: teamBGoalSetting ?? this.teamBGoalSetting,
       teamAJudges: teamAJudges ?? this.teamAJudges,
       teamBJudges: teamBJudges ?? this.teamBJudges,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 }

@@ -85,6 +85,8 @@ class NewsModel {
     ];
   }
 
+
+
   // Copy with method for easy updates
   NewsModel copyWith({
     String? id,

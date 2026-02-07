@@ -102,6 +102,72 @@ class MatchService {
     });
   }
 
+  // NEW: Get matches for a specific date
+  Stream<List<WaoMatch>> getMatchesByDate(DateTime date) {
+    // Start of day (00:00:00)
+    final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    // End of day (23:59:59)
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+    return _db
+        .collection('matches')
+        .where('startTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('startTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+        .snapshots()
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      // Sort by start time (earliest first)
+      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      return matches;
+    });
+  }
+
+  // NEW: Get matches in a date range
+  Stream<List<WaoMatch>> getMatchesInDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    final start = DateTime(startDate.year, startDate.month, startDate.day, 0, 0, 0);
+    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+
+    return _db
+        .collection('matches')
+        .where('startTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('startTime', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .snapshots()
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      return matches;
+    });
+  }
+
+  // NEW: Get matches for multiple teams (for followed teams)
+  Stream<List<WaoMatch>> getMatchesForTeams(List<String> teamIds) {
+    if (teamIds.isEmpty) {
+      return Stream.value([]);
+    }
+
+    return _db
+        .collection('matches')
+        .snapshots()
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .where((match) => teamIds.contains(match.teamAId) || teamIds.contains(match.teamBId))
+          .toList();
+
+      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      return matches;
+    });
+  }
+
   Future<String> createMatch({
     required String teamAId,
     required String teamBId,
@@ -236,6 +302,7 @@ class MatchService {
     final now = DateTime.now();
 
     final List<Map<String, dynamic>> sampleMatches = [
+      // Live matches
       {
         'teamAId': 'ug_warriors',
         'teamBId': 'knust_stars',
@@ -302,6 +369,100 @@ class MatchService {
         'teamAJudges': 67,
         'teamBJudges': 63,
       },
+
+      // Upcoming matches - TODAY
+      {
+        'teamAId': 'legon_lions',
+        'teamBId': 'knust_stars',
+        'teamAName': 'Legon Lions',
+        'teamBName': 'KNUST Stars',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.championship.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(hours: 3))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(hours: 3))),
+        'venue': 'Legon Stadium',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+      {
+        'teamAId': 'gimpa_gladiators',
+        'teamBId': 'ucc_titans',
+        'teamAName': 'GIMPA Gladiators',
+        'teamBName': 'UCC Titans',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.friendly.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(hours: 5))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(hours: 5))),
+        'venue': 'GIMPA Arena',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+
+      // Upcoming matches - TOMORROW
+      {
+        'teamAId': 'ug_warriors',
+        'teamBId': 'upsa_eagles',
+        'teamAName': 'UG Warriors',
+        'teamBName': 'UPSA Eagles',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.championship.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 14))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 14))),
+        'venue': 'National Stadium',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+      {
+        'teamAId': 'wao_all_stars',
+        'teamBId': 'legon_lions',
+        'teamAName': 'WAO All-Stars',
+        'teamBName': 'Legon Lions',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.friendly.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 16))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 1, hours: 16))),
+        'venue': 'WaoSphere',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+
+      // Upcoming matches - DAY 3
       {
         'teamAId': 'upsa_eagles',
         'teamBId': 'ug_warriors',
@@ -311,7 +472,7 @@ class MatchService {
         'scoreB': 0,
         'status': MatchStatus.upcoming.name,
         'type': MatchType.championship.name,
-        'startTime': Timestamp.fromDate(now.add(const Duration(days: 3))),
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 14))),
         'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 14))),
         'venue': 'UPSA Arena',
         'championshipId': null,
@@ -324,6 +485,122 @@ class MatchService {
         'teamAJudges': 0,
         'teamBJudges': 0,
       },
+      {
+        'teamAId': 'knust_stars',
+        'teamBId': 'gimpa_gladiators',
+        'teamAName': 'KNUST Stars',
+        'teamBName': 'GIMPA Gladiators',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.campusInternal.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 18))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 3, hours: 18))),
+        'venue': 'KNUST Sports Complex',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+
+      // Upcoming matches - DAY 4
+      {
+        'teamAId': 'national_champions',
+        'teamBId': 'ucc_titans',
+        'teamAName': 'National Champions',
+        'teamBName': 'UCC Titans',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.friendly.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 4, hours: 10))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 4, hours: 10))),
+        'venue': 'Cape Coast Arena',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+
+      // Upcoming matches - DAY 5
+      {
+        'teamAId': 'legon_lions',
+        'teamBId': 'upsa_eagles',
+        'teamAName': 'Legon Lions',
+        'teamBName': 'UPSA Eagles',
+        'scoreA': 0,
+        'scoreB': 0,
+        'status': MatchStatus.upcoming.name,
+        'type': MatchType.championship.name,
+        'startTime': Timestamp.fromDate(now.add(const Duration(days: 5, hours: 15))),
+        'scheduledDate': Timestamp.fromDate(now.add(const Duration(days: 5, hours: 15))),
+        'venue': 'Legon Stadium',
+        'championshipId': null,
+        'teamAKingdom': 0,
+        'teamBKingdom': 0,
+        'teamAWorkout': 0,
+        'teamBWorkout': 0,
+        'teamAGoalSetting': 0,
+        'teamBGoalSetting': 0,
+        'teamAJudges': 0,
+        'teamBJudges': 0,
+      },
+
+      // Finished matches
+      {
+        'teamAId': 'ug_warriors',
+        'teamBId': 'ucc_titans',
+        'teamAName': 'UG Warriors',
+        'teamBName': 'UCC Titans',
+        'scoreA': 58,
+        'scoreB': 52,
+        'status': MatchStatus.finished.name,
+        'type': MatchType.championship.name,
+        'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 2))),
+        'venue': 'Legon Sports Complex',
+        'championshipId': null,
+        'teamAKingdom': 125,
+        'teamBKingdom': 105,
+        'teamAWorkout': 88,
+        'teamBWorkout': 95,
+        'teamAGoalSetting': 92,
+        'teamBGoalSetting': 85,
+        'teamAJudges': 58,
+        'teamBJudges': 52,
+      },
+      {
+        'teamAId': 'wao_all_stars',
+        'teamBId': 'gimpa_gladiators',
+        'teamAName': 'WAO All-Stars',
+        'teamBName': 'GIMPA Gladiators',
+        'scoreA': 71,
+        'scoreB': 68,
+        'status': MatchStatus.finished.name,
+        'type': MatchType.friendly.name,
+        'startTime': Timestamp.fromDate(now.subtract(const Duration(days: 5))),
+        'scheduledDate': Timestamp.fromDate(now.subtract(const Duration(days: 5))),
+        'venue': 'WaoSphere',
+        'championshipId': null,
+        'teamAKingdom': 118,
+        'teamBKingdom': 112,
+        'teamAWorkout': 105,
+        'teamBWorkout': 102,
+        'teamAGoalSetting': 98,
+        'teamBGoalSetting': 95,
+        'teamAJudges': 71,
+        'teamBJudges': 68,
+      },
     ];
 
     try {
@@ -333,7 +610,7 @@ class MatchService {
             .add(match)
             .timeout(const Duration(seconds: 5));
       }
-      print('Matches seeded successfully');
+      print('${sampleMatches.length} matches seeded successfully');
     } catch (e) {
       print('Error seeding matches: $e');
       rethrow;
@@ -403,4 +680,56 @@ class MatchService {
       return true;
     }
   }
+
+  /// Toggle favorite status for a match
+  Future<void> toggleMatchFavorite(String matchId, bool isFavorite) async {
+    try {
+      await _db
+          .collection('matches')
+          .doc(matchId)
+          .update({'isFavorite': isFavorite})
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      print('Error toggling match favorite: $e');
+      rethrow;
+    }
+  }
+
+  /// Get all favorite matches
+  Stream<List<WaoMatch>> getFavoriteMatches() {
+    return _db
+        .collection('matches')
+        .where('isFavorite', isEqualTo: true)
+        .snapshots()
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      return matches;
+    });
+  }
+
+  /// Get favorite matches by date
+  Stream<List<WaoMatch>> getFavoriteMatchesByDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+    return _db
+        .collection('matches')
+        .where('isFavorite', isEqualTo: true)
+        .where('startTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('startTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+        .snapshots()
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      return matches;
+    });
+  }
+
 }

@@ -6,6 +6,11 @@ import '../../Model/teams_games/wao_match.dart';
 class MatchViewModel extends ChangeNotifier {
   final MatchService _matchService = MatchService();
 
+  // Initialize method for consistency with other ViewModels
+  void initialize() {
+    // Any initialization logic can go here
+  }
+
   Stream<List<WaoMatch>> getAllMatches() {
     return _matchService.getAllMatches();
   }
@@ -36,6 +41,27 @@ class MatchViewModel extends ChangeNotifier {
 
   Stream<List<WaoMatch>> getChampionshipMatches(String championshipId) {
     return _matchService.getChampionshipMatches(championshipId);
+  }
+
+  // NEW: Get matches for a specific date
+  Stream<List<WaoMatch>> getMatchesByDate(DateTime date) {
+    return _matchService.getMatchesByDate(date);
+  }
+
+  // NEW: Get matches in a date range
+  Stream<List<WaoMatch>> getMatchesInDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _matchService.getMatchesInDateRange(
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  // NEW: Get matches for multiple teams (for followed teams)
+  Stream<List<WaoMatch>> getMatchesForTeams(List<String> teamIds) {
+    return _matchService.getMatchesForTeams(teamIds);
   }
 
   Future<String> createMatch({
@@ -126,4 +152,26 @@ class MatchViewModel extends ChangeNotifier {
   Future<bool> isMatchesEmpty() async {
     return await _matchService.isMatchesEmpty();
   }
+
+  /// Toggle favorite status for a match
+  Future<void> toggleMatchFavorite(String matchId, bool currentStatus) async {
+    try {
+      await _matchService.toggleMatchFavorite(matchId, !currentStatus);
+      notifyListeners();
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      rethrow;
+    }
+  }
+
+  /// Get all favorite matches
+  Stream<List<WaoMatch>> getFavoriteMatches() {
+    return _matchService.getFavoriteMatches();
+  }
+
+  /// Get favorite matches for a specific date
+  Stream<List<WaoMatch>> getFavoriteMatchesByDate(DateTime date) {
+    return _matchService.getFavoriteMatchesByDate(date);
+  }
+
 }
