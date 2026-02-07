@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum TeamCategory { general, campus }
+enum TeamCategory { general, campus, women, mixed, men }
 
 class TeamRoster {
   final List<String> kingIds;

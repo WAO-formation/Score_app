@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
 
     return  MaterialApp(
       themeMode: themeProvider.themeMode,
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,

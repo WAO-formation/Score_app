@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/View/dashboard/widgets/LiveMatchesCarousel.dart';
+import 'package:wao_mobile/View/dashboard/widgets/all_teams.dart';
 import 'package:wao_mobile/View/dashboard/widgets/news.dart';
 import 'package:wao_mobile/View/dashboard/widgets/team_card.dart';
 import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
@@ -211,7 +212,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        print('See all teams tapped');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AllTeamsPage(),
+                          ),
+                        );
                       },
                       child: const Text(
                         'See All',
