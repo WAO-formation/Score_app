@@ -263,7 +263,7 @@ class LiveScore {
   final double goalpost;
   final double judges;
 
-  // Raw data for calculations
+  // Raw Model for calculations
   final int bounces;
   final int workoutSeconds;
   final int goals;
@@ -426,7 +426,7 @@ class MatchEvent {
       'quarter': quarter.name,
       'matchTime': matchTime.inMilliseconds,
       'description': description,
-      'data': data,
+      'Model': data,
     };
   }
 
@@ -440,7 +440,7 @@ class MatchEvent {
       quarter: Quarter.values.firstWhere((e) => e.name == json['quarter']),
       matchTime: Duration(milliseconds: json['matchTime']),
       description: json['description'],
-      data: json['data'],
+      data: json['Model'],
     );
   }
 }
@@ -563,7 +563,7 @@ class ScoreCalculator {
     return (baseScore + sacrificeScore + goalSettingScore).clamp(0.0, 100.0);
   }
 
-  // Update live score with new data
+  // Update live score with new Model
   static LiveScore updateScore(LiveScore currentScore, {
     int? additionalBounces,
     int? additionalWorkoutSeconds,

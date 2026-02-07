@@ -32,7 +32,7 @@ class TeamsViewModel {
 
   String get errorMessage => _errorMessage;
 
-  // Streams for UI to listen to
+  // Streams for View to listen to
   Stream<List<Teams>> get teamsStream => _teamsController.stream;
 
   Stream<Teams?> get selectedTeamStream => _selectedTeamController.stream;
@@ -234,7 +234,7 @@ class TeamsViewModel {
     _setStatus(TeamStatus.empty);
   }
 
-  // Sample data for testing
+  // Sample Model for testing
   void loadSampleData() {
     _setStatus(TeamStatus.loading);
 

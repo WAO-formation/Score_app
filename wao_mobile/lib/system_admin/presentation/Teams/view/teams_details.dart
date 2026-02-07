@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../../../../presentation/user/teams/models/teams_models.dart';
 import '../../../../shared/custom_text.dart';
 import '../../../../shared/theme_data.dart';
-import '../../score_board/model/live_score.dart';
 import '../model/team_model.dart';
 
 

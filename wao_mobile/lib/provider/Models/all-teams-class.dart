@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wao_mobile/provider/Models/teamModel.dart';
-
-import '../../presentation/teams/teams_dashboard.dart';
 import '../../shared/custom_text.dart';
 import '../../shared/theme_data.dart';
 
@@ -70,12 +68,7 @@ class TeamsCart extends StatelessWidget {
                         horizontal: 60.0, vertical: 10.0),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const TeamsHome(
-                                  title: '',
-                                )));
+
                   },
                   child:  Text(
                     'View More',

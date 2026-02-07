@@ -12,7 +12,7 @@ class teamproperties{
 final List<teamproperties> teams = [
 
   teamproperties(
-      teamName:'Team UI',
+      teamName:'Team View',
       image: 'assets/images/officiate.jpg',
 
   ),

@@ -1,0 +1,2 @@
+C:/Users/afany/Desktop/Projects/Score_app/wao_mobile/android/app/.cxx/RelWithDebInfo/o2i6t5o6/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/afany/Desktop/Projects/Score_app/wao_mobile/android/app/.cxx/RelWithDebInfo/o2i6t5o6/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wao_mobile/presentation/dashboard/widgets/liveMatches.dart';
-import 'package:wao_mobile/presentation/dashboard/widgets/ranking.dart';
-
-import '../../../presentation/dashboard/widgets/up_coming _matches.dart';
+import 'package:wao_mobile/View/dashboard/widgets/ranking.dart';
 import '../../../shared/custom_appbar.dart';
 import '../../../shared/custom_text.dart';
-import '../../../shared/theme_data.dart';
-import '../score_board/model/live_score.dart';
 import '../Teams/model/team_model.dart';
 import '../Teams/view/teams_details.dart';
-import '../match_sheduling/models/match_models.dart';
-import '../team_list/view/team_list.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key, required this.title,  this.teamValue});
@@ -81,9 +74,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
             const SizedBox(height: 20.0),
 
-            // Live matches section
-            const LiveMatchesCarousel(),
-
             const SizedBox(height: 30.0),
 
             // Upcoming games section
@@ -97,10 +87,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ],
             ),
             const SizedBox(height: 10.0),
-
-            const UpcomingGamesCarousel(),
-
-            const SizedBox(height: 30.0),
 
             // Ranking section
             Row(

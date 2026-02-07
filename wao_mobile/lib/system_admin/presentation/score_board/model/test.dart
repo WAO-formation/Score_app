@@ -226,7 +226,7 @@ class LiveScore {
   final double goalpost;
   final double judges;
 
-  // Raw data for calculations
+  // Raw Model for calculations
   final int bounces;
   final int workoutSeconds;
   final int goals;
@@ -431,7 +431,7 @@ class ScoreCalculator {
     return (baseScore + sacrificeScore + goalSettingScore).clamp(0.0, 100.0);
   }
 
-  // Update live score with new data
+  // Update live score with new Model
   static LiveScore updateScore(LiveScore currentScore, {
     int? additionalBounces,
     int? additionalWorkoutSeconds,

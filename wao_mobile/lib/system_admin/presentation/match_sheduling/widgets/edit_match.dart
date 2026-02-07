@@ -29,7 +29,7 @@ class _EditMatchScreenState extends State<EditMatchScreen> {
   void initState() {
     super.initState();
 
-    /// Initialize with existing match data
+    /// Initialize with existing match Model
     _selectedDate = widget.match.date;
     _dateController.text = DateFormat('MMM dd, yyyy').format(_selectedDate);
 

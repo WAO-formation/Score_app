@@ -25,7 +25,7 @@ class MatchStateManager extends ChangeNotifier {
   List<LiveMatch> get completedMatches =>
       _matches.where((match) => match.isEnded).toList();
 
-  // Initialize and load stored data
+  // Initialize and load stored Model
   Future<void> initialize() async {
     await _loadStoredMatches();
     await _loadActiveMatch();
