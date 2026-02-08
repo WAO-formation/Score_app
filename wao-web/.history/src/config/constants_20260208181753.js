@@ -72,7 +72,7 @@ export const recentTeams = [
   { id: 4, name: "Dragon Force", members: 25, status: "Active" },
 ];
 
- export const teamsData = [
+  const teamsData = [
     {
       id: 1,
       name: "Thunder Lions",

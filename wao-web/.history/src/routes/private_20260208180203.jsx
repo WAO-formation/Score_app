@@ -6,7 +6,6 @@ import DashboardLayout from '../layout/DashboardLayout';
 import Dashboard from '../pages/dashboard/Dashboard';
 import TestDashboard from '../pages/testfile';
 import Teams from '../pages/teams/Teams';
-import TeamDetails from '../pages/teams/TeamDetails';
 // import Games from '../pages/Games';
 // import Management from '../pages/Management';
 // import Settings from '../pages/Settings';
@@ -19,7 +18,6 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path='Teams' element={<Teams />} />
-        <Route path="teams/:teamId" element={<TeamDetails />} />
         {/* <Route path="teams" element={<Teams />} />
         <Route path="games" element={<Games />} />
         <Route path="management" element={<Management />} />

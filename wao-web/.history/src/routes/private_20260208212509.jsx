@@ -6,7 +6,6 @@ import DashboardLayout from '../layout/DashboardLayout';
 import Dashboard from '../pages/dashboard/Dashboard';
 import TestDashboard from '../pages/testfile';
 import Teams from '../pages/teams/Teams';
-import TeamDetails from '../pages/teams/TeamDetails';
 // import Games from '../pages/Games';
 // import Management from '../pages/Management';
 // import Settings from '../pages/Settings';
