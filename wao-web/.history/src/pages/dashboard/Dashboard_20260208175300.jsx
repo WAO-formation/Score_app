@@ -9,7 +9,7 @@ function Dashboard() {
   return (
     <section className="scrollbar-hide pb-8">
       {/* Welcome section */}
-      <div className="flex flex-col md:flex-row py-5 md:py-8 justify-between items-center">
+      <div className="flex flex-col md:flex-row py-4 md:py-6 justify-between items-center">
         <h2 className="text-xl lg:text-2xl font-bold text-[#011B3B]">
           Overview
         </h2>
