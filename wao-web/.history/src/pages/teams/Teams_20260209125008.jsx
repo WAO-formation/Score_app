@@ -426,13 +426,6 @@ function Teams() {
           </div>
         </div>
       )}
-
-       {/* Create Team Modal */}
-      <CreateTeam 
-        isOpen={showCreateTeamModal}
-        onClose={() => setShowCreateTeamModal(false)}
-        onCreateTeam={handleCreateTeam}
-      />
     </section>
   );
 }

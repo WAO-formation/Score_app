@@ -9,7 +9,6 @@ import Teams from '../pages/teams/Teams';
 import TeamDetails from '../pages/teams/TeamDetails';
 import Games from '../pages/games/Games';
 import GameDetails from '../pages/games/GameDetails';
-import GameSimulation from '../pages/games/components/LiveGame';
 // import Games from '../pages/Games';
 // import Management from '../pages/Management';
 // import Settings from '../pages/Settings';

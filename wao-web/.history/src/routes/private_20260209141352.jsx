@@ -9,7 +9,6 @@ import Teams from '../pages/teams/Teams';
 import TeamDetails from '../pages/teams/TeamDetails';
 import Games from '../pages/games/Games';
 import GameDetails from '../pages/games/GameDetails';
-import GameSimulation from '../pages/games/components/LiveGame';
 // import Games from '../pages/Games';
 // import Management from '../pages/Management';
 // import Settings from '../pages/Settings';
@@ -25,7 +24,7 @@ const AppRoutes = () => {
         <Route path="teams/:teamId" element={<TeamDetails />} />
         <Route path="games" element={<Games />} />
         <Route path="games/:gameId" element={<GameDetails />} />
-       <Route path="/games/:gameId/simulate" element={<GameSimulation  />} />
+       <Route path="/games/:gameId/simulate" element={<GameSimulation  
       </Route>
 
       {/* 404 Route */}
