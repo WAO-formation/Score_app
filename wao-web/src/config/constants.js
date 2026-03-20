@@ -3,20 +3,20 @@ import {
   Home,
   Users,
   Gamepad2,
-  Settings,
   LayoutDashboard,
   Menu,
   X,
   ChevronDown,
+  UserCircle,
 } from "lucide-react";
 import { href } from "react-router-dom";
 
 export const menuItems = [
-  { name: "Dashboard", icon: Home, href: "/dashboard" },
-  { name: "Teams", icon: Users, href: "/teams" },
-  { name: "Games", icon: Gamepad2, href: "/games" },
+  { name: "Dashboard",  icon: Home,            href: "/dashboard" },
+  { name: "Teams",      icon: Users,           href: "/teams" },
+  { name: "Games",      icon: Gamepad2,        href: "/games" },
   { name: "Management", icon: LayoutDashboard, href: "/management" },
-  { name: "Settings", icon: Settings, href: "/settings" },
+  { name: "Profile",    icon: UserCircle,      href: "/profile" },
 ];
 
 export const sampleGames = [

@@ -5,8 +5,7 @@ import Header from '../components/header';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('Dashboard');
-  const userName = "Afanyu Emmanuel"; // You can make this dynamic from context/auth later
+  const userName = "Afanyu Emmanuel";
 
   return (
     <div className="flex h-screen bg-[#F0F4F9] overflow-hidden">
@@ -14,7 +13,6 @@ const DashboardLayout = () => {
       <SideNav 
         isSidebarOpen={isSidebarOpen} 
         setIsSidebarOpen={setIsSidebarOpen}
-        setCurrentPage={setCurrentPage}
         userName={userName}
       />
 
@@ -23,7 +21,6 @@ const DashboardLayout = () => {
         {/* Header */}
         <Header 
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          currentPage={currentPage}
           userName={userName}
         />
 

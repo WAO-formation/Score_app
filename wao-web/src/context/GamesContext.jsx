@@ -16,6 +16,7 @@ export const GamesProvider = ({ children }) => {
 
   const getGame = (id) => games.find((g) => g.id === parseInt(id));
   const addGame = (game) => setGames((prev) => [...prev, game]);
+  const deleteGame = (id) => setGames((prev) => prev.filter((g) => g.id !== parseInt(id)));
   const updateGame = (id, updater) =>
     setGames((prev) =>
       prev.map((g) => (g.id === parseInt(id) ? (typeof updater === 'function' ? updater(g) : { ...g, ...updater }) : g))
@@ -66,7 +67,7 @@ export const GamesProvider = ({ children }) => {
   }, [timerState]);
 
   return (
-    <GamesContext.Provider value={{ games, getGame, addGame, updateGame, getTimerState, setTimerStateForGame }}>
+    <GamesContext.Provider value={{ games, getGame, addGame, deleteGame, updateGame, getTimerState, setTimerStateForGame }}>
       {children}
     </GamesContext.Provider>
   );
