@@ -259,7 +259,7 @@ const TeamDetails = () => {
   };
 
   return (
-    <section className="scrollbar-hide p-2 pb-8 py-5 md:py-8">
+    <section className="scrollbar-hide px-2 py-4 md:p-4 pb-8">
       {/* Header Section */}
       <div className="bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-lg shadow-lg p-6 mb-6 relative overflow-hidden">
         {/* Background Ball */}
@@ -282,27 +282,26 @@ const TeamDetails = () => {
           </button>
 
           {/* Team Info */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">{team.icon}</span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-white font-bold text-lg md:text-2xl">{team.icon}</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-1">{team.name}</h1>
-                <div className="flex items-center gap-4 text-white/80 text-sm">
+                <h1 className="text-xl md:text-3xl font-bold text-white mb-1">{team.name}</h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-white/80 text-xs md:text-sm">
                   <span>Coach: {team.coach}</span>
-                  <span>•</span>
+                  <span className="hidden sm:inline">•</span>
                   <span>{team.category}</span>
                 </div>
               </div>
             </div>
-
-            <button 
+            <button
               onClick={handleEditTeam}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#011B3B] font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
+              className="flex items-center gap-1.5 px-3 py-2 md:px-6 md:py-3 bg-white text-[#011B3B] font-semibold rounded-lg hover:shadow-lg transition-all duration-200 text-sm flex-shrink-0"
             >
               <Edit className="w-4 h-4" />
-              <span>Edit Team</span>
+              <span>Edit</span>
             </button>
           </div>
         </div>
@@ -346,13 +345,13 @@ const TeamDetails = () => {
 
       {/* Tab Content */}
       {activeTab === 'roster' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 md:p-6">
+          <div className="flex flex-col gap-2 mb-4">
             <h3 className="text-lg font-bold text-[#011B3B]">Team Roster ({team.players.length}/12 Players)</h3>
-            <button 
+            <button
               onClick={handleAddPlayer}
               disabled={team.players.length >= 12}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-medium transition-all ${
                 team.players.length >= 12
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-br from-[#FFC600] to-[#FF6B35] text-white hover:shadow-lg'
@@ -448,12 +447,11 @@ const TeamDetails = () => {
       )}
 
       {activeTab === 'upcoming' && (
-        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-            {team.upcomingGames.map((game) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {team.upcomingGames.map((game) => (
               <div
                 key={game.id}
-                className="w-[320px] bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 overflow-hidden flex-shrink-0 shadow-sm border border-gray-100"
+                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 overflow-hidden shadow-sm border border-gray-100"
               >
                 {/* Teams Section */}
                 <div className="flex items-center justify-between mb-4 relative z-10">
@@ -533,17 +531,15 @@ const TeamDetails = () => {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       )}
 
       {activeTab === 'past' && (
-        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-            {team.pastGames.map((game) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {team.pastGames.map((game) => (
               <div
                 key={game.id}
-                className="w-[320px] bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden flex-shrink-0 shadow-sm border border-gray-100"
+                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden shadow-sm border border-gray-100"
               >
                 {/* Win/Loss/Draw Badge */}
                 <div className="absolute top-4 right-4 z-10">
@@ -624,7 +620,6 @@ const TeamDetails = () => {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       )}
 

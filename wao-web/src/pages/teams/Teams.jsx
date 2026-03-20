@@ -3,6 +3,8 @@ import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, 
 import { teamsData as initialTeamsData } from '../../config/constants';
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
+import CreateGame from '../games/components/CreateGame';
+import { useGames } from '../../context/GamesContext';
 
 function Teams() {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ function Teams() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState(null);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+  const [showCreateGameModal, setShowCreateGameModal] = useState(false);
+  const { addGame } = useGames();
 
   const categories = ['all', 'Senior', 'Junior', 'Youth'];
 
@@ -110,31 +114,26 @@ function Teams() {
   };
 
   return (
-    <section className='scrollbar-hide p-2'>
-      <div className="flex flex-col md:flex-row py-5 md:py-8 justify-between items-center">
-        <h2 className="text-xl lg:text-2xl font-bold text-[#011B3B]">
-          Teams Management
-        </h2>
-
-        <div className="flex gap-3">
-          {/* Create Team Button */}
-          <button 
-           onClick={() => setShowCreateTeamModal(true)}
-          className="flex items-center cursor-pointer gap-2 px-6 py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200">
-            <Users className="w-5 h-5" />
+    <section className='scrollbar-hide px-2 py-2 md:p-4'>
+      <div className="flex flex-col gap-3 py-4 md:py-8 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-lg md:text-2xl font-bold text-[#011B3B]">Teams Management</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCreateTeamModal(true)}
+            className="flex-1 md:flex-none flex items-center justify-center cursor-pointer gap-1.5 px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 text-sm md:text-base"
+          >
+            <Users className="w-4 h-4 md:w-5 md:h-5" />
             <span>Create Team</span>
           </button>
-
-          {/* Create Game Button */}
-          <button className="flex items-center cursor-pointer gap-2 px-6 py-3 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200">
-            <Trophy className="w-5 h-5" />
+          <button onClick={() => setShowCreateGameModal(true)} className="flex-1 md:flex-none flex items-center justify-center cursor-pointer gap-1.5 px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 text-sm md:text-base">
+            <Trophy className="w-4 h-4 md:w-5 md:h-5" />
             <span>Create Game</span>
           </button>
         </div>
       </div>
 
       {/* Search and Filter Section */}
-      <div className="bg-white rounded-lg shadow-sm px-5 py-10 mb-6">
+      <div className="bg-white rounded-lg shadow-sm px-3 py-5 md:px-5 md:py-10 mb-6">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search Bar */}
           <div className="flex-1 relative">
@@ -179,105 +178,110 @@ function Teams() {
           </div>
         </div>
 
-        {/* Teams Table */}
+        {/* Teams List */}
         {filteredTeams.length > 0 ? (
           <>
-            <div className="overflow-hidden">
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full min-w-[800px]">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Team
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Coach
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Games Played
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {currentTeams.map((team) => (
-                      <tr 
-                        key={team.id} 
-                        className="hover:bg-gray-50 transition-colors cursor-pointer"
-                        onClick={() => viewTeamDetails(team.id)}
+            {/* ── Mobile cards (< md) ── */}
+            <div className="md:hidden space-y-3">
+              {currentTeams.map((team) => (
+                <div
+                  key={team.id}
+                  onClick={() => viewTeamDetails(team.id)}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 cursor-pointer active:scale-[0.98] transition-transform"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-sm">{team.icon}</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#011B3B]">{team.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Coach: {team.coach}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => toggleActionMenu(team.id)}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                       >
-                        {/* Team Icon & Name */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center">
-                              <span className="text-white font-bold text-sm">
-                                {team.icon}
-                              </span>
-                            </div>
-                            <span className="font-medium text-[#011B3B]">{team.name}</span>
-                          </div>
-                        </td>
-
-                        {/* Coach */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-700">{team.coach}</span>
-                        </td>
-
-                        {/* Category */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            team.category === 'Senior' ? 'bg-blue-100 text-blue-800' :
-                            team.category === 'Junior' ? 'bg-green-100 text-green-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {team.category}
-                          </span>
-                        </td>
-
-                        {/* Games Played */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="font-semibold text-[#011B3B]">{team.gamesPlayed}</span>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-6 py-4 whitespace-nowrap relative" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => toggleActionMenu(team.id)}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <MoreVertical className="w-5 h-5 text-gray-600" />
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </button>
+                      {showActionMenu === team.id && (
+                        <div className="absolute right-4 mt-16 w-44 bg-white rounded-xl shadow-lg border border-gray-100 z-10">
+                          <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-sm">
+                            <Eye className="w-4 h-4 text-[#011B3B]" /> View Details
                           </button>
+                          <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-left text-sm text-[#D30336] border-t border-gray-100">
+                            <Trash2 className="w-4 h-4" /> Delete Team
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      team.category === 'Senior' ? 'bg-blue-100 text-blue-700' :
+                      team.category === 'Junior' ? 'bg-green-100 text-green-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>{team.category}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{team.gamesPlayed} games played</span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                          {/* Action Menu Dropdown */}
-                          {showActionMenu === team.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                              <button 
-                                onClick={() => viewTeamDetails(team.id)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
-                              >
-                                <Eye className="w-4 h-4 text-[#011B3B]" />
-                                <span className="text-sm text-gray-700">View Details</span>
-                              </button>
-                              <button 
-                                onClick={() => openDeleteModal(team)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
-                              >
-                                <Trash2 className="w-4 h-4 text-[#D30336]" />
-                                <span className="text-sm text-[#D30336]">Delete Team</span>
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
+            {/* ── Desktop table (md+) ── */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    {['Team', 'Coach', 'Category', 'Games Played', 'Actions'].map((h) => (
+                      <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{h}</th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {currentTeams.map((team) => (
+                    <tr key={team.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => viewTeamDetails(team.id)}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">{team.icon}</span>
+                          </div>
+                          <span className="font-medium text-[#011B3B]">{team.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{team.coach}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          team.category === 'Senior' ? 'bg-blue-100 text-blue-800' :
+                          team.category === 'Junior' ? 'bg-green-100 text-green-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>{team.category}</span>
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-[#011B3B]">{team.gamesPlayed}</td>
+                      <td className="px-6 py-4 relative" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => toggleActionMenu(team.id)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                        {showActionMenu === team.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                            <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left">
+                              <Eye className="w-4 h-4 text-[#011B3B]" />
+                              <span className="text-sm text-gray-700">View Details</span>
+                            </button>
+                            <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-left border-t border-gray-100">
+                              <Trash2 className="w-4 h-4 text-[#D30336]" />
+                              <span className="text-sm text-[#D30336]">Delete Team</span>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination Controls */}
@@ -428,10 +432,17 @@ function Teams() {
       )}
 
        {/* Create Team Modal */}
-      <CreateTeam 
+      <CreateTeam
         isOpen={showCreateTeamModal}
         onClose={() => setShowCreateTeamModal(false)}
         onCreateTeam={handleCreateTeam}
+      />
+
+      {/* Create Game Modal */}
+      <CreateGame
+        isOpen={showCreateGameModal}
+        onClose={() => setShowCreateGameModal(false)}
+        onCreateGame={(g) => { addGame(g); setShowCreateGameModal(false); }}
       />
     </section>
   );

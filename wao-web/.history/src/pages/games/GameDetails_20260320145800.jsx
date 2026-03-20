@@ -129,7 +129,7 @@ const GameDetails = () => {
               {game.status === 'live' ? (
                 <div className="bg-white/15 backdrop-blur-sm px-5 py-3 rounded-xl text-center border border-white/20">
                   <p className="text-white/70 text-xs mb-1">{game.currentQuarter}</p>
-                  <p className="text-white text-sm  md:text-2xl font-black">{game.homeScore} – {game.awayScore}</p>
+                  <p className="text-white text-2xl  md:text-2xl font-black">{game.homeScore} – {game.awayScore}</p>
                   <p className="text-white/60 text-xs mt-1">{game.timeRemaining}</p>
                 </div>
               ) : (
@@ -308,39 +308,10 @@ const GameDetails = () => {
       {/* ── Game Details (live/completed) ── */}
       {activeTab === 'game-details' && (game.status === 'live' || game.status === 'completed') && (
         <div className="space-y-5">
-          {/* Quarter breakdown */}
+          {/* Quarter breakdown table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <h3 className="font-bold text-[#011B3B] mb-4">Quarter by Quarter</h3>
-
-            {/* ── Mobile cards ── */}
-            <div className="md:hidden space-y-3">
-              {[
-                { label: game.homeTeam, isHome: true, score: game.homeScore, quarters: [game.quarters.q1.home, game.quarters.q2.home, game.quarters.q3.home, game.quarters.q4.home] },
-                { label: game.awayTeam, isHome: false, score: game.awayScore, quarters: [game.quarters.q1.away, game.quarters.q2.away, game.quarters.q3.away, game.quarters.q4.away] },
-              ].map(({ label, isHome, score, quarters }) => (
-                <div key={label} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Avatar name={label} isHome={isHome} size="sm" />
-                    <span className="font-semibold text-[#011B3B]">{label}</span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2 text-center">
-                    {['Q1','Q2','Q3','Q4'].map((q, i) => (
-                      <div key={q} className="bg-white rounded-lg py-2">
-                        <p className="text-xs text-gray-400 mb-0.5">{q}</p>
-                        <p className="font-bold text-[#011B3B]">{quarters[i]}</p>
-                      </div>
-                    ))}
-                    <div className="bg-[#011B3B] rounded-lg py-2">
-                      <p className="text-xs text-white/60 mb-0.5">Total</p>
-                      <p className="font-black text-white">{score}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* ── Desktop table ── */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">

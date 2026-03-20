@@ -49,7 +49,7 @@ const SideNav = ({
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 z-40 backdrop-blur-sm bg-[#011B3B]/40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
