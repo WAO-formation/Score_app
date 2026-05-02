@@ -82,12 +82,12 @@ class WaoPlayer {
       'status': status.name,
       'currentTeamId': currentTeamId,
       'currentTeamName': currentTeamName,
-      'joinedTeamAt': joinedTeamAt,
+      'joinedTeamAt': joinedTeamAt != null ? Timestamp.fromDate(joinedTeamAt!) : null,
       'gamesPlayed': gamesPlayed,
       'goalsScored': goalsScored,
       'assists': assists,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt ?? FieldValue.serverTimestamp(),
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
     };
   }
 

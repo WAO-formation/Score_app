@@ -103,13 +103,16 @@ class TeamService {
   Stream<List<WaoTeam>> getTopTeams({int limit = 5}) {
     return _firestore
         .collection('teams')
-        .where('ranking', isGreaterThan: 0)
-        .orderBy('ranking', descending: false)
+        .where('isTopTeam', isEqualTo: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => WaoTeam.fromFirestore(doc.data(), doc.id))
-        .toList());
+        .map((snapshot) {
+      final teams = snapshot.docs
+          .map((doc) => WaoTeam.fromFirestore(doc.data(), doc.id))
+          .toList();
+      teams.sort((a, b) => a.ranking.compareTo(b.ranking));
+      return teams;
+    });
   }
 
   Future<WaoTeam?> getTeamById(String teamId) async {
@@ -545,11 +548,12 @@ class TeamService {
 
   Future<int> getTeamFollowerCount(String teamId) async {
     try {
+      // Count directly from the team's subcollection — no collectionGroup index needed
       final querySnapshot = await _firestore
-          .collectionGroup('followedTeams')
-          .where('teamId', isEqualTo: teamId)
+          .collection('teams')
+          .doc(teamId)
+          .collection('followers')
           .get();
-
       return querySnapshot.docs.length;
     } catch (e) {
       print('Error getting follower count: $e');

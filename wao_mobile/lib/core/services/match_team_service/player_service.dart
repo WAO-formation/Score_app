@@ -60,13 +60,11 @@ class PlayerService {
     return _firestore
         .collection('players')
         .where('currentTeamId', isEqualTo: null)
-        .where('status', isEqualTo: PlayerStatus.active.name)
         .snapshots()
-        .map(
-          (snap) => snap.docs
-          .map((doc) => WaoPlayer.fromFirestore(doc.data(), doc.id))
-          .toList(),
-    );
+        .map((snap) => snap.docs
+            .map((doc) => WaoPlayer.fromFirestore(doc.data(), doc.id))
+            .where((p) => p.status == PlayerStatus.active)
+            .toList());
   }
 
   // Get players by role
@@ -100,21 +98,12 @@ class PlayerService {
     required String teamName,
   }) async {
     try {
-      // Check if player is already in a team
-      final isInTeam = await isPlayerInTeam(playerId);
-      if (isInTeam) {
-        throw Exception('Player is already assigned to a team. Remove them first.');
-      }
-
-      // Update player document
       await _firestore.collection('players').doc(playerId).update({
         'currentTeamId': teamId,
         'currentTeamName': teamName,
         'joinedTeamAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      print('Player $playerId assigned to team $teamId');
     } catch (e) {
       print('Error assigning player to team: $e');
       rethrow;
@@ -215,10 +204,10 @@ class PlayerService {
       final snapshot = await _firestore
           .collection('players')
           .where('currentTeamId', isEqualTo: teamId)
-          .where('status', isEqualTo: PlayerStatus.active.name)
           .get();
-
-      return snapshot.docs.length;
+      return snapshot.docs
+          .where((d) => d.data()['status'] == PlayerStatus.active.name)
+          .length;
     } catch (e) {
       print('Error getting active players count: $e');
       return 0;
@@ -231,13 +220,12 @@ class PlayerService {
       final snapshot = await _firestore
           .collection('players')
           .where('currentTeamId', isEqualTo: teamId)
-          .where('status', whereIn: [
-        PlayerStatus.inactive.name,
-        PlayerStatus.suspended.name
-      ])
           .get();
-
-      return snapshot.docs.length;
+      return snapshot.docs
+          .where((d) =>
+              d.data()['status'] == PlayerStatus.inactive.name ||
+              d.data()['status'] == PlayerStatus.suspended.name)
+          .length;
     } catch (e) {
       print('Error getting inactive players count: $e');
       return 0;

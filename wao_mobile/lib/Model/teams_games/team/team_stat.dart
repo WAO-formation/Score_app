@@ -44,7 +44,7 @@ class GameResult {
       'opponentTeamName': opponentTeamName,
       'teamScore': teamScore,
       'opponentScore': opponentScore,
-      'playedAt': playedAt,
+      'playedAt': Timestamp.fromDate(playedAt),
       'isHomeGame': isHomeGame,
     };
   }
@@ -130,8 +130,8 @@ class TeamStatistics {
       'inactivePlayers': inactivePlayers,
       'totalFollowers': totalFollowers,
       'recentGames': recentGames.map((g) => g.toFirestore()).toList(),
-      'lastGameDate': lastGameDate,
-      'updatedAt': updatedAt,
+      'lastGameDate': lastGameDate != null ? Timestamp.fromDate(lastGameDate!) : null,
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 

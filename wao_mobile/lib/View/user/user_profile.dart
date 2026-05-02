@@ -26,9 +26,17 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Consumer(
-      builder: (BuildContext context, value, Widget? child) {
-        return  Scaffold(
+    return Consumer<UserProvider>(
+      builder: (BuildContext context, userProvider, Widget? child) {
+        final user = userProvider.userProfile;
+
+        if (user == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
           extendBody: true,
           body: SafeArea(
             child: SingleChildScrollView(
@@ -38,7 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Profile Card
                   Padding(
                     padding: const EdgeInsets.only(top: 25.0),
-                    child: _buildProfileCard(isDarkMode, Provider.of<UserProvider>(context).userProfile!),
+                    child: _buildProfileCard(isDarkMode, user),
                   ),
 
                   const SizedBox(height: 24),
@@ -218,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 24),
 
                         // Logout Button
-                        _buildLogoutButton(isDarkMode, Provider.of<UserProvider>(context)),
+                        _buildLogoutButton(isDarkMode, userProvider),
 
                         const SizedBox(height: 16),
 

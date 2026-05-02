@@ -48,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final User? currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -62,48 +61,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: StreamBuilder<DocumentSnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(currentUser?.uid)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          String name = "User";
-                          String? profilePic;
-
-                          if (snapshot.hasData && snapshot.data!.exists) {
-                            final data = snapshot.data!.data() as Map<String, dynamic>;
-                            name = data['username'] ?? "User";
-                            profilePic = data['profilePicture'];
+                      child: StreamBuilder<User?>(
+                        stream: FirebaseAuth.instance.authStateChanges(),
+                        builder: (context, authSnapshot) {
+                          final uid = authSnapshot.data?.uid;
+                          if (uid == null) {
+                            return _buildUserAvatar('User', null);
                           }
+                          return StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(uid)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              String name = 'User';
+                              String? profilePic;
 
-                          return Row(
-                            children: [
-                              _buildUserAvatar(name, profilePic),
-                              const SizedBox(width: 12.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      "Welcome Back!",
-                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                              if (snapshot.hasData && snapshot.data!.exists) {
+                                final data = snapshot.data!.data() as Map<String, dynamic>;
+                                name = data['displayName'] ?? data['username'] ?? 'User';
+                                profilePic = data['profilePicture'] ?? data['photoUrl'];
+                              }
+
+                              return Row(
+                                children: [
+                                  _buildUserAvatar(name, profilePic),
+                                  const SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Welcome Back!',
+                                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                                        ),
+                                        const SizedBox(height: 2.0),
+                                        Text(
+                                          name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 2.0),
-                                    Text(
-                                      name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
                       ),

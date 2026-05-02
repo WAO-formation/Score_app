@@ -58,10 +58,40 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      // Ensure Firestore profile exists for this user
+      if (userCredential.user != null) {
+        await _ensureProfileExists(userCredential.user!);
+      }
+
       return userCredential;
     } catch (err) {
       print("Login Failed: $err");
       rethrow;
+    }
+  }
+
+  Future<void> _ensureProfileExists(User user) async {
+    try {
+      final doc = await _db.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        // Create profile using Firebase Auth display name / email
+        final displayName = user.displayName ?? user.email?.split('@').first ?? 'User';
+        final userProfile = UserProfile(
+          uid: user.uid,
+          username: displayName,
+          email: user.email ?? '',
+          displayName: user.displayName,
+          createdAt: DateTime.now(),
+        );
+        await _db
+            .collection('users')
+            .doc(user.uid)
+            .set(userProfile.toFirestore());
+        print('Created missing Firestore profile for ${user.email}');
+      }
+    } catch (e) {
+      print('Error ensuring profile exists: $e');
     }
   }
 
