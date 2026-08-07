@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import AppRoutes from './routes/private';
+import AppRoutes from './routes';
 import { GamesProvider } from './context/GamesContext';
 import { AuthProvider } from './context/AuthContext';
 
