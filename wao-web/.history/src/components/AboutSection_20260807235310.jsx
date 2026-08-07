@@ -44,7 +44,7 @@ const AboutSection = () => {
           <img
             src="/assets/design/solo.jpeg"
             alt="WAO! team gathered on court in Accra"
-            className="h-full w-full aspect-[4/5] object-cover object-top md:aspect-auto md:h-[520px]"
+            className="h-full w-full aspect-[4/5] object-cover md:aspect-auto md:h-[520px]"
           />
         </div>
 

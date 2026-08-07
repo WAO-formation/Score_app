@@ -103,7 +103,7 @@ const PlaySection = () => {
           {TRACK.map((src, i) => (
             <div
               key={i}
-              className="relative h-64 w-72 shrink-0 mx-2 rounded-xl overflow-hidden shadow-md"
+              className="relative h-96 w-72 shrink-0 mx-2 rounded-xl overflow-hidden shadow-md"
             >
               <img
                 src={src}

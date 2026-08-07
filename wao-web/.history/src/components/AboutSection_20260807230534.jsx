@@ -42,9 +42,9 @@ const AboutSection = () => {
       <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-16">
         <div className="about-image overflow-hidden rounded-2xl shadow-sm">
           <img
-            src="/assets/design/solo.jpeg"
+            src="/assets/card-carosel4.png"
             alt="WAO! team gathered on court in Accra"
-            className="h-full w-full aspect-[4/5] object-cover object-top md:aspect-auto md:h-[520px]"
+            className="h-full w-full aspect-[4/5] object-cover md:aspect-auto md:h-[520px]"
           />
         </div>
 
@@ -54,14 +54,14 @@ const AboutSection = () => {
             style={{ fontFamily: BRAND.font.heading, color: BRAND.dark }}
           >
             Creating the World's
-            <br />Next Great <span style={{ color: BRAND.primary }}>Sport</span>.
+            <br />A World-Class Vision.
           </h2>
 
           <p
             className="about-copy mt-6 text-base leading-relaxed text-gray-600 md:text-lg"
             style={{ fontFamily: BRAND.font.body }}
           >
-            WAO! was founded in 2012 by Solomon Kyei in Accra, Ghana a two-ball,
+            WAO! was founded in 2012 by Solomon Kyei in Accra, Ghana — a two-ball,
             hand-controlled contact sport built from scratch and registered with
             Copyright Ghana in 2014. What started with a small group playing at a
             church car park in Dome has grown into clinics and community games
@@ -73,7 +73,7 @@ const AboutSection = () => {
             style={{ fontFamily: BRAND.font.body }}
           >
             Waoherds Limited's mission is to empower individuals through
-            world-class edutainment and sports development and the vision goes
+            world-class edutainment and sports development — and the vision goes
             further still: to champion world oneness through innovative sports
             experiences that blend technology with traditional gameplay.
           </p>
@@ -86,7 +86,7 @@ const AboutSection = () => {
                 style={{
                   fontFamily: BRAND.font.body,
                   color: BRAND.dark,
-                  backgroundColor: BRAND.surface,
+                  backgroundColor: '#F0F4F9',
                 }}
               >
                 {fact}

@@ -38,7 +38,7 @@ const CtaSection = () => (
         onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
         onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
       >
-        See How It's Won
+        See H
       </Link>
     </div>
   </section>

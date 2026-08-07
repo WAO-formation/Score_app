@@ -3,10 +3,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { BRAND } from '../config/brand';
 
 const NAV_LINKS = [
-  { label: 'Home', to: '/', active: true },
+  { label: 'Home', to: '/', active: true },,
   { label: 'About Us', to: '/about' },
   { label: 'How To Play', to: '/how-to-play' },
-  { label: 'Contact Us', to: '#contact' },
+  { label: 'Contact Us', to: '/contact' },
 ];
 
 const Navbar = () => {

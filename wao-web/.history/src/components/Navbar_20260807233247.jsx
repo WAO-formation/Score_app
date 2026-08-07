@@ -4,9 +4,10 @@ import { BRAND } from '../config/brand';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/', active: true },
+  { label: 'Games', to: '/games' },
   { label: 'About Us', to: '/about' },
   { label: 'How To Play', to: '/how-to-play' },
-  { label: 'Contact Us', to: '#contact' },
+  { label: 'Contact Us', to: '/contact' },
 ];
 
 const Navbar = () => {

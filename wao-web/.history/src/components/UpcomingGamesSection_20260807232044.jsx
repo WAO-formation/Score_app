@@ -70,7 +70,7 @@ const GameCard = ({ game }) => {
         <div className="flex flex-col items-center gap-2 flex-1">
           <div className="w-14 h-14 rounded-sm bg-amber-400 flex items-center justify-center" style={{ borderColor: BRAND.dark }}>
             <span className="font-extrabold text-sm" style={{ color: BRAND.dark }}>
-              {getInitials(game.awayTeam)}
+              {game.awayTeam.substring(0, 2).toUpperCase()}
             </span>
           </div>
           <p

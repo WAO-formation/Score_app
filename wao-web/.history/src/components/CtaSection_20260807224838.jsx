@@ -30,7 +30,7 @@ const CtaSection = () => (
 
       <Link
         to="/how-to-play"
-        className="mt-10 inline-flex items-center justify-center px-8 py-4 text-sm rounded-sm font-semibold uppercase tracking-widest text-white transition"
+        className="mt-10 inline-flex items-center justify-center px-8 py-4 text-sm font-semibold uppercase tracking-widest text-white transition"
         style={{
           fontFamily: BRAND.font.body,
           backgroundColor: BRAND.primary,
@@ -38,7 +38,7 @@ const CtaSection = () => (
         onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
         onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
       >
-        See How It's Won
+        Learn How To Play
       </Link>
     </div>
   </section>

@@ -42,9 +42,9 @@ const AboutSection = () => {
       <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-16">
         <div className="about-image overflow-hidden rounded-2xl shadow-sm">
           <img
-            src="/assets/design/solo.jpeg"
+            src="/assets/design/solo.j"
             alt="WAO! team gathered on court in Accra"
-            className="h-full w-full aspect-[4/5] object-cover object-top md:aspect-auto md:h-[520px]"
+            className="h-full w-full aspect-[4/5] object-cover md:aspect-auto md:h-[520px]"
           />
         </div>
 
