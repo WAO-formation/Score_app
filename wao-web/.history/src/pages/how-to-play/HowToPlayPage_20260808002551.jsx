@@ -82,7 +82,7 @@ const PANELS = {
               </h3>
             </div>
             <span
-              className="shrink-0 rounded-full px-3 py-1 text-sm font-medium"
+              className="shrink-0 rounded-full px-3 py-1 text-sm font-m"
               style={{ fontFamily: BRAND.font.heading, backgroundColor: z.color + '18', color: z.color }}
             >
               {z.weight}

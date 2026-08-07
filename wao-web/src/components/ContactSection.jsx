@@ -24,11 +24,19 @@ const ContactSection = () => {
     const mm = gsap.matchMedia();
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set(['.contact-heading', '.contact-form'], { opacity: 0, y: 20 });
-        gsap
-          .timeline({ defaults: { ease: 'power3.out' }, scrollTrigger: { trigger: rootRef.current, start: 'top 75%' } })
-          .to('.contact-heading', { opacity: 1, y: 0, duration: 0.6 })
-          .to('.contact-form',    { opacity: 1, y: 0, duration: 0.6 }, '-=0.3');
+        // Heading: clip-path wipe
+        gsap.set('.contact-heading', { clipPath: 'inset(100% 0% 0% 0%)' });
+        gsap.to('.contact-heading', {
+          clipPath: 'inset(0% 0% 0% 0%)', duration: 0.85, ease: 'power4.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 75%' },
+        });
+
+        // Form: slide up + fade
+        gsap.set('.contact-form', { opacity: 0, y: 48 });
+        gsap.to('.contact-form', {
+          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 70%' },
+        });
       }, rootRef);
       return () => ctx.revert();
     });

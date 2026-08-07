@@ -1,13 +1,24 @@
+import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BRAND } from '../config/brand';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const NAV = [
-  { label: 'Home', to: '/' },
-  { label: 'About', to: '/#about' },
-  { label: 'How To Play', to: '/how-to-play' },
+  { label: 'Home',          to: '/' },
+  { label: 'About',         to: '/#about' },
+  { label: 'How To Play',   to: '/#how-to-play' },
   { label: 'Upcoming Games', to: '/#games' },
-  { label: 'Contact', to: '/#contact' },
+  { label: 'Contact',       to: '/#contact' },
 ];
+
+const scrollTo = (to) => {
+  const hash = to.split('#')[1];
+  if (!hash) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 const SOCIALS = [
   {
@@ -51,18 +62,51 @@ const SOCIALS = [
 ];
 
 const Footer = () => {
+  const rootRef = useRef(null);
   const year = new Date().getFullYear();
 
+  useLayoutEffect(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const ctx = gsap.context(() => {
+        // Ghost headline: slow horizontal drift scrubbed to scroll
+        gsap.to('.footer-ghost', {
+          xPercent: -6,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: rootRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.5,
+          },
+        });
+
+        // Grid columns: staggered fade-up
+        gsap.set('.footer-col', { opacity: 0, y: 36 });
+        gsap.to('.footer-col', {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.footer-grid', start: 'top 88%' },
+        });
+      }, rootRef);
+      return () => ctx.revert();
+    });
+    return () => mm.revert();
+  }, []);
+
   return (
-    <footer style={{ backgroundColor: BRAND.ink }} className="w-full">
-      {/* Top bar — large CTA */}
+    <footer ref={rootRef} style={{ backgroundColor: BRAND.ink }} className="w-full overflow-hidden">
+      {/* Top bar — ghost headline */}
       <div
         className="border-b px-6 py-14 sm:px-12 lg:px-24"
         style={{ borderColor: 'rgba(255,255,255,0.07)' }}
       >
         <div className="mx-auto max-w-6xl text-center">
           <h2
-            className="text-5xl uppercase leading-none sm:text-7xl lg:text-8xl"
+            className="footer-ghost text-5xl uppercase leading-none sm:text-7xl lg:text-8xl"
             style={{
               fontFamily: BRAND.font.heading,
               color: 'transparent',
@@ -75,10 +119,10 @@ const Footer = () => {
       </div>
 
       {/* Main grid */}
-      <div className="mx-auto max-w-6xl px-6 py-14 sm:px-12 lg:px-24">
+      <div className="footer-grid mx-auto max-w-6xl px-6 py-14 sm:px-12 lg:px-24">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           {/* Brand */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="footer-col col-span-2 sm:col-span-1">
             <Link to="/" className="inline-block">
               <img src="/assets/logo.png" alt="WAO!" className="h-9 w-auto" />
             </Link>
@@ -98,7 +142,7 @@ const Footer = () => {
           </div>
 
           {/* Nav */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="footer-col col-span-2 sm:col-span-1">
             <p
               className="text-[10px] font-semibold uppercase tracking-[0.3em]"
               style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.3)' }}
@@ -110,6 +154,7 @@ const Footer = () => {
                 <li key={l.label}>
                   <Link
                     to={l.to}
+                    onClick={(e) => { e.preventDefault(); scrollTo(l.to); }}
                     className="text-sm transition-colors duration-200 hover:text-white"
                     style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.6)' }}
                   >
@@ -121,7 +166,7 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="footer-col col-span-2 sm:col-span-1">
             <p
               className="text-[10px] font-semibold uppercase tracking-[0.3em]"
               style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.3)' }}
@@ -148,7 +193,7 @@ const Footer = () => {
           </div>
 
           {/* App download */}
-          <div className="col-span-2">
+          <div className="footer-col col-span-2">
             <p
               className="text-[10px] font-semibold uppercase tracking-[0.3em]"
               style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.3)' }}
@@ -156,7 +201,6 @@ const Footer = () => {
               Get the App
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              {/* App Store */}
               <button
                 className="flex items-center gap-3 rounded-xl px-5 py-3 transition-all duration-300 hover:scale-105"
                 style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
@@ -174,7 +218,6 @@ const Footer = () => {
                 </div>
               </button>
 
-              {/* Google Play */}
               <button
                 className="flex items-center gap-3 rounded-xl px-5 py-3 transition-all duration-300 hover:scale-105"
                 style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
@@ -212,7 +255,6 @@ const Footer = () => {
             &copy; {year} Waoherds Limited. All rights reserved.
           </p>
 
-          {/* Socials */}
           <div className="flex items-center gap-4">
             {SOCIALS.map((s) => (
               <a

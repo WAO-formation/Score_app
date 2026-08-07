@@ -38,43 +38,33 @@ const WhyJoinSection = () => {
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
-
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set(['.wj-eyebrow', '.wj-title', '.wj-sub'], { opacity: 0, y: 22 });
+        // Header block: clip-path wipe
+        gsap.set(['.wj-eyebrow', '.wj-title', '.wj-sub'], { clipPath: 'inset(100% 0% 0% 0%)' });
         gsap
-          .timeline({
-            defaults: { ease: 'power3.out' },
-            scrollTrigger: { trigger: rootRef.current, start: 'top 70%' },
-          })
-          .to('.wj-eyebrow', { opacity: 1, y: 0, duration: 0.6 })
-          .to('.wj-title', { opacity: 1, y: 0, duration: 0.7 }, '-=0.35')
-          .to('.wj-sub', { opacity: 1, y: 0, duration: 0.6 }, '-=0.35');
+          .timeline({ defaults: { ease: 'power4.out' }, scrollTrigger: { trigger: rootRef.current, start: 'top 72%' } })
+          .to('.wj-eyebrow', { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.6 })
+          .to('.wj-title',   { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.85 }, '-=0.35')
+          .to('.wj-sub',     { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.7 }, '-=0.4');
 
-        gsap.set('.wj-reason', { opacity: 0, y: 24 });
+        // Cards: staggered scale-pop
+        gsap.set('.wj-reason', { opacity: 0, scale: 0.86, y: 20 });
         gsap.to('.wj-reason', {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.08,
-          ease: 'power3.out',
+          opacity: 1, scale: 1, y: 0,
+          duration: 0.65, stagger: { amount: 0.6, from: 'start' }, ease: 'back.out(1.3)',
           scrollTrigger: { trigger: '.wj-reasons', start: 'top 80%' },
         });
 
-        gsap.set('.wj-cta', { opacity: 0, y: 22 });
+        // CTA: fade up
+        gsap.set('.wj-cta', { opacity: 0, y: 24 });
         gsap.to('.wj-cta', {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: '.wj-cta', start: 'top 90%' },
+          opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+          scrollTrigger: { trigger: '.wj-cta', start: 'top 92%' },
         });
       }, rootRef);
-
       return () => ctx.revert();
     });
-
     return () => mm.revert();
   }, []);
 

@@ -12,24 +12,32 @@ const AboutSection = () => {
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
-
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set('.about-image', { opacity: 0, x: -32 });
-        gsap.set('.about-copy', { opacity: 0, y: 24 });
+        // Image: slide from left + clip reveal
+        gsap.set('.about-image', { opacity: 0, x: -60, clipPath: 'inset(0% 100% 0% 0%)' });
+        gsap.to('.about-image', {
+          opacity: 1, x: 0, clipPath: 'inset(0% 0% 0% 0%)',
+          duration: 1.1, ease: 'power3.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 72%' },
+        });
 
-        gsap
-          .timeline({
-            defaults: { ease: 'power3.out' },
-            scrollTrigger: { trigger: rootRef.current, start: 'top 70%' },
-          })
-          .to('.about-image', { opacity: 1, x: 0, duration: 0.8 })
-          .to('.about-copy', { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 }, '-=0.5');
+        // Text: staggered fade-up
+        gsap.set('.about-copy', { opacity: 0, y: 36 });
+        gsap.to('.about-copy', {
+          opacity: 1, y: 0, duration: 0.75, stagger: 0.13, ease: 'power3.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 68%' },
+        });
+
+        // Fact pills: scale pop
+        gsap.set('.about-pill', { opacity: 0, scale: 0.8 });
+        gsap.to('.about-pill', {
+          opacity: 1, scale: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.6)',
+          scrollTrigger: { trigger: '.about-pills', start: 'top 85%' },
+        });
       }, rootRef);
-
       return () => ctx.revert();
     });
-
     return () => mm.revert();
   }, []);
 
@@ -78,11 +86,11 @@ const AboutSection = () => {
             experiences that blend technology with traditional gameplay.
           </p>
 
-          <div className="about-copy mt-8 flex flex-wrap gap-2">
+          <div className="about-copy mt-8 about-pills flex flex-wrap gap-2">
             {FACTS.map((fact) => (
               <span
                 key={fact}
-                className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em]"
+                className="about-pill inline-flex items-center rounded-full px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em]"
                 style={{
                   fontFamily: BRAND.font.body,
                   color: BRAND.dark,

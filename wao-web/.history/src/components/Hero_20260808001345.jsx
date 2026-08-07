@@ -63,7 +63,7 @@ const Hero = () => {
 
       <div className="hero-content relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-6 text-center">
         <h1
-          className="uppercase leading-[1.05] tracking-normal sm:tracking-wide text-white text-[1.65rem] sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
+          className="uppercase leading-[1.05] tracking-wide text-white text-3xl sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
           style={{ fontFamily: BRAND.font.heading }}
         >
           <span className="hero-line block">One World. Two Balls.</span>
@@ -89,12 +89,11 @@ const Hero = () => {
             Join WAO
           </Link>
           <a
-            href="#how-to-play"
-            onClick={(e) => { e.preventDefault(); document.getElementById('how-to-play')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+            href="#play"
             className="hero-cta inline-flex items-center justify-center rounded-sm border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white backdrop-blur-sm transition hover:bg-white/20"
             style={{ fontFamily: BRAND.font.body }}
           >
-            How To Play
+            h
           </a>
         </div>
       </div>

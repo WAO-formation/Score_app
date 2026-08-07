@@ -27,24 +27,31 @@ const PlaySection = () => {
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
-
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set(['.play-heading', '.play-strip', '.play-cta'], { opacity: 0, y: 24 });
+        // Heading: clip-path wipe
+        gsap.set('.play-heading', { clipPath: 'inset(100% 0% 0% 0%)' });
+        gsap.to('.play-heading', {
+          clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: 'power4.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 78%' },
+        });
 
-        gsap
-          .timeline({
-            defaults: { ease: 'power3.out' },
-            scrollTrigger: { trigger: rootRef.current, start: 'top 75%' },
-          })
-          .to('.play-heading', { opacity: 1, y: 0, duration: 0.7 })
-          .to('.play-strip', { opacity: 1, y: 0, duration: 0.7 }, '-=0.4')
-          .to('.play-cta', { opacity: 1, y: 0, duration: 0.5 }, '-=0.3');
+        // Strip: fade in
+        gsap.set('.play-strip', { opacity: 0 });
+        gsap.to('.play-strip', {
+          opacity: 1, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 70%' },
+        });
+
+        // CTA line: fade up
+        gsap.set('.play-cta', { opacity: 0, y: 20 });
+        gsap.to('.play-cta', {
+          opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+          scrollTrigger: { trigger: '.play-cta', start: 'top 92%' },
+        });
       }, rootRef);
-
       return () => ctx.revert();
     });
-
     return () => mm.revert();
   }, []);
 

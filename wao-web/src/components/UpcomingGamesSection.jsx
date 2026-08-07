@@ -121,18 +121,22 @@ const UpcomingGamesSection = () => {
 
   useLayoutEffect(() => {
     if (loading) return;
-
     const mm = gsap.matchMedia();
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set(['.games-heading', '.game-card'], { opacity: 0, y: 24 });
-        gsap
-          .timeline({
-            defaults: { ease: 'power3.out' },
-            scrollTrigger: { trigger: rootRef.current, start: 'top 75%' },
-          })
-          .to('.games-heading', { opacity: 1, y: 0, duration: 0.7 })
-          .to('.game-card', { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }, '-=0.35');
+        // Heading: clip-path wipe
+        gsap.set('.games-heading', { clipPath: 'inset(100% 0% 0% 0%)' });
+        gsap.to('.games-heading', {
+          clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'power4.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 78%' },
+        });
+
+        // Cards: slide up with stagger
+        gsap.set('.game-card', { opacity: 0, y: 50 });
+        gsap.to('.game-card', {
+          opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 72%' },
+        });
       }, rootRef);
       return () => ctx.revert();
     });

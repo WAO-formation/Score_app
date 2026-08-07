@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND } from '../config/brand';
 
 const NAV_LINKS = [
-  { label: 'Home', to: '/', active: true },
-  { label: 'About Us', to: '/about' },
-  { label: 'How To Play', to: '/how-to-play' },
-  { label: 'Contact Us', to: '#contact' },
+  { label: 'Home',       to: '/' },
+  { label: 'About Us',   to: '/#about' },
+  { label: 'How To Play', to: '/#how-to-play' },
+  { label: 'Upcoming Games', to: '/#games' },
+  { label: 'Contact Us', to: '/#contact' },
 ];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -23,7 +25,34 @@ const Navbar = () => {
   // Close mobile menu on route change
   useEffect(() => setOpen(false), [location]);
 
-  const isActive = (to) => location.pathname === to;
+  // Scroll to hash after navigation
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location]);
+
+  const handleNavClick = (e, to) => {
+    if (!to.includes('#')) return; // let React Router handle plain routes
+    e.preventDefault();
+    const [path, hash] = to.split('#');
+    const targetPath = path || '/';
+    if (location.pathname === targetPath) {
+      // Already on the right page — just scroll
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // Navigate then scroll (handled by the useEffect above)
+      navigate(to);
+    }
+  };
+
+  const isActive = (to) => {
+    if (to === '/') return location.pathname === '/' && !location.hash;
+    if (to.includes('#')) return location.hash === `#${to.split('#')[1]}`;
+    return location.pathname === to;
+  };
 
   return (
     <header
@@ -47,6 +76,7 @@ const Navbar = () => {
             <li key={link.label}>
               <Link
                 to={link.to}
+                onClick={(e) => handleNavClick(e, link.to)}
                 className="uppercase pb-1 border-b-2 transition-colors duration-200"
                 style={isActive(link.to)
                   ? { borderColor: BRAND.primary, color: scrolled ? BRAND.dark : '#fff' }
@@ -91,6 +121,7 @@ const Navbar = () => {
               <li key={link.label}>
                 <Link
                   to={link.to}
+                  onClick={(e) => handleNavClick(e, link.to)}
                   className="uppercase"
                   style={{ color: isActive(link.to) ? BRAND.primary : 'rgba(255,255,255,0.85)' }}
                 >

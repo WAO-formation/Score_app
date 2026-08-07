@@ -39,22 +39,24 @@ const FaqSection = () => {
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
-
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const ctx = gsap.context(() => {
-        gsap.set(['.faq-heading', '.faq-item'], { opacity: 0, y: 20 });
-        gsap
-          .timeline({
-            defaults: { ease: 'power3.out' },
-            scrollTrigger: { trigger: rootRef.current, start: 'top 75%' },
-          })
-          .to('.faq-heading', { opacity: 1, y: 0, duration: 0.6 })
-          .to('.faq-item', { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 }, '-=0.3');
-      }, rootRef);
+        // Heading: clip-path wipe
+        gsap.set('.faq-heading', { clipPath: 'inset(100% 0% 0% 0%)' });
+        gsap.to('.faq-heading', {
+          clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'power4.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 78%' },
+        });
 
+        // Items: slide up stagger
+        gsap.set('.faq-item', { opacity: 0, y: 28 });
+        gsap.to('.faq-item', {
+          opacity: 1, y: 0, duration: 0.55, stagger: 0.09, ease: 'power3.out',
+          scrollTrigger: { trigger: rootRef.current, start: 'top 72%' },
+        });
+      }, rootRef);
       return () => ctx.revert();
     });
-
     return () => mm.revert();
   }, []);
 
