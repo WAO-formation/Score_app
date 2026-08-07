@@ -3,14 +3,14 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAerNcQyVOZaJsb0QMfQ8KJdwogRM1nYag",
-  authDomain: "wao-mobile-app-7e3c9.firebaseapp.com",
-  projectId: "wao-mobile-app-7e3c9",
-  storageBucket: "wao-mobile-app-7e3c9.firebasestorage.app",
-  messagingSenderId: "556690053319",
-  appId: "1:556690053319:web:f2e2163fd95488b4c3c6e2"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db   = getFirestore(app);
 export const auth = getAuth(app);
