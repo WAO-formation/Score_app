@@ -5,9 +5,13 @@ import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 
 const DashboardLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
-  const userName = user?.displayName || user?.email || 'Account';
+  const fullName = user?.displayName || user?.email || 'Account';
+  // The sidebar/header have tight, fixed-width space — a long full name
+  // wraps or gets clipped mid-word, so past a length threshold we drop to
+  // just the first name instead of truncating with an ellipsis.
+  const userName = fullName.length > 16 ? fullName.trim().split(' ')[0] : fullName;
   const roleLabel = user?.role === 'admin' ? 'Admin' : 'Moderator';
 
   return (

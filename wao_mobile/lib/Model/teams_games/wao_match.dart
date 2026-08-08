@@ -1,7 +1,7 @@
 // wao_match.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum MatchStatus { live, upcoming, finished }
+enum MatchStatus { live, upcoming, finished, postponed, suspended, cancelled }
 enum MatchType { friendly, championship, campusInternal }
 
 class WaoMatch {
@@ -30,6 +30,19 @@ class WaoMatch {
   final int teamAJudges;
   final int teamBJudges;
 
+  // wao-web moderator/access-code + live-scoring-detail fields (additive —
+  // mobile writes/reads these but its own UI doesn't require them to be set).
+  final String? moderatorUid;
+  final String? moderatorName;
+  final List<Map<String, String>> judges;
+  final Map<String, dynamic>? quarters;
+  final Map<String, dynamic>? fouls;
+  final List<Map<String, dynamic>> events;
+  final String? currentQuarter;
+  final String? timeRemaining;
+  final String? championshipName;
+  final DateTime? completedAt;
+
   WaoMatch({
     required this.id,
     required this.teamAId,
@@ -53,6 +66,16 @@ class WaoMatch {
     this.teamAJudges = 0,
     this.teamBJudges = 0,
     this.isFavorite = false,
+    this.moderatorUid,
+    this.moderatorName,
+    this.judges = const [],
+    this.quarters,
+    this.fouls,
+    this.events = const [],
+    this.currentQuarter,
+    this.timeRemaining,
+    this.championshipName,
+    this.completedAt,
   });
 
   // Calculate percentage for a category
@@ -146,6 +169,28 @@ class WaoMatch {
       teamAJudges: data['teamAJudges'] ?? 0,
       teamBJudges: data['teamBJudges'] ?? 0,
       isFavorite: data['isFavorite'] ?? false,
+      moderatorUid: data['moderatorUid'],
+      moderatorName: data['moderatorName'],
+      judges: data['judges'] != null
+          ? List<Map<String, String>>.from(
+              (data['judges'] as List).map((j) => Map<String, String>.from(j as Map)))
+          : [],
+      quarters: data['quarters'] != null
+          ? Map<String, dynamic>.from(data['quarters'] as Map)
+          : null,
+      fouls: data['fouls'] != null
+          ? Map<String, dynamic>.from(data['fouls'] as Map)
+          : null,
+      events: data['events'] != null
+          ? List<Map<String, dynamic>>.from(
+              (data['events'] as List).map((e) => Map<String, dynamic>.from(e as Map)))
+          : [],
+      currentQuarter: data['currentQuarter'],
+      timeRemaining: data['timeRemaining'],
+      championshipName: data['championshipName'],
+      completedAt: data['completedAt'] != null
+          ? (data['completedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -174,6 +219,16 @@ class WaoMatch {
       'teamAJudges': teamAJudges,
       'teamBJudges': teamBJudges,
       'isFavorite': isFavorite,
+      'moderatorUid': moderatorUid,
+      'moderatorName': moderatorName,
+      'judges': judges,
+      'quarters': quarters,
+      'fouls': fouls,
+      'events': events,
+      'currentQuarter': currentQuarter,
+      'timeRemaining': timeRemaining,
+      'championshipName': championshipName,
+      'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
     };
   }
 
@@ -208,6 +263,16 @@ class WaoMatch {
     int? teamAJudges,
     int? teamBJudges,
     bool? isFavorite,
+    String? moderatorUid,
+    String? moderatorName,
+    List<Map<String, String>>? judges,
+    Map<String, dynamic>? quarters,
+    Map<String, dynamic>? fouls,
+    List<Map<String, dynamic>>? events,
+    String? currentQuarter,
+    String? timeRemaining,
+    String? championshipName,
+    DateTime? completedAt,
   }) {
     return WaoMatch(
       id: id ?? this.id,
@@ -232,6 +297,16 @@ class WaoMatch {
       teamAJudges: teamAJudges ?? this.teamAJudges,
       teamBJudges: teamBJudges ?? this.teamBJudges,
       isFavorite: isFavorite ?? this.isFavorite,
+      moderatorUid: moderatorUid ?? this.moderatorUid,
+      moderatorName: moderatorName ?? this.moderatorName,
+      judges: judges ?? this.judges,
+      quarters: quarters ?? this.quarters,
+      fouls: fouls ?? this.fouls,
+      events: events ?? this.events,
+      currentQuarter: currentQuarter ?? this.currentQuarter,
+      timeRemaining: timeRemaining ?? this.timeRemaining,
+      championshipName: championshipName ?? this.championshipName,
+      completedAt: completedAt ?? this.completedAt,
     );
   }
 }

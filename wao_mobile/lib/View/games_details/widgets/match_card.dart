@@ -27,6 +27,9 @@ class MatchCard extends StatelessWidget {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final isLive = match.status == MatchStatus.live;
     final isFinished = match.status == MatchStatus.finished;
+    final isCancelled = match.status == MatchStatus.cancelled;
+    final isPostponedOrSuspended = match.status == MatchStatus.postponed ||
+        match.status == MatchStatus.suspended;
 
     return GestureDetector(
       onTap: onTap ?? () {
@@ -63,7 +66,7 @@ class MatchCard extends StatelessWidget {
         child: Row(
           children: [
             // Time or Status
-            _buildTimeColumn(isDarkMode, isLive, isFinished),
+            _buildTimeColumn(isDarkMode, isLive, isFinished, isCancelled, isPostponedOrSuspended),
             const SizedBox(width: 12),
             // Teams and Scores
             Expanded(
@@ -96,7 +99,7 @@ class MatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeColumn(bool isDarkMode, bool isLive, bool isFinished) {
+  Widget _buildTimeColumn(bool isDarkMode, bool isLive, bool isFinished, bool isCancelled, bool isPostponedOrSuspended) {
     return SizedBox(
       width: 60,
       child: Column(
@@ -122,6 +125,24 @@ class MatchCard extends StatelessWidget {
               'FT',
               style: TextStyle(
                 fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+              ),
+            )
+          else if (isCancelled)
+            Text(
+              'CANC',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade400,
+              ),
+            )
+          else if (isPostponedOrSuspended)
+            Text(
+              match.status == MatchStatus.postponed ? 'PPD' : 'SUSP',
+              style: TextStyle(
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: isDarkMode ? Colors.white70 : Colors.black54,
               ),

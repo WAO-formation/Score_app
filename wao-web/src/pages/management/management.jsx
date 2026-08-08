@@ -4,11 +4,16 @@ import Players from './components/Players';
 import VenuesAndTournaments from './components/VenuesAndTournaments';
 import Reports from './components/Reports';
 import GamesManagement from './components/GamesManagement';
+import Users from './components/Users';
+import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
-const TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games'];
+const BASE_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games'];
 
 export default function Management() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const TABS = isAdmin ? [...BASE_TABS, 'Users'] : BASE_TABS;
   const [tab, setTab] = useState('Officials');
 
   return (
@@ -43,6 +48,7 @@ export default function Management() {
       {tab === 'Venues & Tournaments' && <VenuesAndTournaments />}
       {tab === 'Reports'              && <Reports />}
       {tab === 'Games'                && <GamesManagement />}
+      {tab === 'Users' && isAdmin     && <Users />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum TeamCategory { general, campus, women, mixed, men }
+enum TeamCategory { senior, junior, youth }
 
 class TeamRoster {
   final List<String> kingIds;
@@ -9,6 +9,8 @@ class TeamRoster {
   final List<String> antagueIds;
   final List<String> warriorIds;
   final List<String> sacrificerIds;
+  final List<String> servitorIds;
+  final List<String> substituteIds;
 
   TeamRoster({
     this.kingIds = const [],
@@ -17,6 +19,8 @@ class TeamRoster {
     this.antagueIds = const [],
     this.warriorIds = const [],
     this.sacrificerIds = const [],
+    this.servitorIds = const [],
+    this.substituteIds = const [],
   });
 
   int get totalPlayers =>
@@ -25,7 +29,9 @@ class TeamRoster {
           protagueIds.length +
           antagueIds.length +
           warriorIds.length +
-          sacrificerIds.length;
+          sacrificerIds.length +
+          servitorIds.length +
+          substituteIds.length;
 
   factory TeamRoster.fromFirestore(Map<String, dynamic> data) {
     return TeamRoster(
@@ -35,6 +41,8 @@ class TeamRoster {
       antagueIds: List<String>.from(data['antagueIds'] ?? []),
       warriorIds: List<String>.from(data['warriorIds'] ?? []),
       sacrificerIds: List<String>.from(data['sacrificerIds'] ?? []),
+      servitorIds: List<String>.from(data['servitorIds'] ?? []),
+      substituteIds: List<String>.from(data['substituteIds'] ?? []),
     );
   }
 
@@ -46,6 +54,8 @@ class TeamRoster {
       'antagueIds': antagueIds,
       'warriorIds': warriorIds,
       'sacrificerIds': sacrificerIds,
+      'servitorIds': servitorIds,
+      'substituteIds': substituteIds,
     };
   }
 
@@ -58,6 +68,8 @@ class TeamRoster {
       ...antagueIds,
       ...warriorIds,
       ...sacrificerIds,
+      ...servitorIds,
+      ...substituteIds,
     ];
   }
 }
@@ -93,8 +105,8 @@ class WaoTeam {
     this.updatedAt,
   }) : roster = roster ?? TeamRoster();
 
-  // Maximum 15 players per team
-  static const int maxSquadSize = 15;
+  // Maximum 12 players per team (7 starters + 5 subs)
+  static const int maxSquadSize = 12;
 
   // Check if team can add more players
   bool get canAddPlayers => roster.totalPlayers < maxSquadSize;
@@ -104,7 +116,7 @@ class WaoTeam {
     return WaoTeam(
       id: id,
       name: data['name'] ?? '',
-      category: TeamCategory.values.byName(data['category'] ?? 'general'),
+      category: TeamCategory.values.byName(data['category'] ?? 'senior'),
       campusId: data['campusId'],
       coach: data['coach'] ?? 'Unknown Coach',
       secretary: data['secretary'] ?? '',

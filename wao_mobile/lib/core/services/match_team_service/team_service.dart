@@ -295,6 +295,8 @@ class TeamService {
           antagueIds: roster.antagueIds,
           warriorIds: roster.warriorIds,
           sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
         );
       case PlayerRole.worker:
         return TeamRoster(
@@ -304,6 +306,8 @@ class TeamService {
           antagueIds: roster.antagueIds,
           warriorIds: roster.warriorIds,
           sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
         );
       case PlayerRole.protague:
         return TeamRoster(
@@ -313,6 +317,8 @@ class TeamService {
           antagueIds: roster.antagueIds,
           warriorIds: roster.warriorIds,
           sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
         );
       case PlayerRole.antague:
         return TeamRoster(
@@ -322,6 +328,8 @@ class TeamService {
           antagueIds: [...roster.antagueIds, playerId],
           warriorIds: roster.warriorIds,
           sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
         );
       case PlayerRole.warrior:
         return TeamRoster(
@@ -331,6 +339,8 @@ class TeamService {
           antagueIds: roster.antagueIds,
           warriorIds: [...roster.warriorIds, playerId],
           sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
         );
       case PlayerRole.sacrificer:
         return TeamRoster(
@@ -340,6 +350,30 @@ class TeamService {
           antagueIds: roster.antagueIds,
           warriorIds: roster.warriorIds,
           sacrificerIds: [...roster.sacrificerIds, playerId],
+          servitorIds: roster.servitorIds,
+          substituteIds: roster.substituteIds,
+        );
+      case PlayerRole.servitor:
+        return TeamRoster(
+          kingIds: roster.kingIds,
+          workerIds: roster.workerIds,
+          protagueIds: roster.protagueIds,
+          antagueIds: roster.antagueIds,
+          warriorIds: roster.warriorIds,
+          sacrificerIds: roster.sacrificerIds,
+          servitorIds: [...roster.servitorIds, playerId],
+          substituteIds: roster.substituteIds,
+        );
+      case PlayerRole.substitute:
+        return TeamRoster(
+          kingIds: roster.kingIds,
+          workerIds: roster.workerIds,
+          protagueIds: roster.protagueIds,
+          antagueIds: roster.antagueIds,
+          warriorIds: roster.warriorIds,
+          sacrificerIds: roster.sacrificerIds,
+          servitorIds: roster.servitorIds,
+          substituteIds: [...roster.substituteIds, playerId],
         );
     }
   }
@@ -353,6 +387,8 @@ class TeamService {
       antagueIds: roster.antagueIds.where((id) => id != playerId).toList(),
       warriorIds: roster.warriorIds.where((id) => id != playerId).toList(),
       sacrificerIds: roster.sacrificerIds.where((id) => id != playerId).toList(),
+      servitorIds: roster.servitorIds.where((id) => id != playerId).toList(),
+      substituteIds: roster.substituteIds.where((id) => id != playerId).toList(),
     );
   }
 

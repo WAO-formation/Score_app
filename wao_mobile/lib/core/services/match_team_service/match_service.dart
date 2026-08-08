@@ -291,7 +291,16 @@ class MatchService {
   }
 
   Future<void> endMatch(String matchId) async {
-    await updateMatchStatus(matchId, MatchStatus.finished);
+    try {
+      await _db.collection('matches').doc(matchId).update({
+        'status': MatchStatus.finished.name,
+        'completedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      print('Error ending match: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteMatch(String matchId) async {

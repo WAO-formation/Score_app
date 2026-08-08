@@ -26,7 +26,12 @@ async function loadAllowedProfile(firebaseUser) {
     email: firebaseUser.email,
     emailVerified: firebaseUser.emailVerified,
     displayName: data.displayName || data.username || firebaseUser.displayName || firebaseUser.email,
+    username: data.username || '',
+    phone: data.phone || '',
+    bio: data.bio || '',
+    photoUrl: data.photoUrl || null,
     role: data.role,
+    mustChangePassword: !!data.mustChangePassword,
   };
 }
 
@@ -71,7 +76,7 @@ export function AuthProvider({ children }) {
     await setDoc(doc(db, 'users', cred.user.uid), {
       displayName: name,
       email,
-      role: 'user',
+      role: 'fan',
       createdAt: new Date().toISOString(),
     });
     await sendEmailVerification(cred.user);
@@ -88,7 +93,7 @@ export function AuthProvider({ children }) {
       await setDoc(doc(db, 'users', firebaseUser.uid), {
         displayName: firebaseUser.displayName || firebaseUser.email,
         email: firebaseUser.email,
-        role: 'user',
+        role: 'fan',
         createdAt: new Date().toISOString(),
       });
     }
@@ -102,6 +107,21 @@ export function AuthProvider({ children }) {
     return cred;
   };
 
+  // Re-reads the current user's Firestore doc and updates context state.
+  // Call this after saving profile edits (Profile.jsx) so the sidebar/header
+  // name and role badge reflect the change immediately, without waiting for
+  // the next auth-state event (page refresh).
+  const refreshProfile = async () => {
+    if (!auth.currentUser) return;
+    const profile = await loadAllowedProfile(auth.currentUser);
+    if (!profile) {
+      await signOut(auth);
+      setUser(null);
+    } else {
+      setUser(profile);
+    }
+  };
+
   const logout = () => signOut(auth);
 
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
@@ -112,7 +132,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, resetPassword, resendVerification }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, resetPassword, resendVerification, refreshProfile }}>
       {!loading && children}
     </AuthContext.Provider>
   );

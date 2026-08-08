@@ -170,7 +170,7 @@ class SeedingService {
       {
         'id': 'ug_warriors',
         'name': 'UG Warriors',
-        'category': TeamCategory.campus,
+        'category': TeamCategory.senior,
         'campusId': 'ug_legon',
         'coach': 'Daniel Addae',
         'secretary': 'Grace Asante',
@@ -190,7 +190,7 @@ class SeedingService {
       {
         'id': 'knust_stars',
         'name': 'KNUST Stars',
-        'category': TeamCategory.campus,
+        'category': TeamCategory.senior,
         'campusId': 'knust_kumasi',
         'coach': 'Samuel Arthur',
         'secretary': 'Rebecca Tetteh',
@@ -210,7 +210,7 @@ class SeedingService {
       {
         'id': 'ucc_titans',
         'name': 'UCC Titans',
-        'category': TeamCategory.campus,
+        'category': TeamCategory.senior,
         'campusId': 'ucc_cape_coast',
         'coach': 'Michael Osei',
         'secretary': 'Jennifer Ampofo',
@@ -230,7 +230,7 @@ class SeedingService {
       {
         'id': 'upsa_eagles',
         'name': 'UPSA Eagles',
-        'category': TeamCategory.campus,
+        'category': TeamCategory.senior,
         'campusId': 'upsa_accra',
         'coach': 'Patrick Awuah',
         'secretary': 'Nana Ama Owusu',
@@ -250,7 +250,7 @@ class SeedingService {
       {
         'id': 'wao_all_stars',
         'name': 'WAO All-Stars',
-        'category': TeamCategory.general,
+        'category': TeamCategory.senior,
         'campusId': null,
         'coach': 'Joseph Ankrah',
         'secretary': 'Elizabeth Owusu',
@@ -270,7 +270,7 @@ class SeedingService {
       {
         'id': 'ashesi_thunder',
         'name': 'Ashesi Thunder',
-        'category': TeamCategory.campus,
+        'category': TeamCategory.senior,
         'campusId': 'ashesi_berekuso',
         'coach': 'Angela Brooks',
         'secretary': 'Comfort Acheampong',

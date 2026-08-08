@@ -78,48 +78,50 @@ function Dashboard() {
 
           {/* Live Game Spotlight */}
           {liveGames.length > 0 ? (
-            <div className="bg-gradient-to-br from-[#0d3d3d] to-[#0a5252] p-5 border border-teal-700/30">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="bg-white border border-gray-100 p-5">
+              <div className="flex items-center gap-2 mb-5">
                 <span className="flex items-center gap-1.5 bg-emerald-500 text-white text-xs font-bold px-3 py-1" style={{ fontFamily: BRAND.font.body }}>
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
                 </span>
-                <span className="text-white/50 text-xs">Game in progress</span>
+                <span className="text-gray-400 text-xs" style={{ fontFamily: BRAND.font.body }}>Game in progress</span>
               </div>
+
               {liveGames.map((game) => (
                 <div key={game.id}>
                   <div className="flex items-center justify-between gap-4">
+
                     {/* Home */}
-                    <div className="flex flex-col items-center flex-1">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg mb-2">
-                        <span className="text-white font-bold">{game.homeTeam.substring(0, 2).toUpperCase()}</span>
+                    <div className="flex flex-col items-center flex-1 gap-1.5">
+                      <div className="w-14 h-14 bg-amber-400 flex items-center justify-center">
+                        <span className="text-white font-medium text-sm" style={{ fontFamily: BRAND.font.heading }}>{game.homeTeam.substring(0, 2).toUpperCase()}</span>
                       </div>
-                      <p className="text-white text-sm font-semibold text-center line-clamp-1">{game.homeTeam}</p>
+                      <p className="text-[#011B3B] text-xs font-medium text-center line-clamp-1" style={{ fontFamily: BRAND.font.body }}>{game.homeTeam}</p>
+                      <span className="text-3xl text-[#011B3B]" style={{ fontFamily: BRAND.font.heading }}>{game.homeScore}</span>
                     </div>
 
-                    {/* Score */}
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-3 bg-white/10 rounded-xl px-5 py-3">
-                        <span className="text-4xl font-bold text-white">{game.homeScore}</span>
-                        <span className="text-white/40 text-xl">:</span>
-                        <span className="text-4xl font-bold text-white">{game.awayScore}</span>
+                    {/* Middle — time */}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center bg-emerald-50 border border-emerald-200 px-5 py-3 gap-1">
+                        <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>Q{game.currentQuarter}</span>
+                        <span className="text-emerald-700 text-xl font-bold tabular-nums" style={{ fontFamily: BRAND.font.heading }}>{game.timeRemaining}</span>
                       </div>
-                      <p className="text-emerald-300 text-xs font-semibold mt-2" style={{ fontFamily: BRAND.font.body }}>{game.currentQuarter} · {game.timeRemaining}</p>
                     </div>
 
                     {/* Away */}
-                    <div className="flex flex-col items-center flex-1">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center shadow-lg mb-2">
-                        <span className="text-white font-bold">{game.awayTeam.substring(0, 2).toUpperCase()}</span>
+                    <div className="flex flex-col items-center flex-1 gap-1.5">
+                      <div className="w-14 h-14 bg-[#c81434] flex items-center justify-center">
+                        <span className="text-white font-medium text-sm" style={{ fontFamily: BRAND.font.heading }}>{game.awayTeam.substring(0, 2).toUpperCase()}</span>
                       </div>
-                      <p className="text-white text-sm font-semibold text-center line-clamp-1">{game.awayTeam}</p>
+                      <p className="text-[#011B3B] text-xs font-medium text-center line-clamp-1" style={{ fontFamily: BRAND.font.body }}>{game.awayTeam}</p>
+                      <span className="text-3xl text-[#011B3B]" style={{ fontFamily: BRAND.font.heading }}>{game.awayScore}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400" style={{ fontFamily: BRAND.font.body }}>
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{game.venue}</span>
                     <button
                       onClick={() => navigate(`/games/${game.id}`)}
-                      className="flex items-center gap-1 text-[#D30336] font-semibold hover:text-[#ff3355] transition-colors"
+                      className="flex items-center gap-1 text-emerald-600 font-semibold hover:text-emerald-500 transition-colors"
                     >
                       Watch Live <ArrowRight className="w-3 h-3" />
                     </button>
@@ -128,12 +130,12 @@ function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-[#0d3d3d] to-[#0a5252] p-8 border border-teal-700/20 flex flex-col items-center justify-center text-center">
-              <div className="w-14 h-14 bg-[#D30336]/20 rounded-full flex items-center justify-center mb-3">
-                <Radio className="w-7 h-7 text-[#D30336]" />
+            <div className="bg-white border border-gray-100 p-8 flex flex-col items-center justify-center text-center">
+              <div className="w-14 h-14 bg-gray-50 flex items-center justify-center mb-3">
+                <Radio className="w-7 h-7 text-gray-300" />
               </div>
-              <p className="text-white font-semibold mb-1">No Live Games</p>
-              <p className="text-white/40 text-sm">Games in progress will appear here</p>
+              <p className="text-[#011B3B] font-medium mb-1" style={{ fontFamily: BRAND.font.body }}>No Live Games</p>
+              <p className="text-gray-400 text-sm" style={{ fontFamily: BRAND.font.body }}>Games in progress will appear here</p>
             </div>
           )}
 

@@ -54,11 +54,13 @@ service cloud.firestore {
 
       // Self-registration: a user may create only their own profile, and
       // only as the default 'fan' role — nobody can hand themselves a
-      // privileged role at signup. Granting official/admin happens later,
-      // via an existing admin's update (or the Firebase Console/Admin SDK
-      // for the very first admin — see SeedingService.seedAdminProfile).
-      allow create: if isOwner(userId)
-                    && request.resource.data.role == 'fan';
+      // privileged role at signup. An admin may instead create a profile
+      // for *someone else's* uid with any role — that's how wao-web's
+      // "Add User" (Management > Users) provisions moderators/officials:
+      // the Auth account is created first, then this doc, while still
+      // signed in as the admin.
+      allow create: if (isOwner(userId) && request.resource.data.role == 'fan')
+                    || isAdmin();
 
       // Self-service update: owner can edit their own display/preference
       // fields, but role and createdAt aren't in the allow-list, so any
@@ -69,6 +71,7 @@ service cloud.firestore {
                         && request.resource.data.diff(resource.data).affectedKeys()
                              .hasOnly([
                                'username', 'email', 'displayName', 'photoUrl',
+                               'phone', 'bio', 'mustChangePassword',
                                'favoriteTeamIds', 'favoriteMatchIds',
                                'totalMatches', 'totalTeams', 'themePreference',
                                'notificationsEnabled', 'emailNotifications',
@@ -126,6 +129,9 @@ service cloud.firestore {
       allow create: if isOfficial()
                     && request.resource.data.scoreA == 0
                     && request.resource.data.scoreB == 0
+                    && 'moderatorUid' in request.resource.data
+                    && request.resource.data.moderatorUid is string
+                    && request.resource.data.moderatorUid.size() > 0
                     && stampsServerTime();
 
       // Split into two update shapes rather than one blanket "official can
@@ -143,6 +149,8 @@ service cloud.firestore {
                  'teamAWorkout', 'teamBWorkout',
                  'teamAGoalSetting', 'teamBGoalSetting',
                  'teamAJudges', 'teamBJudges',
+                 'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining',
+                 'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
                  'updatedAt',
                ])
           && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0 && request.resource.data.scoreA <= 999
@@ -152,6 +160,16 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isFavorite']));
 
       allow delete: if isOfficial();
+
+      match /private/access {
+        // accessCode is how a game gets started/simulated. Anyone signed-in can
+        // read the parent matches doc, so the code can't live there — only an
+        // admin or the specific moderator assigned to *this* match may read it.
+        allow read: if isAdmin()
+                    || (isSignedIn()
+                        && get(/databases/$(database)/documents/matches/$(matchId)).data.moderatorUid == request.auth.uid);
+        allow write: if isOfficial();
+      }
     }
 
     // ==================== CHAMPIONSHIPS ====================
@@ -160,6 +178,21 @@ service cloud.firestore {
       allow read: if isSignedIn();
       // Higher-stakes, low-frequency writes — admin only, not officials.
       allow create, update, delete: if isAdmin();
+    }
+
+    // ==================== VENUES ====================
+
+    match /venues/{venueId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==================== REPORTS ====================
+
+    match /reports/{reportId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOfficial();
+      allow delete: if isAdmin();
     }
 
     // ==================== NEWS ====================

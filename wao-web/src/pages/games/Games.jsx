@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Plus, Search, Radio, Calendar, CheckCircle } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
+import { isRecentOrActive } from '../../services/matchesService';
 import CreateGame from './components/CreateGame';
 import GameCard from './components/GameCard';
 import { BRAND } from '../../config/brand';
@@ -18,10 +19,14 @@ const TAB_CONFIG = {
 
 function Games() {
   const navigate = useNavigate();
-  const { games, addGame } = useGames();
+  const { games: allGames, loading, addGame } = useGames();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Completed games drop off this list 7 days after they finished — the
+  // full history stays available under Management > Games, never deleted.
+  const games = allGames.filter(isRecentOrActive);
 
   const byStatus = (status) => games.filter((g) => g.status === status);
 
@@ -113,7 +118,9 @@ function Games() {
         </div>
 
         <div className="p-4 sm:p-5">
-          {filteredGames.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-14 text-gray-400 text-sm" style={{ fontFamily: B }}>Loading games…</div>
+          ) : filteredGames.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredGames.map((game) => (
                 <GameCard key={game.id} game={game} onStartGame={(id) => navigate(`/games/${id}/simulate`)} />
@@ -145,7 +152,7 @@ function Games() {
       <CreateGame
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onCreateGame={(g) => { addGame(g); setShowCreateModal(false); }}
+        onCreateGame={(g) => addGame(g)}
       />
     </section>
   );

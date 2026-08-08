@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Clock, Trophy, Play, AlertCircle, Copy, Check } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
+import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
 const B = BRAND.font.body;
@@ -65,6 +66,7 @@ const GameDetails = () => {
   const { gameId }  = useParams();
   const navigate    = useNavigate();
   const { getGame } = useGames();
+  const { user }    = useAuth();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [copied, setCopied]       = useState(false);
@@ -95,6 +97,7 @@ const GameDetails = () => {
   const isLive      = game.status === 'live';
   const isCompleted = game.status === 'completed';
   const isUpcoming  = game.status === 'upcoming';
+  const canSeeAccessCode = user?.role === 'admin' || (!!user?.uid && game.moderatorUid === user.uid);
 
   // Header bg: live = teal, completed = slate, upcoming = dark navy
   const headerBg = isLive
@@ -177,15 +180,17 @@ const GameDetails = () => {
           <div className="flex flex-wrap items-center justify-center gap-3">
             {isUpcoming && (
               <>
-                <div className="bg-white/10 border border-white/20 px-4 py-2.5 flex items-center gap-3">
-                  <div>
-                    <p className="text-white/60 text-xs" style={{ fontFamily: B }}>Access Code</p>
-                    <p className="text-white font-bold font-mono">{game.accessCode}</p>
+                {canSeeAccessCode && (
+                  <div className="bg-white/10 border border-white/20 px-4 py-2.5 flex items-center gap-3">
+                    <div>
+                      <p className="text-white/60 text-xs" style={{ fontFamily: B }}>Access Code</p>
+                      <p className="text-white font-bold font-mono">{game.accessCode}</p>
+                    </div>
+                    <button onClick={handleCopy} className="p-1.5 hover:bg-white/10 transition-colors">
+                      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white/70" />}
+                    </button>
                   </div>
-                  <button onClick={handleCopy} className="p-1.5 hover:bg-white/10 transition-colors">
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white/70" />}
-                  </button>
-                </div>
+                )}
                 <button
                   onClick={() => navigate(`/games/${game.id}/simulate`)}
                   className="flex items-center gap-2 px-6 py-2.5 bg-amber-400 text-[#011B3B] font-bold hover:bg-amber-300 transition-all"

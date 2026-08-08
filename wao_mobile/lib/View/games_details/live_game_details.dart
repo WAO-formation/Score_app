@@ -918,6 +918,12 @@ class _LiveGamesDetailsState extends State<LiveGamesDetails> with SingleTickerPr
       case PlayerRole.sacrificer:
         iconData = Icons.favorite;
         break;
+      case PlayerRole.servitor:
+        iconData = Icons.support_agent;
+        break;
+      case PlayerRole.substitute:
+        iconData = Icons.swap_horiz;
+        break;
     }
 
     return Icon(

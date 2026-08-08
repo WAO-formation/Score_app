@@ -7,6 +7,8 @@ enum PlayerRole {
   antague,
   warrior,
   sacrificer,
+  servitor,
+  substitute,
 }
 
 enum PlayerStatus {
@@ -30,6 +32,8 @@ class WaoPlayer {
   final int assists;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final int? jerseyNumber;
+  final int? age;
 
   WaoPlayer({
     required this.id,
@@ -46,6 +50,8 @@ class WaoPlayer {
     this.assists = 0,
     required this.createdAt,
     this.updatedAt,
+    this.jerseyNumber,
+    this.age,
   });
 
   factory WaoPlayer.fromFirestore(Map<String, dynamic> data, String id) {
@@ -70,6 +76,8 @@ class WaoPlayer {
       updatedAt: data['updatedAt'] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
+      jerseyNumber: data['jerseyNumber'],
+      age: data['age'],
     );
   }
 
@@ -88,6 +96,8 @@ class WaoPlayer {
       'assists': assists,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'jerseyNumber': jerseyNumber,
+      'age': age,
     };
   }
 
@@ -106,6 +116,8 @@ class WaoPlayer {
     int? assists,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? jerseyNumber,
+    int? age,
   }) {
     return WaoPlayer(
       id: id ?? this.id,
@@ -122,6 +134,8 @@ class WaoPlayer {
       assists: assists ?? this.assists,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      jerseyNumber: jerseyNumber ?? this.jerseyNumber,
+      age: age ?? this.age,
     );
   }
 

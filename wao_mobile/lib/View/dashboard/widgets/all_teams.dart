@@ -18,7 +18,7 @@ class AllTeamsPage extends StatefulWidget {
 
 class _AllTeamsPageState extends State<AllTeamsPage> {
   String selectedCategory = 'All';
-  final List<String> categories = ['All', 'Men', 'Women', 'Mixed'];
+  final List<String> categories = ['All', 'Senior', 'Junior', 'Youth'];
   String searchQuery = '';
 
   @override
@@ -209,12 +209,12 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
             if (selectedCategory != 'All') {
               teams = teams.where((team) {
                 switch (selectedCategory) {
-                  case 'Men':
-                    return team.category == TeamCategory.men;
-                  case 'Women':
-                    return team.category == TeamCategory.women;
-                  case 'Mixed':
-                    return team.category == TeamCategory.mixed;
+                  case 'Senior':
+                    return team.category == TeamCategory.senior;
+                  case 'Junior':
+                    return team.category == TeamCategory.junior;
+                  case 'Youth':
+                    return team.category == TeamCategory.youth;
                   default:
                     return true;
                 }
