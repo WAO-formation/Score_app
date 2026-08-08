@@ -141,7 +141,7 @@ export default function Officials() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 bg-[#011B3B] flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-medium text-xs" style={{ fontFamily: H }}>{o.name.substring(0, 2).toUpperCase()}</span>
+                        <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{o.name.substring(0, 2).toUpperCase()}</span>
                       </div>
                       <span className="font-medium text-[#011B3B] text-sm" style={{ fontFamily: B }}>{o.name}</span>
                     </div>

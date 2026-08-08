@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, X, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { reportsData as initialData } from '../../../config/constants';
+import { BRAND } from '../../../config/brand';
+const B = BRAND.font.body;
+const H = BRAND.font.heading;
 
 const STATUS_STYLES = {
   pending:  { style: 'bg-yellow-100 text-yellow-700', icon: Clock },
@@ -52,7 +55,7 @@ export default function Reports() {
   return (
     <section className="px-2 py-2 md:p-4">
       <div className="py-4 md:py-8">
-        <h2 className="text-lg md:text-2xl font-bold text-[#011B3B]">Reports</h2>
+        <h2 className="text-xl md:text-2xl text-[#011B3B] uppercase tracking-widest" style={{ fontFamily: H }}>Reports</h2>
       </div>
 
       {/* Stats */}
@@ -72,7 +75,7 @@ export default function Reports() {
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm px-3 py-5 md:px-5 md:py-8">
+      <div className="bg-white border border-gray-100 px-3 py-5 md:px-5 md:py-8">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3 mb-6">
           <div className="flex-1 relative">
@@ -139,7 +142,7 @@ export default function Reports() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 {['Type', 'Game', 'Date', 'Description', 'Status', 'Actions'].map(h => (
-                  <th key={h} className="px-5 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-5 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style={{ fontFamily: B }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -151,9 +154,9 @@ export default function Reports() {
                     <td className="px-5 py-4">
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${TYPE_STYLES[r.type] ?? 'bg-gray-100 text-gray-600'}`}>{r.type}</span>
                     </td>
-                    <td className="px-5 py-4 text-sm font-medium text-[#011B3B]">{r.game}</td>
-                    <td className="px-5 py-4 text-sm text-gray-500">{r.date}</td>
-                    <td className="px-5 py-4 text-sm text-gray-500 max-w-xs truncate">{r.description}</td>
+                    <td className="px-5 py-4 text-sm font-medium text-[#011B3B]" style={{ fontFamily: B }}>{r.game}</td>
+                    <td className="px-5 py-4 text-sm text-gray-500" style={{ fontFamily: B }}>{r.date}</td>
+                    <td className="px-5 py-4 text-sm text-gray-500 max-w-xs truncate" style={{ fontFamily: B }}>{r.description}</td>
                     <td className="px-5 py-4">
                       <span className={`flex items-center gap-1 w-fit text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${style}`}>
                         <StatusIcon className="w-3 h-3" />{r.status}
@@ -164,7 +167,7 @@ export default function Reports() {
                         <button onClick={() => openView(r)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="View">
                           <Eye className="w-4 h-4 text-[#011B3B]" />
                         </button>
-                        <button onClick={() => openEditStatus(r)} className="text-xs font-semibold px-3 py-1.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white rounded-lg hover:shadow transition-all">
+                        <button onClick={() => openEditStatus(r)} className="text-xs font-semibold px-3 py-1.5 bg-[#011B3B] text-white hover:bg-[#022d5f] transition-all" style={{ fontFamily: B }}>
                           Update
                         </button>
                       </div>
@@ -186,7 +189,7 @@ export default function Reports() {
       {/* View Modal */}
       {modal === 'view' && selected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <div className="bg-white shadow-xl w-full max-w-md p-6 relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -212,7 +215,7 @@ export default function Reports() {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</p>
               <p className="text-sm text-gray-700">{selected.description}</p>
             </div>
-            <button onClick={closeModal} className="w-full mt-5 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg text-sm">Close</button>
+            <button onClick={closeModal} className="w-full mt-5 py-2.5 bg-[#011B3B] text-white font-semibold hover:bg-[#022d5f] text-sm" style={{ fontFamily: B }}>Close</button>
           </div>
         </div>
       )}
@@ -220,10 +223,10 @@ export default function Reports() {
       {/* Update Status Modal */}
       {modal === 'status' && selected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 relative">
+          <div className="bg-white shadow-xl w-full max-w-sm p-6 relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
-            <h3 className="text-lg font-bold text-[#011B3B] mb-1">Update Status</h3>
-            <p className="text-sm text-gray-500 mb-5">{selected.game}</p>
+            <h3 className="text-lg text-[#011B3B] mb-1 uppercase tracking-widest" style={{ fontFamily: H }}>Update Status</h3>
+            <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: B }}>{selected.game}</p>
             <div className="space-y-2">
               {['pending', 'reviewed', 'resolved'].map(s => {
                 const { style, icon: StatusIcon } = STATUS_STYLES[s];

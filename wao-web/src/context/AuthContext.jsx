@@ -1,43 +1,119 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  signInWithPopup,
+  updateProfile,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db, googleProvider } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
-// Temporary credentials — replace with Firebase when backend is ready
-const USERS = [
-  { email: 'admin@wao.com', password: 'wao@admin', name: 'WAO Admin', role: 'Administrator' },
-];
+const ALLOWED_ROLES = ['admin', 'moderator'];
+
+async function loadAllowedProfile(firebaseUser) {
+  const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  if (!ALLOWED_ROLES.includes(data.role)) return null;
+  return {
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    emailVerified: firebaseUser.emailVerified,
+    displayName: data.displayName || data.username || firebaseUser.displayName || firebaseUser.email,
+    role: data.role,
+  };
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const saved = sessionStorage.getItem('wao_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email, password) => {
-    const match = USERS.find(u => u.email === email && u.password === password);
-    if (!match) return Promise.reject({ code: 'auth/invalid-credential' });
-    const { password: _, ...safeUser } = match;
-    sessionStorage.setItem('wao_user', JSON.stringify(safeUser));
-    setUser(safeUser);
-    return Promise.resolve(safeUser);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      const profile = await loadAllowedProfile(firebaseUser);
+      if (!profile) {
+        await signOut(auth);
+        setUser(null);
+      } else {
+        setUser(profile);
+      }
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  const login = async (email, password) => {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const profile = await loadAllowedProfile(cred.user);
+    if (!profile) {
+      await signOut(auth);
+      throw { code: 'auth/insufficient-role' };
+    }
+    setUser(profile);
+    return cred;
   };
 
-  const logout = () => {
-    sessionStorage.removeItem('wao_user');
-    setUser(null);
-    return Promise.resolve();
+  const register = async (name, email, password) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    // Create Firestore user doc with default 'user' role — admin must elevate manually
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      displayName: name,
+      email,
+      role: 'user',
+      createdAt: new Date().toISOString(),
+    });
+    await sendEmailVerification(cred.user);
+    return cred;
   };
 
-  const resetPassword = (email) => {
-    const exists = USERS.find(u => u.email === email);
-    if (!exists) return Promise.reject({ code: 'auth/user-not-found' });
-    // No-op for now — will trigger Firebase email when backend is ready
-    return Promise.resolve();
+  const loginWithGoogle = async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const firebaseUser = cred.user;
+
+    // Upsert Firestore doc if first time signing in with Google
+    const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+    if (!snap.exists()) {
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        displayName: firebaseUser.displayName || firebaseUser.email,
+        email: firebaseUser.email,
+        role: 'user',
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    const profile = await loadAllowedProfile(firebaseUser);
+    if (!profile) {
+      await signOut(auth);
+      throw { code: 'auth/insufficient-role' };
+    }
+    setUser(profile);
+    return cred;
+  };
+
+  const logout = () => signOut(auth);
+
+  const resetPassword = (email) => sendPasswordResetEmail(auth, email);
+
+  const resendVerification = () => {
+    if (auth.currentUser) return sendEmailVerification(auth.currentUser);
+    return Promise.reject(new Error('No user logged in'));
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, resetPassword }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, resetPassword, resendVerification }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

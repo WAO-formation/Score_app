@@ -525,6 +525,13 @@ class SeedingService {
       }
     }
 
+    // firestore.rules only allows a user to create their own profile with
+    // role: 'fan' — no client, including this seeding script, can hand
+    // itself 'admin'. Create as fan, then promote by hand in the Firebase
+    // Console (Firestore Data tab: users/{uid} -> role -> "admin") or via
+    // the Admin SDK, which is exempt from these rules. Every other seed
+    // step (players/teams/matches/news) needs that promotion to have
+    // happened first, since they all require an official/admin caller.
     await _firestore.collection('users').doc(uid).set({
       'username': 'afanyuemma',
       'email': email,
@@ -540,10 +547,11 @@ class SeedingService {
       'notificationsEnabled': true,
       'emailNotifications': false,
       'language': 'English',
-      'role': 'admin',
+      'role': 'fan',
     }, SetOptions(merge: true));
 
-    print('✅ Admin profile ready — email: $email  password: $password');
+    print('✅ Profile created for $email — now open the Firebase Console,');
+    print('   set users/$uid . role to "admin", then re-run the rest of seedAll().');
   }
 
   // ==================== MASTER SEED FUNCTION ====================

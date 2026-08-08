@@ -206,6 +206,7 @@ class MatchService {
         'teamBGoalSetting': 0,
         'teamAJudges': 0,
         'teamBJudges': 0,
+        'updatedAt': FieldValue.serverTimestamp(),
       }).timeout(const Duration(seconds: 5));
 
       return docRef.id;
@@ -223,6 +224,7 @@ class MatchService {
           .update({
         'scoreA': scoreA,
         'scoreB': scoreB,
+        'updatedAt': FieldValue.serverTimestamp(),
       })
           .timeout(const Duration(seconds: 5));
     } catch (e) {
@@ -255,6 +257,7 @@ class MatchService {
       if (teamBJudges != null) updates['teamBJudges'] = teamBJudges;
 
       if (updates.isNotEmpty) {
+        updates['updatedAt'] = FieldValue.serverTimestamp();
         await _db
             .collection('matches')
             .doc(matchId)
@@ -272,7 +275,10 @@ class MatchService {
       await _db
           .collection('matches')
           .doc(matchId)
-          .update({'status': status.name})
+          .update({
+            'status': status.name,
+            'updatedAt': FieldValue.serverTimestamp(),
+          })
           .timeout(const Duration(seconds: 5));
     } catch (e) {
       print('Error updating match status: $e');

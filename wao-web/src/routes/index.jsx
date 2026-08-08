@@ -13,6 +13,7 @@ import Profile from '../pages/profile/Profile';
 import NotFound from '../pages/NotFound';
 import Login from '../pages/auth/Login';
 import ForgotPassword from '../pages/auth/ForgotPassword';
+import VerifyEmail from '../pages/auth/VerifyEmail';
 import LandingPage from '../pages/landing/LandingPage';
 import HowToPlayPage from '../pages/how-to-play/HowToPlayPage';
 import ProtectedRoute from './ProtectedRoute';
@@ -24,8 +25,9 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/how-to-play" element={<HowToPlayPage />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/login"           element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/forgot-password" element={user ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
+      <Route path="/verify-email"    element={!user ? <Navigate to="/login" replace /> : <VerifyEmail />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>

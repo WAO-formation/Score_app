@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Filter, MoreVertical, Eye, Trash2, Plus, X, User } from 'lucide-react';
 import { playersData as initialData, teamsData } from '../../../config/constants';
+import { BRAND } from '../../../config/brand';
+const B = BRAND.font.body;
+const H = BRAND.font.heading;
 
 const STATUS_STYLES = {
   active:    'bg-green-100 text-green-700',
@@ -53,16 +56,17 @@ export default function Players() {
     <section className="px-2 py-2 md:p-4">
       {/* Header */}
       <div className="flex flex-col gap-3 py-4 md:py-8 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-lg md:text-2xl font-bold text-[#011B3B]">Players Management</h2>
+        <h2 className="text-xl md:text-2xl text-[#011B3B] uppercase tracking-widest" style={{ fontFamily: H }}>Players</h2>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#011B3B] text-white font-semibold hover:bg-[#022d5f] transition-all text-sm"
+          style={{ fontFamily: B }}
         >
           <Plus className="w-4 h-4" /> Add Player
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm px-3 py-5 md:px-5 md:py-8">
+      <div className="bg-white border border-gray-100 px-3 py-5 md:px-5 md:py-8">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3 mb-6">
           <div className="flex-1 relative">
@@ -139,7 +143,7 @@ export default function Players() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 {['Player', 'Team', 'Position', 'Fouls', 'Suspended Until', 'Status', 'Actions'].map(h => (
-                  <th key={h} className="px-5 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-5 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style={{ fontFamily: B }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -148,13 +152,13 @@ export default function Players() {
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-xs">{p.name.substring(0, 2).toUpperCase()}</span>
+                      <div className="w-9 h-9 bg-[#c81434] flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{p.name.substring(0, 2).toUpperCase()}</span>
                       </div>
-                      <span className="font-medium text-[#011B3B] text-sm">{p.name}</span>
+                      <span className="font-medium text-[#011B3B] text-sm" style={{ fontFamily: B }}>{p.name}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{p.team}</td>
+                  <td className="px-5 py-4 text-sm text-gray-600" style={{ fontFamily: B }}>{p.team}</td>
                   <td className="px-5 py-4">
                     <span className="text-xs bg-purple-100 text-purple-700 font-semibold px-2.5 py-1 rounded-full">{p.position}</span>
                   </td>
@@ -193,67 +197,57 @@ export default function Players() {
       {/* Add / Edit Modal */}
       {(modal === 'add' || modal === 'edit') && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <div className="bg-white shadow-xl w-full max-w-md p-6 relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
-            <h3 className="text-lg font-bold text-[#011B3B] mb-5">{modal === 'add' ? 'Add Player' : 'Edit Player'}</h3>
+            <h3 className="text-lg text-[#011B3B] mb-5 uppercase tracking-widest" style={{ fontFamily: H }}>{modal === 'add' ? 'Add Player' : 'Edit Player'}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Full Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Alex Rodriguez"
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm"
+                  style={{ fontFamily: B }}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
-                  <select value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm bg-white">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Team</label>
+                  <select value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm bg-white" style={{ fontFamily: B }}>
                     {teamsData.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                  <select value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm bg-white">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Position</label>
+                  <select value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm bg-white" style={{ fontFamily: B }}>
                     {['Forward', 'Guard', 'Center'].map(pos => <option key={pos}>{pos}</option>)}
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fouls</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.fouls}
-                    onChange={e => setForm({ ...form, fouls: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm"
-                  />
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Fouls</label>
+                  <input type="number" min="0" value={form.fouls} onChange={e => setForm({ ...form, fouls: e.target.value })} className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm" style={{ fontFamily: B }} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm bg-white">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Status</label>
+                  <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm bg-white" style={{ fontFamily: B }}>
                     {['active', 'suspended'].map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
               {form.status === 'suspended' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Suspended Until</label>
-                  <input
-                    type="date"
-                    value={form.suspendedUntil}
-                    onChange={e => setForm({ ...form, suspendedUntil: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm"
-                  />
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1" style={{ fontFamily: B }}>Suspended Until</label>
+                  <input type="date" value={form.suspendedUntil} onChange={e => setForm({ ...form, suspendedUntil: e.target.value })} className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm" style={{ fontFamily: B }} />
                 </div>
               )}
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={closeModal} className="flex-1 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
-              <button onClick={handleSave} className="flex-1 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg text-sm">
+              <button onClick={closeModal} className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 text-sm" style={{ fontFamily: B }}>Cancel</button>
+              <button onClick={handleSave} className="flex-1 py-2.5 bg-[#011B3B] text-white font-semibold hover:bg-[#022d5f] text-sm" style={{ fontFamily: B }}>
                 {modal === 'add' ? 'Add Player' : 'Save Changes'}
               </button>
             </div>
@@ -264,13 +258,13 @@ export default function Players() {
       {/* View Modal */}
       {modal === 'view' && selected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 relative">
+          <div className="bg-white shadow-xl w-full max-w-sm p-6 relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             <div className="flex flex-col items-center mb-5">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center mb-3">
-                <span className="text-white font-bold text-lg">{selected.name.substring(0, 2).toUpperCase()}</span>
+              <div className="w-16 h-16 bg-[#c81434] flex items-center justify-center mb-3">
+                <span className="text-white font-bold text-lg" style={{ fontFamily: H }}>{selected.name.substring(0, 2).toUpperCase()}</span>
               </div>
-              <h3 className="text-lg font-bold text-[#011B3B]">{selected.name}</h3>
+              <h3 className="text-lg text-[#011B3B]" style={{ fontFamily: H }}>{selected.name}</h3>
               <span className="text-xs bg-purple-100 text-purple-700 font-semibold px-2.5 py-1 rounded-full mt-1">{selected.position}</span>
             </div>
             <div className="space-y-1 text-sm">
@@ -286,7 +280,7 @@ export default function Players() {
                 </div>
               ))}
             </div>
-            <button onClick={closeModal} className="w-full mt-5 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg text-sm">Close</button>
+            <button onClick={closeModal} className="w-full mt-5 py-2.5 bg-[#011B3B] text-white font-semibold hover:bg-[#022d5f] text-sm" style={{ fontFamily: B }}>Close</button>
           </div>
         </div>
       )}
@@ -294,18 +288,18 @@ export default function Players() {
       {/* Delete Modal */}
       {modal === 'delete' && selected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 relative">
+          <div className="bg-white shadow-xl w-full max-w-sm p-6 relative">
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
-            <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-7 h-7 text-[#D30336]" />
+            <div className="w-14 h-14 bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-7 h-7 text-[#c81434]" />
             </div>
-            <h3 className="text-lg font-bold text-[#011B3B] text-center mb-2">Delete Player</h3>
-            <p className="text-gray-600 text-center text-sm mb-6">
+            <h3 className="text-lg text-[#011B3B] text-center mb-2 uppercase tracking-widest" style={{ fontFamily: H }}>Delete Player</h3>
+            <p className="text-gray-600 text-center text-sm mb-6" style={{ fontFamily: B }}>
               Are you sure you want to delete <span className="font-semibold text-[#011B3B]">{selected.name}</span>? This cannot be undone.
             </p>
             <div className="flex gap-3">
-              <button onClick={closeModal} className="flex-1 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2.5 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg text-sm">Delete</button>
+              <button onClick={closeModal} className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 text-sm" style={{ fontFamily: B }}>Cancel</button>
+              <button onClick={handleDelete} className="flex-1 py-2.5 bg-[#c81434] text-white font-semibold hover:bg-[#e21e43] text-sm" style={{ fontFamily: B }}>Delete</button>
             </div>
           </div>
         </div>

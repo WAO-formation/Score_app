@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Bell, Search, Menu, User, X } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useState } from 'react';
+import { Bell, Search, Menu, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { BRAND } from '../config/brand';
 
 const PAGE_NAMES = {
   dashboard:  'Dashboard',
@@ -10,108 +11,115 @@ const PAGE_NAMES = {
   profile:    'Profile',
 };
 
-const Header = ({ onMenuClick, userName = "Afanyu Emmanuel" }) => {
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
+const getInitials = (name) => {
+  if (!name) return 'U';
+  const parts = name.trim().split(' ');
+  return parts.length === 1
+    ? parts[0][0].toUpperCase()
+    : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const Header = ({ onMenuClick, userName = 'Account', roleLabel = 'Admin' }) => {
+  const [mobileSearch, setMobileSearch] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const segment = location.pathname.split('/')[1] || 'dashboard';
-  const currentPage = PAGE_NAMES[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
-  const getInitials = (name) => {
-    if (!name) return "U";
-    const names = name.trim().split(" ");
-    if (names.length === 1) {
-      return names[0].charAt(0).toUpperCase();
-    }
-    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
-  };
-
-  const userInitials = getInitials(userName);
+  const pageTitle = PAGE_NAMES[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
 
   return (
-    <header className="h-16 md:h-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-6">
-      
-      <div className="flex items-center gap-2">
+    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 shrink-0">
+
+      {/* Left */}
+      <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="p-2 text-[#011B3B] bg-gray-100 hover:bg-yellow-300 hover:text-white rounded-lg transition-colors"
+          className="p-2 rounded-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
 
-    
-        {!showMobileSearch && (
-          <h2 className="text-xl lg:text-2xl font-bold text-[#011B3B]">
-            {currentPage}
-          </h2>
+        {!mobileSearch && (
+          <h1
+            className="text-base font-semibold text-gray-900 uppercase tracking-widest"
+            style={{ fontFamily: BRAND.font.body }}
+          >
+            {pageTitle}
+          </h1>
         )}
       </div>
 
-
-      {showMobileSearch && (
-        <div className="md:hidden flex-1 mx-2">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+      {/* Mobile search expanded */}
+      {mobileSearch && (
+        <div className="md:hidden flex-1 mx-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
               autoFocus
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors"
+              style={{ fontFamily: BRAND.font.body }}
             />
           </div>
         </div>
       )}
 
-      {/* Right Side Icons */}
-      <div className="flex items-center space-x-2 md:space-x-4">
-        {/* Search Icon for Mobile - toggles search bar */}
-        <button 
-          onClick={() => setShowMobileSearch(!showMobileSearch)}
-          className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          {showMobileSearch ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Search className="w-5 h-5" />
-          )}
-        </button>
-
-        {/* Search Bar - Hidden on mobile, shown on tablet and up */}
-        <div className="hidden md:flex flex-1 max-w-md mx-4">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+      {/* Right */}
+      <div className="flex items-center gap-2">
+        {/* Desktop search */}
+        <div className="hidden md:flex items-center">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent"
+              className="w-48 lg:w-64 pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors bg-gray-50"
+              style={{ fontFamily: BRAND.font.body }}
             />
           </div>
         </div>
 
-        {/* Notification Bell - hidden when mobile search is open */}
-        {!showMobileSearch && (
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+        {/* Mobile search toggle */}
+        <button
+          onClick={() => setMobileSearch(!mobileSearch)}
+          className="md:hidden p-2 rounded-sm text-gray-500 hover:bg-gray-100 transition-colors"
+        >
+          {mobileSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+        </button>
+
+        {/* Notifications */}
+        {!mobileSearch && (
+          <button className="relative p-2 rounded-sm text-gray-500 hover:bg-gray-100 transition-colors">
+            <Bell className="w-4 h-4" />
+            <span
+              className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: BRAND.primary }}
+            />
           </button>
         )}
 
-        {/* User Avatar - hidden when mobile search is open */}
-        {!showMobileSearch && (
-          <div className="flex items-center space-x-2 md:space-x-3 pl-2 md:pl-4 border-l border-gray-200">
-            <div className="w-8 h-8 md:w-9 md:h-9 bg-[#FFC600] rounded-full flex items-center justify-center">
-              <span className="text-yellow-100 font-bold text-xs md:text-sm">
-                {userInitials}
-              </span>
+        {/* User */}
+        {!mobileSearch && (
+          <button
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2.5 pl-3 border-l border-gray-100 hover:opacity-80 transition-opacity"
+          >
+            <div
+              className="w-8 h-8 rounded-sm flex items-center justify-center text-white text-xs font-bold shrink-0"
+              style={{ backgroundColor: BRAND.primary, fontFamily: BRAND.font.body }}
+            >
+              {getInitials(userName)}
             </div>
-
-            {/* User Name  */}
-            <div className="hidden lg:block">
-              <p className="text-sm font-medium text-[#131314]">
+            <div className="hidden lg:block text-left">
+              <p className="text-xs font-semibold text-gray-900 leading-tight" style={{ fontFamily: BRAND.font.body }}>
                 {userName}
               </p>
-              <p className="text-xs text-gray-500">Admin</p>
+              <p className="text-xs text-gray-400 leading-tight" style={{ fontFamily: BRAND.font.body }}>
+                {roleLabel}
+              </p>
             </div>
-          </div>
+          </button>
         )}
       </div>
     </header>

@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState } from 'react';
+import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { teamsData as initialTeamsData } from '../../config/constants';
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
 import CreateGame from '../games/components/CreateGame';
 import { useGames } from '../../context/GamesContext';
+import { BRAND } from '../../config/brand';
+
+const CATEGORY_COLORS = {
+  Senior: 'bg-blue-50 text-blue-700 border border-blue-100',
+  Junior: 'bg-green-50 text-green-700 border border-green-100',
+  Youth:  'bg-amber-50 text-amber-700 border border-amber-100',
+};
 
 function Teams() {
   const navigate = useNavigate();
@@ -22,7 +29,6 @@ function Teams() {
 
   const categories = ['all', 'Senior', 'Junior', 'Youth'];
 
-  // Filter teams based on search and category
   const filteredTeams = teamsData.filter(team => {
     const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          team.coach.toLowerCase().includes(searchQuery.toLowerCase());
@@ -30,250 +36,177 @@ function Teams() {
     return matchesSearch && matchesCategory;
   });
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredTeams.length / teamsPerPage);
-  const indexOfLastTeam = currentPage * teamsPerPage;
-  const indexOfFirstTeam = indexOfLastTeam - teamsPerPage;
-  const currentTeams = filteredTeams.slice(indexOfFirstTeam, indexOfLastTeam);
+  const indexOfLast = currentPage * teamsPerPage;
+  const indexOfFirst = indexOfLast - teamsPerPage;
+  const currentTeams = filteredTeams.slice(indexOfFirst, indexOfLast);
 
-  // Reset to page 1 when filters change
-  const handleSearchChange = (value) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  };
+  const handleSearchChange = (v) => { setSearchQuery(v); setCurrentPage(1); };
+  const handleCategoryChange = (v) => { setSelectedCategory(v); setCurrentPage(1); };
+  const handlePerPageChange = (v) => { setTeamsPerPage(Number(v)); setCurrentPage(1); };
 
-  const handleCategoryChange = (value) => {
-    setSelectedCategory(value);
-    setCurrentPage(1);
-  };
+  const viewTeamDetails = (id) => { navigate(`/teams/${id}`); setShowActionMenu(null); };
 
-  const handleTeamsPerPageChange = (value) => {
-    setTeamsPerPage(Number(value));
-    setCurrentPage(1);
-  };
-
-  const toggleActionMenu = (teamId) => {
-    setShowActionMenu(showActionMenu === teamId ? null : teamId);
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Navigate to team details
-  const viewTeamDetails = (teamId) => {
-    navigate(`/teams/${teamId}`);
-    setShowActionMenu(null);
-  };
-
-  // Create team
-  const handleCreateTeam = (newTeam) => {
-    setTeamsData([...teamsData, newTeam]);
-  };
-
-  // Delete team functions
-  const openDeleteModal = (team) => {
-    setTeamToDelete(team);
-    setShowDeleteModal(true);
-    setShowActionMenu(null);
-  };
-
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
-    setTeamToDelete(null);
-  };
-
-  const confirmDeleteTeam = () => {
-    if (teamToDelete) {
-      setTeamsData(teamsData.filter(team => team.id !== teamToDelete.id));
-      
-      const newFilteredTeams = teamsData.filter(
-        team => team.id !== teamToDelete.id
-      ).filter(team => {
-        const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                             team.coach.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === 'all' || team.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-      });
-      
-      const newTotalPages = Math.ceil(newFilteredTeams.length / teamsPerPage);
-      if (currentPage > newTotalPages && newTotalPages > 0) {
-        setCurrentPage(newTotalPages);
-      }
-      
-      closeDeleteModal();
-    }
+  const openDeleteModal = (team) => { setTeamToDelete(team); setShowDeleteModal(true); setShowActionMenu(null); };
+  const closeDeleteModal = () => { setShowDeleteModal(false); setTeamToDelete(null); };
+  const confirmDelete = () => {
+    if (!teamToDelete) return;
+    const updated = teamsData.filter(t => t.id !== teamToDelete.id);
+    setTeamsData(updated);
+    const newTotal = Math.ceil(updated.filter(t => {
+      const ms = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.coach.toLowerCase().includes(searchQuery.toLowerCase());
+      const mc = selectedCategory === 'all' || t.category === selectedCategory;
+      return ms && mc;
+    }).length / teamsPerPage);
+    if (currentPage > newTotal && newTotal > 0) setCurrentPage(newTotal);
+    closeDeleteModal();
   };
 
   return (
-    <section className='scrollbar-hide px-2 py-2 md:p-4'>
-      <div className="flex flex-col gap-3 py-4 md:py-8 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-lg md:text-2xl font-bold text-[#011B3B]">Teams Management</h2>
+    <section className="scrollbar-hide px-2 py-2 md:p-4">
+
+      {/* Page header */}
+      <div className="flex flex-col gap-3 py-4 md:py-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-900 uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>
+            Teams
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: BRAND.font.body }}>
+            {teamsData.length} teams registered
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setShowCreateTeamModal(true)}
-            className="flex-1 md:flex-none flex items-center justify-center cursor-pointer gap-1.5 px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 text-sm md:text-base"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition"
+            style={{ fontFamily: BRAND.font.body, backgroundColor: '#111' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#333'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#111'}
           >
-            <Users className="w-4 h-4 md:w-5 md:h-5" />
-            <span>Create Team</span>
+            <Users className="w-4 h-4" /> Create Team
           </button>
-          <button onClick={() => setShowCreateGameModal(true)} className="flex-1 md:flex-none flex items-center justify-center cursor-pointer gap-1.5 px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 text-sm md:text-base">
-            <Trophy className="w-4 h-4 md:w-5 md:h-5" />
-            <span>Create Game</span>
+          <button
+            onClick={() => setShowCreateGameModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition"
+            style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
+          >
+            <Trophy className="w-4 h-4" /> Create Game
           </button>
         </div>
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="bg-white rounded-lg shadow-sm px-3 py-5 md:px-5 md:py-10 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          {/* Search Bar */}
+      {/* Filters */}
+      <div className="bg-white border border-gray-100 rounded-sm p-4 mb-4">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
-              type="text"
-              placeholder="Search teams or coaches..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent"
+              type="text" placeholder="Search teams or coaches..."
+              value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 transition"
+              style={{ fontFamily: BRAND.font.body }}
             />
           </div>
-
-          {/* Category Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <select
-              value={selectedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent cursor-pointer appearance-none bg-white min-w-[180px]"
+              value={selectedCategory} onChange={e => handleCategoryChange(e.target.value)}
+              className="pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 appearance-none cursor-pointer min-w-[160px]"
+              style={{ fontFamily: BRAND.font.body }}
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
-                </option>
+              {categories.map(c => (
+                <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>
               ))}
             </select>
           </div>
-
-          {/* Teams Per Page */}
-          <div className="relative">
-            <select
-              value={teamsPerPage}
-              onChange={(e) => handleTeamsPerPageChange(e.target.value)}
-              className="pl-4 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-transparent cursor-pointer appearance-none bg-white min-w-[120px]"
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
-          </div>
+          <select
+            value={teamsPerPage} onChange={e => handlePerPageChange(e.target.value)}
+            className="px-4 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 appearance-none cursor-pointer min-w-[120px]"
+            style={{ fontFamily: BRAND.font.body }}
+          >
+            {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n} per page</option>)}
+          </select>
         </div>
+      </div>
 
-        {/* Teams List */}
+      {/* Table */}
+      <div className="bg-white border border-gray-100 rounded-sm">
         {filteredTeams.length > 0 ? (
           <>
-            {/* ── Mobile cards (< md) ── */}
-            <div className="md:hidden space-y-3">
-              {currentTeams.map((team) => (
-                <div
-                  key={team.id}
-                  onClick={() => viewTeamDetails(team.id)}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 cursor-pointer active:scale-[0.98] transition-transform"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-sm">{team.icon}</span>
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#011B3B]">{team.name}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Coach: {team.coach}</p>
-                      </div>
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-gray-50">
+              {currentTeams.map(team => (
+                <div key={team.id} className="p-4 flex items-center justify-between gap-3 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => viewTeamDetails(team.id)}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-sm flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: BRAND.primary, fontFamily: BRAND.font.body }}>
+                      {team.icon}
                     </div>
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => toggleActionMenu(team.id)}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900" style={{ fontFamily: BRAND.font.body }}>{team.name}</p>
+                      <p className="text-xs text-gray-400" style={{ fontFamily: BRAND.font.body }}>{team.coach}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-sm ${CATEGORY_COLORS[team.category]}`} style={{ fontFamily: BRAND.font.body }}>{team.category}</span>
+                    <div className="relative" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setShowActionMenu(showActionMenu === team.id ? null : team.id)} className="p-1.5 hover:bg-gray-100 rounded transition-colors">
+                        <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
                       {showActionMenu === team.id && (
-                        <div className="absolute right-4 mt-16 w-44 bg-white rounded-xl shadow-lg border border-gray-100 z-10">
-                          <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-sm">
-                            <Eye className="w-4 h-4 text-[#011B3B]" /> View Details
+                        <div className="absolute right-0 top-8 w-40 bg-white border border-gray-100 shadow-lg rounded-sm z-20">
+                          <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50" style={{ fontFamily: BRAND.font.body }}>
+                            <Eye className="w-3.5 h-3.5" /> View Details
                           </button>
-                          <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-left text-sm text-[#D30336] border-t border-gray-100">
-                            <Trash2 className="w-4 h-4" /> Delete Team
+                          <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 border-t border-gray-50" style={{ fontFamily: BRAND.font.body }}>
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      team.category === 'Senior' ? 'bg-blue-100 text-blue-700' :
-                      team.category === 'Junior' ? 'bg-green-100 text-green-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>{team.category}</span>
-                    <span className="text-xs text-gray-400">•</span>
-                    <span className="text-xs text-gray-500">{team.gamesPlayed} games played</span>
-                  </div>
                 </div>
               ))}
             </div>
 
-            {/* ── Desktop table (md+) ── */}
+            {/* Desktop table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    {['Team', 'Coach', 'Category', 'Games Played', 'Actions'].map((h) => (
-                      <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{h}</th>
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['Team', 'Coach', 'Category', 'Games Played', ''].map(h => (
+                      <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {currentTeams.map((team) => (
-                    <tr key={team.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => viewTeamDetails(team.id)}>
-                      <td className="px-6 py-4">
+                <tbody className="divide-y divide-gray-50">
+                  {currentTeams.map(team => (
+                    <tr key={team.id} className="hover:bg-gray-50 transition-colors cursor-pointer group" onClick={() => viewTeamDetails(team.id)}>
+                      <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-sm">{team.icon}</span>
+                          <div className="w-9 h-9 rounded-sm flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: BRAND.primary, fontFamily: BRAND.font.body }}>
+                            {team.icon}
                           </div>
-                          <span className="font-medium text-[#011B3B]">{team.name}</span>
+                          <span className="text-sm font-semibold text-gray-900" style={{ fontFamily: BRAND.font.body }}>{team.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-700">{team.coach}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          team.category === 'Senior' ? 'bg-blue-100 text-blue-800' :
-                          team.category === 'Junior' ? 'bg-green-100 text-green-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>{team.category}</span>
+                      <td className="px-5 py-4 text-sm text-gray-500" style={{ fontFamily: BRAND.font.body }}>{team.coach}</td>
+                      <td className="px-5 py-4">
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-sm ${CATEGORY_COLORS[team.category]}`} style={{ fontFamily: BRAND.font.body }}>{team.category}</span>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-[#011B3B]">{team.gamesPlayed}</td>
-                      <td className="px-6 py-4 relative" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => toggleActionMenu(team.id)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                      <td className="px-5 py-4 text-sm font-semibold text-gray-900" style={{ fontFamily: BRAND.font.body }}>{team.gamesPlayed}</td>
+                      <td className="px-5 py-4 relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowActionMenu(showActionMenu === team.id ? null : team.id)} className="p-1.5 hover:bg-gray-100 rounded transition-colors opacity-0 group-hover:opacity-100">
+                          <MoreVertical className="w-4 h-4 text-gray-400" />
                         </button>
                         {showActionMenu === team.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                            <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left">
-                              <Eye className="w-4 h-4 text-[#011B3B]" />
-                              <span className="text-sm text-gray-700">View Details</span>
+                          <div className="absolute right-4 top-10 w-44 bg-white border border-gray-100 shadow-lg rounded-sm z-20">
+                            <button onClick={() => viewTeamDetails(team.id)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50" style={{ fontFamily: BRAND.font.body }}>
+                              <Eye className="w-3.5 h-3.5" /> View Details
                             </button>
-                            <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-left border-t border-gray-100">
-                              <Trash2 className="w-4 h-4 text-[#D30336]" />
-                              <span className="text-sm text-[#D30336]">Delete Team</span>
+                            <button onClick={() => openDeleteModal(team)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 border-t border-gray-50" style={{ fontFamily: BRAND.font.body }}>
+                              <Trash2 className="w-3.5 h-3.5" /> Delete Team
                             </button>
                           </div>
                         )}
@@ -284,145 +217,73 @@ function Teams() {
               </table>
             </div>
 
-            {/* Pagination Controls */}
-            <div className="p-4 mt-4">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* Results Info */}
-                <div className="text-sm text-gray-600">
-                  Showing <span className="font-semibold text-[#011B3B]">{indexOfFirstTeam + 1}</span> to{' '}
-                  <span className="font-semibold text-[#011B3B]">
-                    {Math.min(indexOfLastTeam, filteredTeams.length)}
-                  </span>{' '}
-                  of <span className="font-semibold text-[#011B3B]">{filteredTeams.length}</span> teams
-                </div>
-
-                {/* Pagination Buttons */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                      currentPage === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-[#011B3B] text-white hover:bg-[#022d5f] hover:shadow-lg'
-                    }`}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Previous</span>
-                  </button>
-
-                  {/* Page Numbers */}
-                  <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, index) => {
-                      const pageNumber = index + 1;
-                      if (
-                        pageNumber === 1 ||
-                        pageNumber === totalPages ||
-                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={pageNumber}
-                            onClick={() => setCurrentPage(pageNumber)}
-                            className={`w-10 h-10 rounded-lg font-medium transition-all ${
-                              currentPage === pageNumber
-                                ? 'bg-[#D30336] text-white shadow-lg'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        );
-                      } else if (
-                        pageNumber === currentPage - 2 ||
-                        pageNumber === currentPage + 2
-                      ) {
-                        return (
-                          <span key={pageNumber} className="px-2 text-gray-400">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                      currentPage === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-[#011B3B] text-white hover:bg-[#022d5f] hover:shadow-lg'
-                    }`}
-                  >
-                    <span className="hidden sm:inline">Next</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+            {/* Pagination */}
+            <div className="px-5 py-4 border-t border-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-gray-400" style={{ fontFamily: BRAND.font.body }}>
+                Showing <span className="font-semibold text-gray-700">{indexOfFirst + 1}</span>–<span className="font-semibold text-gray-700">{Math.min(indexOfLast, filteredTeams.length)}</span> of <span className="font-semibold text-gray-700">{filteredTeams.length}</span> teams
+              </p>
+              <div className="flex items-center gap-1.5">
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                  className="p-2 rounded-sm border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {[...Array(totalPages)].map((_, i) => {
+                  const p = i + 1;
+                  if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) return (
+                    <button key={p} onClick={() => setCurrentPage(p)}
+                      className="w-8 h-8 rounded-sm text-xs font-semibold transition-colors border"
+                      style={{
+                        fontFamily: BRAND.font.body,
+                        backgroundColor: currentPage === p ? BRAND.primary : 'transparent',
+                        color: currentPage === p ? '#fff' : '#6b7280',
+                        borderColor: currentPage === p ? BRAND.primary : '#e5e7eb',
+                      }}
+                    >{p}</button>
+                  );
+                  if (p === currentPage - 2 || p === currentPage + 2) return <span key={p} className="text-gray-300 text-xs">…</span>;
+                  return null;
+                })}
+                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                  className="p-2 rounded-sm border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </>
         ) : (
-          // Empty State
-          <div className="p-12 text-center">
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Users className="w-10 h-10 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-bold text-[#011B3B] mb-2">No Teams Found</h3>
-              <p className="text-gray-600 mb-6">
-                {searchQuery || selectedCategory !== 'all' 
-                  ? "No teams match your search criteria. Try adjusting your filters."
-                  : "Get started by creating your first team!"}
-              </p>
-              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200">
-                <Users className="w-5 h-5" />
-                <span>Create Your First Team</span>
-              </button>
+          <div className="py-16 text-center">
+            <div className="w-14 h-14 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4">
+              <Users className="w-6 h-6 text-gray-300" />
             </div>
+            <p className="text-sm font-semibold text-gray-500 mb-1" style={{ fontFamily: BRAND.font.body }}>No teams found</p>
+            <p className="text-xs text-gray-400" style={{ fontFamily: BRAND.font.body }}>
+              {searchQuery || selectedCategory !== 'all' ? 'Try adjusting your filters.' : 'Create your first team to get started.'}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            {/* Close button */}
-            <button
-              onClick={closeDeleteModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6 relative">
+            <button onClick={closeDeleteModal} className="absolute top-4 right-4 text-gray-300 hover:text-gray-500 transition-colors">
+              <X className="w-4 h-4" />
             </button>
-
-            {/* Icon */}
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-8 h-8 text-[#D30336]" />
+            <div className="w-12 h-12 rounded-sm flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${BRAND.primary}15` }}>
+              <Trash2 className="w-5 h-5" style={{ color: BRAND.primary }} />
             </div>
-
-            {/* Title */}
-            <h3 className="text-xl font-bold text-[#011B3B] text-center mb-2">
-              Delete Team
-            </h3>
-
-            {/* Message */}
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to delete <span className="font-semibold text-[#011B3B]">{teamToDelete?.name}</span>? This action cannot be undone.
+            <h3 className="text-base font-semibold text-gray-900 text-center mb-1 uppercase tracking-wide" style={{ fontFamily: BRAND.font.body }}>Delete Team</h3>
+            <p className="text-sm text-gray-400 text-center mb-6" style={{ fontFamily: BRAND.font.body }}>
+              Are you sure you want to delete <span className="font-semibold text-gray-700">{teamToDelete?.name}</span>? This cannot be undone.
             </p>
-
-            {/* Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={closeDeleteModal}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
-              >
+            <div className="flex gap-2">
+              <button onClick={closeDeleteModal} className="flex-1 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors rounded-sm" style={{ fontFamily: BRAND.font.body }}>
                 Cancel
               </button>
-              <button
-                onClick={confirmDeleteTeam}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
+              <button onClick={confirmDelete} className="flex-1 py-2.5 text-sm font-semibold text-white transition-colors rounded-sm" style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
               >
                 Delete
               </button>
@@ -431,19 +292,8 @@ function Teams() {
         </div>
       )}
 
-       {/* Create Team Modal */}
-      <CreateTeam
-        isOpen={showCreateTeamModal}
-        onClose={() => setShowCreateTeamModal(false)}
-        onCreateTeam={handleCreateTeam}
-      />
-
-      {/* Create Game Modal */}
-      <CreateGame
-        isOpen={showCreateGameModal}
-        onClose={() => setShowCreateGameModal(false)}
-        onCreateGame={(g) => { addGame(g); setShowCreateGameModal(false); }}
-      />
+      <CreateTeam isOpen={showCreateTeamModal} onClose={() => setShowCreateTeamModal(false)} onCreateTeam={t => setTeamsData(prev => [...prev, t])} />
+      <CreateGame isOpen={showCreateGameModal} onClose={() => setShowCreateGameModal(false)} onCreateGame={g => { addGame(g); setShowCreateGameModal(false); }} />
     </section>
   );
 }

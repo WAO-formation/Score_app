@@ -5,6 +5,7 @@ import { useGames } from "../../context/GamesContext";
 import { useNavigate } from "react-router-dom";
 import CreateGame from "../games/components/CreateGame";
 import CreateTeam from "../../components/CreateTeam";
+import { BRAND } from "../../config/brand";
 
 function Dashboard() {
   const { games, addGame } = useGames();
@@ -30,9 +31,9 @@ function Dashboard() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <p className="text-white/60 text-sm font-medium mb-1">Welcome back 👋</p>
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">WAO Dashboard</h1>
-            <p className="text-white/70 text-sm max-w-md">Manage your games, teams and track live scores all in one place.</p>
+            <p className="text-white/60 text-sm mb-1" style={{ fontFamily: BRAND.font.body }}>Welcome back 👋</p>
+            <h1 className="text-2xl md:text-4xl text-white mb-2" style={{ fontFamily: BRAND.font.heading }}>WAO Dashboard</h1>
+            <p className="text-white/70 text-sm max-w-md" style={{ fontFamily: BRAND.font.body }}>Manage your games, teams and track live scores all in one place.</p>
           </div>
 
           {/* Hero Stats */}
@@ -43,8 +44,8 @@ function Dashboard() {
               { label: "Upcoming", value: upcomingGames.length, color: "bg-white/10" },
             ].map((s) => (
               <div key={s.label} className={`${s.color} backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]`}>
-                <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-white/70 text-xs mt-0.5">{s.label}</p>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: BRAND.font.heading }}>{s.value}</p>
+                <p className="text-white/70 text-xs mt-0.5" style={{ fontFamily: BRAND.font.body }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -54,13 +55,15 @@ function Dashboard() {
         <div className="relative z-10 flex gap-2 mt-5">
           <button
             onClick={() => setShowCreateTeamModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#011B3B] font-semibold rounded-lg text-sm hover:shadow-lg transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#011B3B] font-semibold text-sm hover:shadow-lg transition-all"
+            style={{ fontFamily: BRAND.font.body }}
           >
             <Users className="w-4 h-4" /> Create Team
           </button>
           <button
             onClick={() => setShowCreateGameModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#D30336] text-white font-semibold rounded-lg text-sm hover:shadow-lg transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
+            style={{ fontFamily: BRAND.font.body }}
           >
             <Trophy className="w-4 h-4" /> Create Game
           </button>
@@ -75,9 +78,9 @@ function Dashboard() {
 
           {/* Live Game Spotlight */}
           {liveGames.length > 0 ? (
-            <div className="bg-gradient-to-br from-[#1a0a0e] to-[#2d0a14] rounded-2xl p-5 border border-[#D30336]/30">
+            <div className="bg-gradient-to-br from-[#0d3d3d] to-[#0a5252] p-5 border border-teal-700/30">
               <div className="flex items-center gap-2 mb-4">
-                <span className="flex items-center gap-1.5 bg-[#D30336] text-white text-xs font-bold px-3 py-1 rounded-full">
+                <span className="flex items-center gap-1.5 bg-emerald-500 text-white text-xs font-bold px-3 py-1" style={{ fontFamily: BRAND.font.body }}>
                   <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
                 </span>
                 <span className="text-white/50 text-xs">Game in progress</span>
@@ -100,7 +103,7 @@ function Dashboard() {
                         <span className="text-white/40 text-xl">:</span>
                         <span className="text-4xl font-bold text-white">{game.awayScore}</span>
                       </div>
-                      <p className="text-[#FFC600] text-xs font-semibold mt-2">{game.currentQuarter} · {game.timeRemaining}</p>
+                      <p className="text-emerald-300 text-xs font-semibold mt-2" style={{ fontFamily: BRAND.font.body }}>{game.currentQuarter} · {game.timeRemaining}</p>
                     </div>
 
                     {/* Away */}
@@ -125,7 +128,7 @@ function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-[#1a0a0e] to-[#2d0a14] rounded-2xl p-8 border border-[#D30336]/20 flex flex-col items-center justify-center text-center">
+            <div className="bg-gradient-to-br from-[#0d3d3d] to-[#0a5252] p-8 border border-teal-700/20 flex flex-col items-center justify-center text-center">
               <div className="w-14 h-14 bg-[#D30336]/20 rounded-full flex items-center justify-center mb-3">
                 <Radio className="w-7 h-7 text-[#D30336]" />
               </div>
@@ -137,8 +140,8 @@ function Dashboard() {
           {/* Upcoming Games */}
           <div className="bg-white rounded-2xl shadow-sm p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#011B3B] text-base">Upcoming Games</h3>
-              <button onClick={() => navigate('/games')} className="text-[#D30336] text-xs font-semibold flex items-center gap-1 hover:underline">
+              <h3 className="text-[#011B3B] text-base uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Upcoming Games</h3>
+              <button onClick={() => navigate('/games')} className="text-[#c81434] text-xs font-semibold flex items-center gap-1 hover:underline" style={{ fontFamily: BRAND.font.body }}>
                 View all <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -189,7 +192,7 @@ function Dashboard() {
           {/* Completed Games */}
           <div className="bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#011B3B] text-base">Recent Results</h3>
+              <h3 className="text-[#011B3B] text-base uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Recent Results</h3>
               <CheckCircle className="w-4 h-4 text-green-500" />
             </div>
             {completedGames.length > 0 ? (
@@ -220,8 +223,8 @@ function Dashboard() {
           {/* Teams */}
           <div className="bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#011B3B] text-base">Teams</h3>
-              <button onClick={() => navigate('/teams')} className="text-[#D30336] text-xs font-semibold flex items-center gap-1 hover:underline">
+              <h3 className="text-[#011B3B] text-base uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Teams</h3>
+              <button onClick={() => navigate('/teams')} className="text-[#c81434] text-xs font-semibold flex items-center gap-1 hover:underline" style={{ fontFamily: BRAND.font.body }}>
                 View all <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -247,14 +250,14 @@ function Dashboard() {
 
           {/* Quick Actions */}
           <div className="bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-2xl p-4">
-            <h3 className="font-bold text-white text-base mb-3">Quick Actions</h3>
+            <h3 className="text-white text-base mb-3 uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Quick Actions</h3>
             <div className="space-y-2">
               {[
                 { label: "Schedule a Game", icon: Calendar, action: () => setShowCreateGameModal(true) },
                 { label: "Add a Team", icon: Users, action: () => setShowCreateTeamModal(true) },
                 { label: "View All Games", icon: Trophy, action: () => navigate('/games') },
               ].map(({ label, icon: Icon, action }) => (
-                <button key={label} onClick={action} className="w-full flex items-center gap-3 bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-3 py-2.5 rounded-xl transition-colors text-left">
+                <button key={label} onClick={action} className="w-full flex items-center gap-3 bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-3 py-2.5 transition-colors text-left" style={{ fontFamily: BRAND.font.body }}>
                   <Icon className="w-4 h-4 text-white/70" /> {label}
                 </button>
               ))}

@@ -4,6 +4,9 @@ import { Trophy, Plus, Search, Radio, Calendar, CheckCircle } from 'lucide-react
 import { useGames } from '../../context/GamesContext';
 import CreateGame from './components/CreateGame';
 import GameCard from './components/GameCard';
+import { BRAND } from '../../config/brand';
+const B = BRAND.font.body;
+const H = BRAND.font.heading;
 
 const TABS = ['upcoming', 'live', 'completed'];
 
@@ -44,9 +47,9 @@ function Games() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
           <div>
-            <p className="text-white/60 text-sm font-medium mb-1">Manage & Track</p>
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Games</h1>
-            <p className="text-white/70 text-sm max-w-md">Schedule, simulate and review all your games in one place.</p>
+            <p className="text-white/60 text-sm font-medium mb-1" style={{ fontFamily: B }}>Manage & Track</p>
+            <h1 className="text-2xl md:text-4xl text-white mb-2" style={{ fontFamily: H }}>Games</h1>
+            <p className="text-white/70 text-sm max-w-md" style={{ fontFamily: B }}>Schedule, simulate and review all your games in one place.</p>
           </div>
 
           <div className="flex gap-3 flex-wrap">
@@ -56,8 +59,8 @@ function Games() {
               { label: 'Completed', value: byStatus('completed').length, color: 'bg-white/10' },
             ].map((s) => (
               <div key={s.label} className={`${s.color} backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]`}>
-                <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-white/70 text-xs mt-0.5">{s.label}</p>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: H }}>{s.value}</p>
+                <p className="text-white/70 text-xs mt-0.5" style={{ fontFamily: B }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -66,7 +69,8 @@ function Games() {
         <div className="relative z-10 mt-5">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#D30336] text-white font-semibold rounded-lg text-sm hover:shadow-lg transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
+            style={{ fontFamily: B }}
           >
             <Plus className="w-4 h-4" /> Create Game
           </button>
@@ -85,11 +89,12 @@ function Games() {
                   onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-1.5 px-4 py-3 text-sm font-semibold capitalize whitespace-nowrap transition-colors border-b-2 ${
                     activeTab === tab
-                      ? 'text-[#D30336] border-[#D30336]'
+                      ? 'text-[#c81434] border-[#c81434]'
                       : 'text-gray-500 border-transparent hover:text-[#011B3B]'
                   }`}
+                  style={{ fontFamily: B }}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${activeTab === tab ? 'text-[#D30336]' : 'text-gray-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 ${activeTab === tab ? 'text-[#c81434]' : 'text-gray-400'}`} />
                   {tab} <span className="text-xs opacity-60">({byStatus(tab).length})</span>
                 </button>
               );
@@ -119,14 +124,15 @@ function Games() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trophy className="w-8 h-8 text-gray-300" />
               </div>
-              <h3 className="text-lg font-bold text-[#011B3B] mb-1">No {activeTab} games</h3>
-              <p className="text-sm text-gray-500 mb-5">
+              <h3 className="text-lg text-[#011B3B] mb-1" style={{ fontFamily: H }}>No {activeTab} games</h3>
+              <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: B }}>
                 {activeTab === 'upcoming' ? 'Create a new game to get started.' : `No ${activeTab} games at the moment.`}
               </p>
               {activeTab === 'upcoming' && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#c81434] text-white font-semibold hover:bg-[#e21e43] transition-all"
+                  style={{ fontFamily: B }}
                 >
                   <Plus className="w-4 h-4" /> Create Game
                 </button>

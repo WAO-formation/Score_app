@@ -1,5 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Permission role, distinct from WaoPlayer's PlayerRole (in-game position).
+// Stored on the user doc as 'role' (matching the field SeedingService.
+// seedAdminProfile already writes). Controls what a signed-in user is
+// allowed to write in Firestore — see firestore.rules. Only an existing
+// admin can grant/change this; a user can never elevate their own role
+// (enforced server-side in the rules, not just here).
+//
+// 'official' runs live scoring from the mobile app; 'moderator' runs the
+// wao-web back office (teams/players/games management). Both sit at the
+// same Firestore write tier (see isOfficial below and isOfficial() in
+// firestore.rules), but only 'admin'/'moderator' are let into wao-web at
+// all — that gate lives in wao-web's AuthContext, since an 'official'
+// having Firestore write access is not the same as being welcome in the
+// back-office UI.
+enum AccountRole { fan, player, coach, official, moderator, admin }
+
 class UserProfile {
   final String uid;
   final String username;
@@ -16,6 +32,7 @@ class UserProfile {
   final bool notificationsEnabled;
   final bool emailNotifications;
   final String language;
+  final AccountRole accountRole;
 
   UserProfile({
     required this.uid,
@@ -33,7 +50,14 @@ class UserProfile {
     this.notificationsEnabled = true,
     this.emailNotifications = false,
     this.language = 'English',
+    this.accountRole = AccountRole.fan,
   });
+
+  bool get isOfficial =>
+      accountRole == AccountRole.official ||
+      accountRole == AccountRole.moderator ||
+      accountRole == AccountRole.admin;
+  bool get isAdmin => accountRole == AccountRole.admin;
 
   String get initials {
     final name = displayName ?? username;
@@ -64,6 +88,10 @@ class UserProfile {
       notificationsEnabled: data['notificationsEnabled'] ?? true,
       emailNotifications: data['emailNotifications'] ?? false,
       language: data['language'] ?? 'English',
+      accountRole: AccountRole.values.firstWhere(
+            (e) => e.name == data['role'],
+        orElse: () => AccountRole.fan,
+      ),
     );
   }
 
@@ -83,6 +111,7 @@ class UserProfile {
       'notificationsEnabled': notificationsEnabled,
       'emailNotifications': emailNotifications,
       'language': language,
+      'role': accountRole.name,
     };
   }
 
@@ -100,6 +129,7 @@ class UserProfile {
     bool? notificationsEnabled,
     bool? emailNotifications,
     String? language,
+    AccountRole? accountRole,
   }) {
     return UserProfile(
       uid: uid,
@@ -115,6 +145,7 @@ class UserProfile {
       totalTeams: totalTeams ?? this.totalTeams,
       themePreference: themePreference ?? this.themePreference,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      accountRole: accountRole ?? this.accountRole,
       emailNotifications: emailNotifications ?? this.emailNotifications,
       language: language ?? this.language,
     );
