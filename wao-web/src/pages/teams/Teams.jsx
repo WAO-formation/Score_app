@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { teamsData as initialTeamsData } from '../../config/constants';
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
 import CreateGame from '../games/components/CreateGame';
 import { useGames } from '../../context/GamesContext';
+import * as teamsService from '../../services/teamsService';
 import { BRAND } from '../../config/brand';
 
 const CATEGORY_COLORS = {
@@ -15,7 +15,8 @@ const CATEGORY_COLORS = {
 
 function Teams() {
   const navigate = useNavigate();
-  const [teamsData, setTeamsData] = useState(initialTeamsData);
+  const [teamsData, setTeamsData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showActionMenu, setShowActionMenu] = useState(null);
@@ -29,6 +30,13 @@ function Teams() {
 
   const categories = ['all', 'Senior', 'Junior', 'Youth'];
 
+  useEffect(() => {
+    return teamsService.subscribeToTeams(
+      (list) => { setTeamsData(list); setLoading(false); },
+      (err) => { console.error('Failed to load teams:', err); setLoading(false); }
+    );
+  }, []);
+
   const filteredTeams = teamsData.filter(team => {
     const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          team.coach.toLowerCase().includes(searchQuery.toLowerCase());
@@ -41,6 +49,14 @@ function Teams() {
   const indexOfFirst = indexOfLast - teamsPerPage;
   const currentTeams = filteredTeams.slice(indexOfFirst, indexOfLast);
 
+  // Keeps the current page in range as the live subscription's list shrinks
+  // or grows (e.g. after a delete), instead of computing this once inside
+  // confirmDelete against a snapshot of the array that's about to go stale.
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredTeams.length / teamsPerPage));
+    if (currentPage > maxPage) setCurrentPage(maxPage);
+  }, [filteredTeams.length, teamsPerPage, currentPage]);
+
   const handleSearchChange = (v) => { setSearchQuery(v); setCurrentPage(1); };
   const handleCategoryChange = (v) => { setSelectedCategory(v); setCurrentPage(1); };
   const handlePerPageChange = (v) => { setTeamsPerPage(Number(v)); setCurrentPage(1); };
@@ -49,17 +65,31 @@ function Teams() {
 
   const openDeleteModal = (team) => { setTeamToDelete(team); setShowDeleteModal(true); setShowActionMenu(null); };
   const closeDeleteModal = () => { setShowDeleteModal(false); setTeamToDelete(null); };
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!teamToDelete) return;
-    const updated = teamsData.filter(t => t.id !== teamToDelete.id);
-    setTeamsData(updated);
-    const newTotal = Math.ceil(updated.filter(t => {
-      const ms = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.coach.toLowerCase().includes(searchQuery.toLowerCase());
-      const mc = selectedCategory === 'all' || t.category === selectedCategory;
-      return ms && mc;
-    }).length / teamsPerPage);
-    if (currentPage > newTotal && newTotal > 0) setCurrentPage(newTotal);
+    const id = teamToDelete.id;
     closeDeleteModal();
+    try {
+      await teamsService.deleteTeam(id);
+    } catch (err) {
+      console.error('Failed to delete team:', err);
+    }
+  };
+
+  const handleCreateTeam = async (input) => {
+    const { players: rosterInput = [], ...teamInput } = input;
+    const newTeamId = await teamsService.createTeam(teamInput);
+    await Promise.all(
+      rosterInput.map((p) =>
+        teamsService.addPlayerToTeam(newTeamId, {
+          name: p.name,
+          role: p.role,
+          number: p.number,
+          age: p.age,
+          teamName: teamInput.name,
+        })
+      )
+    );
   };
 
   return (
@@ -133,7 +163,9 @@ function Teams() {
 
       {/* Table */}
       <div className="bg-white border border-gray-100 rounded-sm">
-        {filteredTeams.length > 0 ? (
+        {loading ? (
+          <div className="py-16 text-center text-sm text-gray-400" style={{ fontFamily: BRAND.font.body }}>Loading teams…</div>
+        ) : filteredTeams.length > 0 ? (
           <>
             {/* Mobile cards */}
             <div className="md:hidden divide-y divide-gray-50">
@@ -292,8 +324,8 @@ function Teams() {
         </div>
       )}
 
-      <CreateTeam isOpen={showCreateTeamModal} onClose={() => setShowCreateTeamModal(false)} onCreateTeam={t => setTeamsData(prev => [...prev, t])} />
-      <CreateGame isOpen={showCreateGameModal} onClose={() => setShowCreateGameModal(false)} onCreateGame={g => { addGame(g); setShowCreateGameModal(false); }} />
+      <CreateTeam isOpen={showCreateTeamModal} onClose={() => setShowCreateTeamModal(false)} onCreateTeam={handleCreateTeam} />
+      <CreateGame isOpen={showCreateGameModal} onClose={() => setShowCreateGameModal(false)} onCreateGame={async (g) => { await addGame(g); }} />
     </section>
   );
 }

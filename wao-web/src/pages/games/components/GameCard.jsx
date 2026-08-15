@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, MapPin, Play, Eye, Copy, Check, Radio, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { useGames } from "../../../context/GamesContext";
 import { subscribeToAccessCode, canStartGame } from "../../../services/matchesService";
 import { BRAND } from "../../../config/brand";
 const B = BRAND.font.body;
@@ -10,8 +11,11 @@ const H = BRAND.font.heading;
 const GameCard = ({ game, onStartGame }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { getFormattedTimer } = useGames();
   const [copied, setCopied] = useState(false);
   const [accessCode, setAccessCode] = useState(null);
+
+  const { timeRemaining, currentQuarter } = getFormattedTimer(game.id);
 
   // The access code is how a game gets started/simulated — admins see every
   // code for oversight, but a moderator only sees the code for the game
@@ -78,9 +82,9 @@ const GameCard = ({ game, onStartGame }) => {
               <>
                 {/* show time instead of away score in the middle */}
                 <div className="flex flex-col items-center bg-emerald-50 border border-emerald-200 px-3 py-2 gap-0.5">
-                  <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest" style={{ fontFamily: B }}>Q{game.currentQuarter}</span>
+                  <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest" style={{ fontFamily: B }}>{currentQuarter}</span>
                   <span className="text-emerald-700 text-base font-bold tabular-nums flex items-center gap-1" style={{ fontFamily: H }}>
-                    <Clock className="w-3 h-3" />{game.timeRemaining}
+                    <Clock className="w-3 h-3" />{timeRemaining}
                   </span>
                 </div>
               </>

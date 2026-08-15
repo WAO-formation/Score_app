@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +22,16 @@ import {
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BRAND } from '../../config/brand';
+import { useGames } from '../../context/GamesContext';
+import {
+  subscribeToTeam,
+  subscribeToTeamStats,
+  subscribeToPlayersByIds,
+  updateTeam,
+  addPlayerToTeam,
+  updatePlayer,
+  removePlayerFromTeam,
+} from '../../services/teamsService';
 
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
@@ -49,6 +59,7 @@ const LABEL = "block text-xs font-semibold text-gray-500 uppercase tracking-wide
 const TeamDetails = () => {
   const { teamId } = useParams();
   const navigate = useNavigate();
+  const { games } = useGames();
   const [activeTab, setActiveTab] = useState('roster');
 
   // Modals state
@@ -67,103 +78,71 @@ const TeamDetails = () => {
     return () => document.removeEventListener('click', closeMenu);
   }, []);
 
-  // Sample team data - replace with your actual data source
-  const [team, setTeam] = useState({
-    id: 1,
-    name: "Thunder Lions",
-    coach: "John Smith",
-    category: "Senior",
-    gamesPlayed: 15,
-    icon: "TL",
-    description: "A powerhouse team known for aggressive gameplay and strong defensive strategies.",
-    founded: "2020",
-    stats: {
-      wins: 10,
-      losses: 3,
-      draws: 2,
-      penalties: 5,
-      goalsScored: 45,
-      goalsConceded: 23
-    },
-    players: [
-      { id: 1, name: "Marcus Johnson", role: "King", number: 1, age: 28 },
-      { id: 2, name: "David Chen", role: "Worker", number: 2, age: 25 },
-      { id: 3, name: "Alex Rodriguez", role: "Protaque", number: 3, age: 26 },
-      { id: 4, name: "James Wilson", role: "Antaque", number: 4, age: 27 },
-      { id: 5, name: "Michael Brown", role: "Warrior", number: 5, age: 29 },
-      { id: 6, name: "Chris Taylor", role: "Servitor", number: 6, age: 24 },
-      { id: 7, name: "Ryan Davis", role: "Sacrificer", number: 7, age: 26 },
-      { id: 8, name: "Kevin Lee", role: "Substitute", number: 8, age: 23 },
-      { id: 9, name: "Tom Harris", role: "Substitute", number: 9, age: 25 },
-      { id: 10, name: "Daniel White", role: "Substitute", number: 10, age: 24 },
-      { id: 11, name: "Sam Clark", role: "Substitute", number: 11, age: 22 },
-      { id: 12, name: "Jake Martin", role: "Substitute", number: 12, age: 23 }
-    ],
-    upcomingGames: [
-      {
-        id: 1,
-        team1: "Thunder Lions",
-        team2: "Phoenix Warriors",
-        date: "Feb 15, 2026",
-        time: "3:00 PM",
-        venue: "Main Arena",
-        championship: "Premier League"
-      },
-      {
-        id: 2,
-        team1: "Thunder Lions",
-        team2: "Storm Eagles",
-        date: "Feb 22, 2026",
-        time: "5:00 PM",
-        venue: "City Stadium",
-        championship: "Cup Tournament"
-      }
-    ],
-    pastGames: [
-      {
-        id: 1,
-        team1: "Thunder Lions",
-        team1Score: 3,
-        team2: "Blazing Tigers",
-        team2Score: 2,
-        date: "Feb 1, 2026",
-        venue: "Main Arena",
-        championship: "Premier League",
-        result: "win"
-      },
-      {
-        id: 2,
-        team1: "Ice Wolves",
-        team1Score: 2,
-        team2: "Thunder Lions",
-        team2Score: 2,
-        date: "Jan 25, 2026",
-        venue: "North Stadium",
-        championship: "Premier League",
-        result: "draw"
-      },
-      {
-        id: 3,
-        team1: "Thunder Lions",
-        team1Score: 1,
-        team2: "Dragon Force",
-        team2Score: 3,
-        date: "Jan 18, 2026",
-        venue: "Main Arena",
-        championship: "Cup Tournament",
-        result: "loss"
-      }
-    ]
-  });
+  // Live Firestore data: the team doc itself, its teamStatistics doc (may
+  // not exist yet for a brand-new team — subscribeToTeamStats already
+  // normalizes that to all-zeros), and the actual player docs for every id
+  // across the 8 roster arrays.
+  const [team, setTeam] = useState(null);
+  const [teamLoading, setTeamLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [players, setPlayers] = useState([]);
+
+  useEffect(() => {
+    setTeamLoading(true);
+    return subscribeToTeam(
+      teamId,
+      (t) => { setTeam(t); setTeamLoading(false); },
+      () => setTeamLoading(false)
+    );
+  }, [teamId]);
+
+  useEffect(() => subscribeToTeamStats(teamId, setStats, () => setStats(null)), [teamId]);
+
+  const rosterIds = useMemo(
+    () => (team ? Object.values(team.roster).flat() : []),
+    [team]
+  );
+  const rosterKey = rosterIds.join(',');
+
+  useEffect(() => {
+    if (!team) { setPlayers([]); return undefined; }
+    return subscribeToPlayersByIds(rosterIds, setPlayers, () => setPlayers([]));
+    // rosterIds is recomputed every render; rosterKey is its stable identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [team?.id, rosterKey]);
+
+  // This team's games, reusing GamesContext's live `games` array instead of
+  // a separate query — see matchesService.docToGame for the full shape.
+  const teamGames = useMemo(
+    () => games.filter((g) => g.homeTeamId === teamId || g.awayTeamId === teamId),
+    [games, teamId]
+  );
+  const upcomingGames = useMemo(
+    () => teamGames
+      .filter((g) => g.status === 'upcoming')
+      .map((g) => ({ id: g.id, team1: g.homeTeam, team2: g.awayTeam, date: g.date, time: g.time, venue: g.venue, championship: g.championship })),
+    [teamGames]
+  );
+  const pastGames = useMemo(
+    () => teamGames
+      .filter((g) => g.status === 'completed')
+      .map((g) => {
+        const isHome = g.homeTeamId === teamId;
+        const ownScore = isHome ? g.homeScore : g.awayScore;
+        const oppScore = isHome ? g.awayScore : g.homeScore;
+        const result = ownScore === oppScore ? 'draw' : ownScore > oppScore ? 'win' : 'loss';
+        return {
+          id: g.id, team1: g.homeTeam, team2: g.awayTeam,
+          team1Score: g.homeScore, team2Score: g.awayScore,
+          date: g.date, venue: g.venue, championship: g.championship, result,
+        };
+      }),
+    [teamGames, teamId]
+  );
 
   // Form states
   const [teamForm, setTeamForm] = useState({
-    name: team.name,
-    coach: team.coach,
-    category: team.category,
-    description: team.description,
-    founded: team.founded,
-    icon: team.icon
+    name: '', coach: '', category: 'Senior', description: '', founded: '', icon: ''
   });
 
   const [playerForm, setPlayerForm] = useState({
@@ -177,6 +156,7 @@ const TeamDetails = () => {
 
   // Team CRUD Functions
   const handleEditTeam = () => {
+    if (!team) return;
     setTeamForm({
       name: team.name,
       coach: team.coach,
@@ -188,12 +168,20 @@ const TeamDetails = () => {
     setShowEditTeamModal(true);
   };
 
-  const handleSaveTeam = () => {
-    setTeam({
-      ...team,
-      ...teamForm
-    });
-    setShowEditTeamModal(false);
+  const handleSaveTeam = async () => {
+    try {
+      await updateTeam(teamId, {
+        name: teamForm.name,
+        coach: teamForm.coach,
+        category: teamForm.category.toLowerCase(),
+        description: teamForm.description,
+        founded: teamForm.founded,
+        icon: teamForm.icon.toUpperCase(),
+      });
+      setShowEditTeamModal(false);
+    } catch (err) {
+      alert('Failed to update team. Please try again.');
+    }
   };
 
   // Player CRUD Functions
@@ -201,30 +189,30 @@ const TeamDetails = () => {
     setPlayerForm({
       name: '',
       role: 'Substitute',
-      number: team.players.length + 1,
+      number: players.length + 1,
       age: ''
     });
     setShowAddPlayerModal(true);
   };
 
-  const handleSaveNewPlayer = () => {
+  const handleSaveNewPlayer = async () => {
     if (!playerForm.name || !playerForm.age) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const newPlayer = {
-      id: team.players.length + 1,
-      ...playerForm,
-      number: parseInt(playerForm.number),
-      age: parseInt(playerForm.age)
-    };
-
-    setTeam({
-      ...team,
-      players: [...team.players, newPlayer]
-    });
-    setShowAddPlayerModal(false);
+    try {
+      await addPlayerToTeam(teamId, {
+        name: playerForm.name,
+        role: playerForm.role,
+        number: playerForm.number,
+        age: playerForm.age,
+        teamName: team?.name,
+      });
+      setShowAddPlayerModal(false);
+    } catch (err) {
+      alert('Failed to add player. Please try again.');
+    }
   };
 
   const handleEditPlayer = (player) => {
@@ -239,16 +227,18 @@ const TeamDetails = () => {
     setShowEditPlayerModal(true);
   };
 
-  const handleSavePlayer = () => {
-    setTeam({
-      ...team,
-      players: team.players.map(p =>
-        p.id === selectedPlayer.id
-          ? { ...p, ...playerForm, number: parseInt(playerForm.number), age: parseInt(playerForm.age) }
-          : p
-      )
-    });
-    setShowEditPlayerModal(false);
+  const handleSavePlayer = async () => {
+    if (!selectedPlayer) return;
+    try {
+      await updatePlayer(
+        selectedPlayer.id,
+        { name: playerForm.name, role: playerForm.role, number: playerForm.number, age: playerForm.age },
+        { teamId, previousRoleValue: selectedPlayer.roleValue }
+      );
+      setShowEditPlayerModal(false);
+    } catch (err) {
+      alert('Failed to update player. Please try again.');
+    }
   };
 
   const handleDeletePlayerConfirm = (player) => {
@@ -257,12 +247,14 @@ const TeamDetails = () => {
     setShowDeletePlayerModal(true);
   };
 
-  const handleDeletePlayer = () => {
-    setTeam({
-      ...team,
-      players: team.players.filter(p => p.id !== selectedPlayer.id)
-    });
-    setShowDeletePlayerModal(false);
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer) return;
+    try {
+      await removePlayerFromTeam(teamId, selectedPlayer.id, selectedPlayer.roleValue);
+      setShowDeletePlayerModal(false);
+    } catch (err) {
+      alert('Failed to remove player. Please try again.');
+    }
   };
 
   const PlayerCard = ({ player }) => {
@@ -307,6 +299,29 @@ const TeamDetails = () => {
       </div>
     );
   };
+
+  if (teamLoading) {
+    return (
+      <section className="flex items-center justify-center py-24">
+        <p className="text-gray-400 text-sm" style={{ fontFamily: B }}>Loading team...</p>
+      </section>
+    );
+  }
+
+  if (!team) {
+    return (
+      <section className="flex flex-col items-center justify-center gap-3 py-24">
+        <p className="text-gray-500 text-sm" style={{ fontFamily: B }}>Team not found.</p>
+        <button
+          onClick={() => navigate('/teams')}
+          className="text-sm text-[#011B3B] underline"
+          style={{ fontFamily: B }}
+        >
+          Back to Teams
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section className="scrollbar-hide px-2 py-2 md:p-4 pb-8">

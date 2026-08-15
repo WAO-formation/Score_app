@@ -66,6 +66,7 @@ function docToGame(id, data) {
     judges: data.judges || [],
     currentQuarter: data.currentQuarter || 'Q1',
     timeRemaining: data.timeRemaining || '17:00',
+    isPlaying: data.isPlaying ?? false,
     quarters: data.quarters || emptyQuarters(),
     scoring: {
       kingdom: { home: data.teamAKingdom ?? 0, away: data.teamBKingdom ?? 0 },
@@ -118,6 +119,7 @@ export async function createMatch(input) {
     events: [],
     currentQuarter: 'Q1',
     timeRemaining: '17:00',
+    isPlaying: false,
     isFavorite: false,
     updatedAt: serverTimestamp(),
   });
@@ -146,6 +148,7 @@ const PATCH_MAPPERS = {
   quarters: (v) => ({ quarters: v }),
   fouls: (v) => ({ fouls: v }),
   events: (v) => ({ events: v }),
+  isPlaying: (v) => ({ isPlaying: v }),
   currentQuarter: (v) => ({ currentQuarter: v }),
   timeRemaining: (v) => ({ timeRemaining: v }),
   moderatorUid: (v) => ({ moderatorUid: v }),

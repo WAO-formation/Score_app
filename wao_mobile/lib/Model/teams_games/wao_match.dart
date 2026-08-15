@@ -40,6 +40,7 @@ class WaoMatch {
   final List<Map<String, dynamic>> events;
   final String? currentQuarter;
   final String? timeRemaining;
+  final bool isPlaying;
   final String? championshipName;
   final DateTime? completedAt;
 
@@ -74,6 +75,7 @@ class WaoMatch {
     this.events = const [],
     this.currentQuarter,
     this.timeRemaining,
+    this.isPlaying = false,
     this.championshipName,
     this.completedAt,
   });
@@ -187,6 +189,7 @@ class WaoMatch {
           : [],
       currentQuarter: data['currentQuarter'],
       timeRemaining: data['timeRemaining'],
+      isPlaying: data['isPlaying'] ?? false,
       championshipName: data['championshipName'],
       completedAt: data['completedAt'] != null
           ? (data['completedAt'] as Timestamp).toDate()
@@ -227,6 +230,7 @@ class WaoMatch {
       'events': events,
       'currentQuarter': currentQuarter,
       'timeRemaining': timeRemaining,
+      'isPlaying': isPlaying,
       'championshipName': championshipName,
       'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
     };
@@ -271,6 +275,7 @@ class WaoMatch {
     List<Map<String, dynamic>>? events,
     String? currentQuarter,
     String? timeRemaining,
+    bool? isPlaying,
     String? championshipName,
     DateTime? completedAt,
   }) {
@@ -305,6 +310,7 @@ class WaoMatch {
       events: events ?? this.events,
       currentQuarter: currentQuarter ?? this.currentQuarter,
       timeRemaining: timeRemaining ?? this.timeRemaining,
+      isPlaying: isPlaying ?? this.isPlaying,
       championshipName: championshipName ?? this.championshipName,
       completedAt: completedAt ?? this.completedAt,
     );

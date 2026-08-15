@@ -1,47 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, Calendar, MapPin, Clock, Trophy, Play, AlertCircle, Copy, Check } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
 import { useAuth } from '../../context/AuthContext';
+import { db } from '../../lib/firebase';
+import { subscribeToAccessCode, canStartGame } from '../../services/matchesService';
 import { BRAND } from '../../config/brand';
 
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
 
-const buildTeamStats = (teamName, isHome) => ({
-  name: teamName,
-  form: isHome ? ['W', 'W', 'D', 'L', 'W'] : ['L', 'W', 'W', 'D', 'W'],
-  stats: isHome
-    ? { wins: 8, losses: 2, draws: 2, goalsFor: 96, goalsAgainst: 54, avgScore: 48 }
-    : { wins: 7, losses: 3, draws: 2, goalsFor: 84, goalsAgainst: 62, avgScore: 42 },
-  lastFiveGames: isHome
-    ? [
-        { opponent: 'Storm Eagles',   result: 'W', score: '45-42', date: 'Feb 5' },
-        { opponent: 'Dragon Force',   result: 'W', score: '48-44', date: 'Feb 1' },
-        { opponent: 'Blazing Tigers', result: 'D', score: '43-43', date: 'Jan 28' },
-        { opponent: 'Ice Wolves',     result: 'L', score: '40-47', date: 'Jan 22' },
-        { opponent: 'Golden Hawks',   result: 'W', score: '51-38', date: 'Jan 18' },
-      ]
-    : [
-        { opponent: 'Royal Falcons',  result: 'L', score: '39-44', date: 'Feb 6' },
-        { opponent: 'Wild Mustangs',  result: 'W', score: '46-41', date: 'Feb 2' },
-        { opponent: 'Steel Panthers', result: 'W', score: '43-38', date: 'Jan 29' },
-        { opponent: 'Mighty Sharks',  result: 'D', score: '42-42', date: 'Jan 24' },
-        { opponent: 'Blazing Comets', result: 'W', score: '48-40', date: 'Jan 20' },
-      ],
-  scoringBreakdown: isHome
-    ? { kingdom: 28, workout: 29, goalSetting: 28, judges: 11 }
-    : { kingdom: 26, workout: 27, goalSetting: 30, judges: 10 },
-});
+const EMPTY_TEAM_STATS = { wins: 0, losses: 0, draws: 0, goalsFor: 0, goalsAgainst: 0, avgScore: 0, form: [], recentGames: [] };
+
+// Real per-team history from the `teamStatistics` collection (denormalized
+// by wao_mobile's TeamService after every finished match) — replaces the
+// fabricated form/stats/last-five-games this page used to invent per render.
+function useTeamStats(teamId) {
+  const [stats, setStats] = useState(EMPTY_TEAM_STATS);
+  useEffect(() => {
+    if (!teamId) { setStats(EMPTY_TEAM_STATS); return; }
+    let cancelled = false;
+    getDoc(doc(db, 'teamStatistics', teamId))
+      .then((snap) => {
+        if (cancelled) return;
+        if (!snap.exists()) { setStats(EMPTY_TEAM_STATS); return; }
+        const d = snap.data();
+        const recentGames = (d.recentGames || []).slice(-5).reverse();
+        const form = recentGames.map((g) => (g.teamScore > g.opponentScore ? 'W' : g.teamScore < g.opponentScore ? 'L' : 'D'));
+        setStats({
+          wins: d.wins || 0,
+          losses: d.losses || 0,
+          draws: d.draws || 0,
+          goalsFor: d.goalsScored || 0,
+          goalsAgainst: d.goalsConceded || 0,
+          avgScore: d.totalGamesPlayed ? Math.round((d.goalsScored || 0) / d.totalGamesPlayed) : 0,
+          form,
+          recentGames,
+        });
+      })
+      .catch(() => { if (!cancelled) setStats(EMPTY_TEAM_STATS); });
+    return () => { cancelled = true; };
+  }, [teamId]);
+  return stats;
+}
 
 const FORM_COLORS = { W: 'bg-emerald-500', L: 'bg-red-400', D: 'bg-amber-400' };
-
-const SCORING_BARS = [
-  { key: 'kingdom',    label: 'Kingdom',     bar: 'bg-violet-500' },
-  { key: 'workout',    label: 'Workout',     bar: 'bg-sky-500' },
-  { key: 'goalSetting',label: 'Goal Setting',bar: 'bg-emerald-500' },
-  { key: 'judges',     label: 'Judges',      bar: 'bg-amber-500' },
-];
 
 const SCORING_CARDS = [
   { key: 'kingdom',    label: 'Kingdom (30%)',     bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-100' },
@@ -60,7 +64,7 @@ const Avatar = ({ name, isHome, size = 'md' }) => {
   );
 };
 
-const TABS = ['overview', 'team-stats', 'past-games'];
+const TABS = ['overview', 'past-games'];
 
 const GameDetails = () => {
   const { gameId }  = useParams();
@@ -70,8 +74,19 @@ const GameDetails = () => {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [copied, setCopied]       = useState(false);
+  const [accessCode, setAccessCode] = useState(null);
 
   const game = getGame(gameId);
+
+  const homeStats = useTeamStats(game?.homeTeamId);
+  const awayStats = useTeamStats(game?.awayTeamId);
+
+  const canSeeAccessCode = user?.role === 'admin' || (!!user?.uid && game?.moderatorUid === user.uid);
+
+  useEffect(() => {
+    if (!game || !canSeeAccessCode || game.status !== 'upcoming') return;
+    return subscribeToAccessCode(game.id, setAccessCode, () => setAccessCode(null));
+  }, [game, canSeeAccessCode]);
 
   if (!game) {
     return (
@@ -84,12 +99,11 @@ const GameDetails = () => {
     );
   }
 
-  const homeStats = buildTeamStats(game.homeTeam, true);
-  const awayStats = buildTeamStats(game.awayTeam, false);
-  const allTabs   = [...TABS, ...(game.status === 'live' || game.status === 'completed' ? ['game-details'] : [])];
+  const allTabs = [...TABS, ...(game.status === 'live' || game.status === 'completed' ? ['game-details'] : [])];
+  const canStart = canStartGame(game);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(game.accessCode);
+    navigator.clipboard.writeText(accessCode || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -97,7 +111,6 @@ const GameDetails = () => {
   const isLive      = game.status === 'live';
   const isCompleted = game.status === 'completed';
   const isUpcoming  = game.status === 'upcoming';
-  const canSeeAccessCode = user?.role === 'admin' || (!!user?.uid && game.moderatorUid === user.uid);
 
   // Header bg: live = teal, completed = slate, upcoming = dark navy
   const headerBg = isLive
@@ -180,24 +193,30 @@ const GameDetails = () => {
           <div className="flex flex-wrap items-center justify-center gap-3">
             {isUpcoming && (
               <>
-                {canSeeAccessCode && (
+                {canSeeAccessCode && accessCode && (
                   <div className="bg-white/10 border border-white/20 px-4 py-2.5 flex items-center gap-3">
                     <div>
                       <p className="text-white/60 text-xs" style={{ fontFamily: B }}>Access Code</p>
-                      <p className="text-white font-bold font-mono">{game.accessCode}</p>
+                      <p className="text-white font-bold font-mono">{accessCode}</p>
                     </div>
                     <button onClick={handleCopy} className="p-1.5 hover:bg-white/10 transition-colors">
                       {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white/70" />}
                     </button>
                   </div>
                 )}
-                <button
-                  onClick={() => navigate(`/games/${game.id}/simulate`)}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-amber-400 text-[#011B3B] font-bold hover:bg-amber-300 transition-all"
-                  style={{ fontFamily: B }}
-                >
-                  <Play className="w-4 h-4" /> Start Game
-                </button>
+                {canStart ? (
+                  <button
+                    onClick={() => navigate(`/games/${game.id}/simulate`)}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-amber-400 text-[#011B3B] font-bold hover:bg-amber-300 transition-all"
+                    style={{ fontFamily: B }}
+                  >
+                    <Play className="w-4 h-4" /> Start Game
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 px-6 py-2.5 bg-white/10 text-white/60 font-bold border border-white/20" style={{ fontFamily: B }}>
+                    <Clock className="w-4 h-4" /> Available {game.date} at {game.time}
+                  </div>
+                )}
               </>
             )}
             {isLive && (
@@ -234,29 +253,33 @@ const GameDetails = () => {
       {/* ── Overview ── */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {[{ stats: homeStats, isHome: true }, { stats: awayStats, isHome: false }].map(({ stats, isHome }) => (
-            <div key={stats.name} className="bg-white border border-gray-100 p-5">
+          {[{ stats: homeStats, name: game.homeTeam, isHome: true }, { stats: awayStats, name: game.awayTeam, isHome: false }].map(({ stats, name, isHome }) => (
+            <div key={name} className="bg-white border border-gray-100 p-5">
               <div className="flex items-center gap-3 mb-5">
-                <Avatar name={stats.name} isHome={isHome} />
+                <Avatar name={name} isHome={isHome} />
                 <div>
-                  <h3 className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.name}</h3>
+                  <h3 className="text-[#011B3B]" style={{ fontFamily: H }}>{name}</h3>
                   <p className="text-xs text-gray-500" style={{ fontFamily: B }}>{isHome ? 'Home' : 'Away'} Team</p>
                 </div>
               </div>
 
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2" style={{ fontFamily: B }}>Recent Form</p>
-              <div className="flex gap-1.5 mb-5">
-                {stats.form.map((r, i) => (
-                  <div key={i} className={`w-8 h-8 flex items-center justify-center text-xs font-bold text-white ${FORM_COLORS[r] || 'bg-gray-400'}`} style={{ fontFamily: B }}>{r}</div>
-                ))}
-              </div>
+              {stats.form.length > 0 ? (
+                <div className="flex gap-1.5 mb-5">
+                  {stats.form.map((r, i) => (
+                    <div key={i} className={`w-8 h-8 flex items-center justify-center text-xs font-bold text-white ${FORM_COLORS[r] || 'bg-gray-400'}`} style={{ fontFamily: B }}>{r}</div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic mb-5" style={{ fontFamily: B }}>No completed games yet</p>
+              )}
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {[
-                  { label: 'Wins',      val: stats.stats.wins,      bg: 'bg-emerald-50', color: 'text-emerald-600' },
-                  { label: 'Losses',    val: stats.stats.losses,    bg: 'bg-red-50',     color: 'text-red-500' },
-                  { label: 'Draws',     val: stats.stats.draws,     bg: 'bg-amber-50',   color: 'text-amber-600' },
-                  { label: 'Avg Score', val: stats.stats.avgScore,  bg: 'bg-sky-50',     color: 'text-sky-600' },
+                  { label: 'Wins',      val: stats.wins,      bg: 'bg-emerald-50', color: 'text-emerald-600' },
+                  { label: 'Losses',    val: stats.losses,    bg: 'bg-red-50',     color: 'text-red-500' },
+                  { label: 'Draws',     val: stats.draws,     bg: 'bg-amber-50',   color: 'text-amber-600' },
+                  { label: 'Avg Score', val: stats.avgScore,  bg: 'bg-sky-50',     color: 'text-sky-600' },
                 ].map(({ label, val, bg, color }) => (
                   <div key={label} className={`${bg} p-3 text-center`}>
                     <p className={`text-xl ${color}`} style={{ fontFamily: H }}>{val}</p>
@@ -267,41 +290,13 @@ const GameDetails = () => {
 
               <div className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-4">
                 <div className="text-center">
-                  <p className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.stats.goalsFor}</p>
+                  <p className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.goalsFor}</p>
                   <p className="text-xs text-gray-500" style={{ fontFamily: B }}>Goals For</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.stats.goalsAgainst}</p>
+                  <p className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.goalsAgainst}</p>
                   <p className="text-xs text-gray-500" style={{ fontFamily: B }}>Goals Against</p>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── Team Stats ── */}
-      {activeTab === 'team-stats' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {[{ stats: homeStats, isHome: true }, { stats: awayStats, isHome: false }].map(({ stats, isHome }) => (
-            <div key={stats.name} className="bg-white border border-gray-100 p-5">
-              <div className="flex items-center gap-3 mb-5">
-                <Avatar name={stats.name} isHome={isHome} />
-                <h3 className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.name}</h3>
-              </div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4" style={{ fontFamily: B }}>Scoring Breakdown</p>
-              <div className="space-y-4">
-                {SCORING_BARS.map(({ key, label, bar }) => (
-                  <div key={key}>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-gray-600" style={{ fontFamily: B }}>{label}</span>
-                      <span className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.scoringBreakdown[key]}%</span>
-                    </div>
-                    <div className="w-full bg-gray-100 h-2">
-                      <div className={`${bar} h-2 transition-all duration-500`} style={{ width: `${stats.scoringBreakdown[key]}%` }} />
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           ))}
@@ -311,27 +306,35 @@ const GameDetails = () => {
       {/* ── Past Games ── */}
       {activeTab === 'past-games' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {[{ stats: homeStats, isHome: true }, { stats: awayStats, isHome: false }].map(({ stats, isHome }) => (
-            <div key={stats.name} className="bg-white border border-gray-100 p-5">
+          {[{ stats: homeStats, name: game.homeTeam, isHome: true }, { stats: awayStats, name: game.awayTeam, isHome: false }].map(({ stats, name, isHome }) => (
+            <div key={name} className="bg-white border border-gray-100 p-5">
               <div className="flex items-center gap-3 mb-5">
-                <Avatar name={stats.name} isHome={isHome} />
-                <h3 className="text-[#011B3B]" style={{ fontFamily: H }}>{stats.name}</h3>
+                <Avatar name={name} isHome={isHome} />
+                <h3 className="text-[#011B3B]" style={{ fontFamily: H }}>{name}</h3>
               </div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>Last 5 Games</p>
-              <div className="space-y-2">
-                {stats.lastFiveGames.map((g, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 px-3 py-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-7 h-7 flex items-center justify-center text-xs font-bold text-white ${FORM_COLORS[g.result] || 'bg-gray-400'}`} style={{ fontFamily: B }}>{g.result}</div>
-                      <div>
-                        <p className="text-sm text-[#011B3B]" style={{ fontFamily: B }}>vs {g.opponent}</p>
-                        <p className="text-xs text-gray-400" style={{ fontFamily: B }}>{g.date}</p>
+              {stats.recentGames.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.recentGames.map((g, i) => {
+                    const result = g.teamScore > g.opponentScore ? 'W' : g.teamScore < g.opponentScore ? 'L' : 'D';
+                    const playedAt = g.playedAt?.toDate ? g.playedAt.toDate() : null;
+                    return (
+                      <div key={g.gameId || i} className="flex items-center justify-between bg-gray-50 px-3 py-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-7 h-7 flex items-center justify-center text-xs font-bold text-white ${FORM_COLORS[result] || 'bg-gray-400'}`} style={{ fontFamily: B }}>{result}</div>
+                          <div>
+                            <p className="text-sm text-[#011B3B]" style={{ fontFamily: B }}>vs {g.opponentTeamName}</p>
+                            {playedAt && <p className="text-xs text-gray-400" style={{ fontFamily: B }}>{playedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
+                          </div>
+                        </div>
+                        <span className="text-sm text-[#011B3B]" style={{ fontFamily: H }}>{g.teamScore}-{g.opponentScore}</span>
                       </div>
-                    </div>
-                    <span className="text-sm text-[#011B3B]" style={{ fontFamily: H }}>{g.score}</span>
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic" style={{ fontFamily: B }}>No past games recorded</p>
+              )}
             </div>
           ))}
         </div>

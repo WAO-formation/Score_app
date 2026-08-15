@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Trash2, X, Trophy, MapPin, Calendar, Radio, CheckCircle, AlertTriangle, PauseCircle, Ban, Eye, Clock, MoreVertical } from 'lucide-react';
 import { useGames } from '../../../context/GamesContext';
 import { BRAND } from '../../../config/brand';
+import Pagination, { paginate, PAGE_SIZE } from '../../../components/Pagination';
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
 
@@ -26,6 +27,7 @@ export default function GamesManagement() {
   const [newStatus, setNewStatus] = useState('');
   const [reason, setReason]       = useState('');
   const [openMenu, setOpenMenu]   = useState(null); // id of game whose actions menu is open
+  const [page, setPage]           = useState(1);
 
   useEffect(() => {
     const closeMenu = (e) => {
@@ -36,13 +38,16 @@ export default function GamesManagement() {
   }, []);
 
   const filtered = games.filter(g => {
+
     const matchSearch = g.homeTeam.toLowerCase().includes(search.toLowerCase()) ||
                         g.awayTeam.toLowerCase().includes(search.toLowerCase()) ||
                         g.venue.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || g.status?.toLowerCase() === statusFilter;
     return matchSearch && matchStatus;
   });
+  const paged = paginate(filtered, page);
 
+  const resetPage  = () => setPage(1);
   const openDelete = (g) => { setSelected(g); setModal('delete'); };
   const openStatus = (g) => { setSelected(g); setNewStatus('postponed'); setReason(''); setModal('status'); };
   const openView   = (g) => { setSelected(g); setModal('view'); };
@@ -77,7 +82,7 @@ export default function GamesManagement() {
               type="text"
               placeholder="Search by team or venue..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); resetPage(); }}
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm"
             />
           </div>
@@ -85,7 +90,7 @@ export default function GamesManagement() {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <select
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
+              onChange={e => { setStatusFilter(e.target.value); resetPage(); }}
               className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 appearance-none bg-white text-sm min-w-[160px] cursor-pointer"
             >
               {STATUSES.map(s => <option key={s} value={s}>{s === 'all' ? 'All Statuses' : s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
@@ -95,7 +100,7 @@ export default function GamesManagement() {
 
         {/* Mobile cards */}
         <div className="md:hidden space-y-3">
-          {filtered.map(g => {
+          {paged.map(g => {
             const cfg = STATUS_CONFIG[g.status?.toLowerCase()] ?? STATUS_CONFIG['upcoming'];
             const { style, icon: StatusIcon, label } = cfg;
             return (
@@ -154,7 +159,7 @@ export default function GamesManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(g => {
+              {paged.map(g => {
                 const { style, icon: StatusIcon, label } = STATUS_CONFIG[g.status?.toLowerCase()] ?? STATUS_CONFIG['upcoming'];
                 return (
                   <tr key={g.id} className="hover:bg-gray-50 transition-colors">
@@ -217,6 +222,7 @@ export default function GamesManagement() {
             </div>
           )}
         </div>
+        <Pagination total={filtered.length} page={page} onChange={setPage} />
       </div>
 
       {/* View Details Modal */}

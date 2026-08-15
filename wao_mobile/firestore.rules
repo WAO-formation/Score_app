@@ -149,7 +149,7 @@ service cloud.firestore {
                  'teamAWorkout', 'teamBWorkout',
                  'teamAGoalSetting', 'teamBGoalSetting',
                  'teamAJudges', 'teamBJudges',
-                 'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining',
+                 'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining', 'isPlaying',
                  'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
                  'updatedAt',
                ])

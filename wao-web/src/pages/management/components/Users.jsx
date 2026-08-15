@@ -8,6 +8,7 @@ import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase
 import { db, secondaryAuth } from '../../../lib/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { BRAND } from '../../../config/brand';
+import Pagination, { paginate } from '../../../components/Pagination';
 
 // Every account created here starts with this password and must change it
 // on first login (ForcePasswordChange, gated in ProtectedRoute) — sharing
@@ -50,6 +51,7 @@ export default function Users() {
   const [error, setError]     = useState('');
   const [createdEmail, setCreatedEmail] = useState('');
   const [copied, setCopied]   = useState(false);
+  const [page, setPage]       = useState(1);
 
   useEffect(() => {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
@@ -67,6 +69,8 @@ export default function Users() {
     const matchRole = roleFilter === 'all' || u.role === roleFilter;
     return matchSearch && matchRole;
   });
+  const paged = paginate(filtered, page);
+  const resetPage = () => setPage(1);
 
   const openAdd = () => { setForm(emptyForm); setError(''); setCreatedEmail(''); setCopied(false); setModal('add'); };
   const openRoleChange = (u) => { setSelected(u); setNewRole(u.role || 'fan'); setModal('role'); setMenuOpen(null); };
@@ -156,7 +160,7 @@ export default function Users() {
               type="text"
               placeholder="Search by name or email..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); resetPage(); }}
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 text-sm"
               style={{ fontFamily: B }}
             />
@@ -165,7 +169,7 @@ export default function Users() {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <select
               value={roleFilter}
-              onChange={e => setRoleFilter(e.target.value)}
+              onChange={e => { setRoleFilter(e.target.value); resetPage(); }}
               className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300 appearance-none bg-white text-sm min-w-[160px] cursor-pointer"
               style={{ fontFamily: B }}
             >
@@ -181,7 +185,7 @@ export default function Users() {
           <>
             {/* Mobile cards */}
             <div className="md:hidden space-y-3">
-              {filtered.map(u => {
+              {paged.map(u => {
                 const name = u.displayName || u.username || u.email;
                 const isSelf = u.id === currentAdmin?.uid;
                 return (
@@ -232,7 +236,7 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filtered.map(u => {
+                  {paged.map(u => {
                     const name = u.displayName || u.username || u.email;
                     const isSelf = u.id === currentAdmin?.uid;
                     return (
@@ -279,6 +283,7 @@ export default function Users() {
                 </div>
               )}
             </div>
+            <Pagination total={filtered.length} page={page} onChange={setPage} />
           </>
         )}
       </div>

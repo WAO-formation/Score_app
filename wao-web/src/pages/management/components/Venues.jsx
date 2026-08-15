@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MoreVertical, Trash2, Plus, X, MapPin } from 'lucide-react';
-import { venuesData as initialData } from '../../../config/constants';
+import { useAuth } from '../../../context/AuthContext';
+import { subscribeToVenues, createVenue, updateVenue, deleteVenue } from '../../../services/venuesService';
 
 export default function Venues() {
-  const [venues, setVenues]     = useState(initialData);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  const [venues, setVenues]     = useState([]);
+  const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
   const [menuOpen, setMenuOpen] = useState(null);
   const [modal, setModal]       = useState(null); // 'add' | 'edit' | 'delete'
   const [selected, setSelected] = useState(null);
   const [form, setForm]         = useState({ name: '' });
+  const [saving, setSaving]     = useState(false);
+
+  useEffect(() => {
+    return subscribeToVenues(
+      (list) => { setVenues(list); setLoading(false); },
+      (err) => { console.error('Failed to load venues:', err); setLoading(false); }
+    );
+  }, []);
+
+  useEffect(() => {
+    const closeMenu = (e) => {
+      if (!e.target.closest('[data-actions-menu]')) setMenuOpen(null);
+    };
+    document.addEventListener('click', closeMenu);
+    return () => document.removeEventListener('click', closeMenu);
+  }, []);
 
   const filtered = venues.filter(v => v.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -17,27 +38,44 @@ export default function Venues() {
   const openDelete = (v) => { setSelected(v); setModal('delete'); setMenuOpen(null); };
   const closeModal = () => { setModal(null); setSelected(null); };
 
-  const handleSave = () => {
-    if (modal === 'add') {
-      setVenues([...venues, { id: Date.now(), name: form.name }]);
-    } else {
-      setVenues(venues.map(v => v.id === selected.id ? { ...v, name: form.name } : v));
+  const handleSave = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      if (modal === 'add') {
+        await createVenue(form.name.trim());
+      } else {
+        await updateVenue(selected.id, form.name.trim());
+      }
+      closeModal();
+    } catch (err) {
+      console.error('Failed to save venue:', err);
+    } finally {
+      setSaving(false);
     }
-    closeModal();
   };
 
-  const handleDelete = () => {
-    setVenues(venues.filter(v => v.id !== selected.id));
-    closeModal();
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      await deleteVenue(selected.id);
+      closeModal();
+    } catch (err) {
+      console.error('Failed to delete venue:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold text-[#011B3B]">Venues <span className="text-gray-400 font-normal text-sm">({filtered.length})</span></h3>
-        <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all text-sm">
-          <Plus className="w-4 h-4" /> Add Venue
-        </button>
+        {isAdmin && (
+          <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all text-sm">
+            <Plus className="w-4 h-4" /> Add Venue
+          </button>
+        )}
       </div>
 
       <div className="relative mb-4">
@@ -51,32 +89,38 @@ export default function Venues() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {filtered.map(v => (
-          <div key={v.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-lg flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-4 h-4 text-white" />
+      {loading ? (
+        <p className="text-sm text-gray-400 text-center py-6">Loading venues…</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map(v => (
+            <div key={v.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-medium text-[#011B3B] text-sm">{v.name}</span>
               </div>
-              <span className="font-medium text-[#011B3B] text-sm">{v.name}</span>
-            </div>
-            <div className="relative">
-              <button onClick={() => setMenuOpen(menuOpen === v.id ? null : v.id)} className="p-1.5 hover:bg-gray-200 rounded-lg">
-                <MoreVertical className="w-4 h-4 text-gray-500" />
-              </button>
-              {menuOpen === v.id && (
-                <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                  <button onClick={() => openEdit(v)} className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 text-sm text-[#011B3B]"><MapPin className="w-4 h-4" /> Edit</button>
-                  <button onClick={() => openDelete(v)} className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-red-50 text-sm text-[#D30336] border-t border-gray-100"><Trash2 className="w-4 h-4" /> Delete</button>
+              {isAdmin && (
+                <div className="relative" data-actions-menu>
+                  <button onClick={() => setMenuOpen(menuOpen === v.id ? null : v.id)} className="p-1.5 hover:bg-gray-200 rounded-lg">
+                    <MoreVertical className="w-4 h-4 text-gray-500" />
+                  </button>
+                  {menuOpen === v.id && (
+                    <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 z-10" data-actions-menu>
+                      <button onClick={() => openEdit(v)} className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 text-sm text-[#011B3B]"><MapPin className="w-4 h-4" /> Edit</button>
+                      <button onClick={() => openDelete(v)} className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-red-50 text-sm text-[#D30336] border-t border-gray-100"><Trash2 className="w-4 h-4" /> Delete</button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <p className="text-sm text-gray-400 col-span-full text-center py-6">No venues found</p>
-        )}
-      </div>
+          ))}
+          {filtered.length === 0 && (
+            <p className="text-sm text-gray-400 col-span-full text-center py-6">No venues found</p>
+          )}
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       {(modal === 'add' || modal === 'edit') && (
@@ -94,8 +138,8 @@ export default function Venues() {
             />
             <div className="flex gap-3">
               <button onClick={closeModal} className="flex-1 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
-              <button onClick={handleSave} className="flex-1 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg text-sm">
-                {modal === 'add' ? 'Add Venue' : 'Save Changes'}
+              <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg text-sm disabled:opacity-50">
+                {saving ? 'Saving…' : modal === 'add' ? 'Add Venue' : 'Save Changes'}
               </button>
             </div>
           </div>
@@ -116,7 +160,9 @@ export default function Venues() {
             </p>
             <div className="flex gap-3">
               <button onClick={closeModal} className="flex-1 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2.5 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg text-sm">Delete</button>
+              <button onClick={handleDelete} disabled={saving} className="flex-1 py-2.5 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg text-sm disabled:opacity-50">
+                {saving ? 'Deleting…' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
