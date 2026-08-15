@@ -4,14 +4,12 @@ import { subscribeToTeams } from "../../services/teamsService";
 import { isPastDue } from "../../services/matchesService";
 import { useGames } from "../../context/GamesContext";
 import { useNavigate } from "react-router-dom";
-import CreateGame from "../games/components/CreateGame";
 import CreateTeam from "../../components/CreateTeam";
 import { BRAND } from "../../config/brand";
 
 function Dashboard() {
-  const { games, addGame } = useGames();
+  const { games } = useGames();
   const navigate = useNavigate();
-  const [showCreateGameModal, setShowCreateGameModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [teams, setTeams] = useState([]);
 
@@ -65,7 +63,7 @@ function Dashboard() {
             <Users className="w-4 h-4" /> Create Team
           </button>
           <button
-            onClick={() => setShowCreateGameModal(true)}
+            onClick={() => navigate('/games/create')}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
             style={{ fontFamily: BRAND.font.body }}
           >
@@ -266,7 +264,7 @@ function Dashboard() {
             <h3 className="text-white text-base mb-3 uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Quick Actions</h3>
             <div className="space-y-2">
               {[
-                { label: "Schedule a Game", icon: Calendar, action: () => setShowCreateGameModal(true) },
+                { label: "Schedule a Game", icon: Calendar, action: () => navigate('/games/create') },
                 { label: "Add a Team", icon: Users, action: () => setShowCreateTeamModal(true) },
                 { label: "View All Games", icon: Trophy, action: () => navigate('/games') },
               ].map(({ label, icon: Icon, action }) => (
@@ -279,7 +277,6 @@ function Dashboard() {
         </div>
       </div>
 
-      <CreateGame isOpen={showCreateGameModal} onClose={() => setShowCreateGameModal(false)} onCreateGame={(g) => { addGame(g); setShowCreateGameModal(false); }} />
       <CreateTeam isOpen={showCreateTeamModal} onClose={() => setShowCreateTeamModal(false)} onCreateTeam={() => {}} />
     </section>
   );

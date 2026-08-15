@@ -50,7 +50,13 @@ service cloud.firestore {
     // ==================== USERS ====================
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
+      // isOfficial() already includes isAdmin() — widened from admin-only
+      // so a moderator creating a game can query for other moderator/
+      // official accounts to assign as judges (Management > Games needs
+      // this same lookup; a `where('role', '==', ...)` query is rejected
+      // outright by Firestore rules unless it can hold for every possible
+      // matching doc, not just the caller's own).
+      allow read: if isOwner(userId) || isOfficial();
 
       // Self-registration: a user may create only their own profile, and
       // only as the default 'fan' role — nobody can hand themselves a
@@ -149,13 +155,14 @@ service cloud.firestore {
           && pastCooldown(resource.data, 2)
           && request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly([
-                 'scoreA', 'scoreB', 'status', 'statusReason',
+                 'scoreA', 'scoreB', 'status', 'statusReason', 'previousStatus',
                  'teamAKingdom', 'teamBKingdom',
                  'teamAWorkout', 'teamBWorkout',
                  'teamAGoalSetting', 'teamBGoalSetting',
                  'teamAJudges', 'teamBJudges',
                  'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining', 'isPlaying',
                  'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
+                 'startTime', 'venue',
                  'updatedAt',
                ])
           && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0 && request.resource.data.scoreA <= 999

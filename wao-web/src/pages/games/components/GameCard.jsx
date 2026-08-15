@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, MapPin, Play, Eye, Copy, Check, Radio, Clock } from "lucide-react";
+import { Calendar, MapPin, Play, Eye, Copy, Check, Radio, Clock, CalendarClock, Ban } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useGames } from "../../../context/GamesContext";
-import { subscribeToAccessCode, canStartGame } from "../../../services/matchesService";
+import { subscribeToAccessCode, canStartGame, isPastDue } from "../../../services/matchesService";
+import RescheduleModal from "./RescheduleModal";
+import CancelGameModal from "./CancelGameModal";
 import { BRAND } from "../../../config/brand";
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
@@ -11,9 +13,11 @@ const H = BRAND.font.heading;
 const GameCard = ({ game, onStartGame }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getFormattedTimer } = useGames();
+  const { getFormattedTimer, updateGame } = useGames();
   const [copied, setCopied] = useState(false);
   const [accessCode, setAccessCode] = useState(null);
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
 
   const { timeRemaining, currentQuarter } = getFormattedTimer(game.id);
 
@@ -21,9 +25,14 @@ const GameCard = ({ game, onStartGame }) => {
   // code for oversight, but a moderator only sees the code for the game
   // they were actually assigned (set at creation, Management > Games). It
   // lives in a private subcollection (see firestore.rules) so this is the
-  // real security boundary, not just a UI hide.
+  // real security boundary, not just a UI hide. The same admin-or-assigned
+  // check gates who can actually write a reschedule/cancel — reuse it here
+  // so the buttons aren't offered to someone whose write firestore.rules
+  // would reject anyway.
   const canSeeAccessCode = user?.role === "admin" || (!!user?.uid && game.moderatorUid === user.uid);
+  const canManage = canSeeAccessCode;
   const canStart = canStartGame(game);
+  const pastDue = isPastDue(game);
 
   useEffect(() => {
     if (!canSeeAccessCode || game.status !== "upcoming") return;
@@ -36,6 +45,9 @@ const GameCard = ({ game, onStartGame }) => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleReschedule = (newDate) => updateGame(game.id, { startTime: newDate });
+  const handleCancelGame = (reason) => updateGame(game.id, { status: "cancelled", statusReason: reason });
 
   const isLive      = game.status === "live";
   const isCompleted = game.status === "completed";
@@ -131,14 +143,21 @@ const GameCard = ({ game, onStartGame }) => {
         )}
 
         {/* Can't start before the scheduled date/time */}
-        {game.status === "upcoming" && !canStart && (
+        {game.status === "upcoming" && !pastDue && !canStart && (
           <p className="text-xs text-amber-600 text-center" style={{ fontFamily: B }}>
             Starts {game.date} at {game.time}
           </p>
         )}
 
+        {/* Scheduled day passed with nobody starting it */}
+        {pastDue && (
+          <p className="text-xs text-red-500 text-center font-medium" style={{ fontFamily: B }}>
+            Missed — was scheduled {game.date} at {game.time}
+          </p>
+        )}
+
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => navigate(`/games/${game.id}`)}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold transition-all bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -147,7 +166,7 @@ const GameCard = ({ game, onStartGame }) => {
             <Eye className="w-3.5 h-3.5" /> Details
           </button>
 
-          {game.status === "upcoming" && (
+          {game.status === "upcoming" && !pastDue && (
             <button
               onClick={() => canStart && onStartGame(game.id)}
               disabled={!canStart}
@@ -161,6 +180,25 @@ const GameCard = ({ game, onStartGame }) => {
             </button>
           )}
 
+          {pastDue && canManage && (
+            <>
+              <button
+                onClick={() => setShowReschedule(true)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-sky-500 text-white text-sm font-semibold hover:bg-sky-400 transition-all"
+                style={{ fontFamily: B }}
+              >
+                <CalendarClock className="w-3.5 h-3.5" /> Reschedule
+              </button>
+              <button
+                onClick={() => setShowCancel(true)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white text-[#c81434] border border-[#c81434]/30 text-sm font-semibold hover:bg-red-50 transition-all"
+                style={{ fontFamily: B }}
+              >
+                <Ban className="w-3.5 h-3.5" /> Cancel
+              </button>
+            </>
+          )}
+
           {isLive && (
             <button
               onClick={() => navigate(`/games/${game.id}/simulate`)}
@@ -172,6 +210,13 @@ const GameCard = ({ game, onStartGame }) => {
           )}
         </div>
       </div>
+
+      {showReschedule && (
+        <RescheduleModal game={game} onSave={handleReschedule} onClose={() => setShowReschedule(false)} />
+      )}
+      {showCancel && (
+        <CancelGameModal game={game} onConfirm={handleCancelGame} onClose={() => setShowCancel(false)} />
+      )}
     </div>
   );
 };

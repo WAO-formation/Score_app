@@ -60,6 +60,12 @@ describe('matchesService — Firestore <-> app-shape translation', () => {
     expect(toFirestorePatch({})).toHaveProperty('updatedAt');
   });
 
+  it('converts a reschedule Date into a Firestore Timestamp on startTime', () => {
+    const newDate = new Date('2026-09-01T15:00:00Z');
+    const patch = toFirestorePatch({ startTime: newDate });
+    expect(patch.startTime.toDate().getTime()).toBe(newDate.getTime());
+  });
+
   it('produces zeroed, all-four-quarter/category default shapes', () => {
     expect(emptyQuarters()).toEqual({
       q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 },

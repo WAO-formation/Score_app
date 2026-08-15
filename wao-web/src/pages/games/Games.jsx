@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy, Plus, Search, Radio, Calendar, CheckCircle, History } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
 import { isRecentOrActive, isPastDue } from '../../services/matchesService';
-import CreateGame from './components/CreateGame';
 import GameCard from './components/GameCard';
 import { BRAND } from '../../config/brand';
 const B = BRAND.font.body;
@@ -20,8 +19,7 @@ const TAB_CONFIG = {
 
 function Games() {
   const navigate = useNavigate();
-  const { games: allGames, loading, addGame } = useGames();
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const { games: allGames, loading } = useGames();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -82,7 +80,7 @@ function Games() {
 
         <div className="relative z-10 mt-5">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => navigate('/games/create')}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
             style={{ fontFamily: B }}
           >
@@ -146,7 +144,7 @@ function Games() {
               </p>
               {activeTab === 'upcoming' && (
                 <button
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => navigate('/games/create')}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#c81434] text-white font-semibold hover:bg-[#e21e43] transition-all"
                   style={{ fontFamily: B }}
                 >
@@ -157,12 +155,6 @@ function Games() {
           )}
         </div>
       </div>
-
-      <CreateGame
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreateGame={(g) => addGame(g)}
-      />
     </section>
   );
 }

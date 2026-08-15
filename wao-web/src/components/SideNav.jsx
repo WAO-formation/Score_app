@@ -14,12 +14,13 @@ const getInitials = (name) => {
     : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const SideNav = ({ isSidebarOpen, setIsSidebarOpen, userName = 'Account', roleLabel = 'Admin' }) => {
+const SideNav = ({ isSidebarOpen, setIsSidebarOpen, userName = 'Account', roleLabel = 'Admin', role }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
 
   const activeSegment = location.pathname.split('/')[1] || 'dashboard';
+  const visibleItems = menuItems.filter((item) => !item.roles || item.roles.includes(role));
 
   const handleNav = (item) => {
     navigate(item.href);
@@ -79,7 +80,7 @@ const SideNav = ({ isSidebarOpen, setIsSidebarOpen, userName = 'Account', roleLa
         {/* Nav items */}
         <nav className="flex-1 py-4 overflow-y-auto scrollbar-hide">
           <ul className="space-y-1 px-2">
-            {menuItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon;
               const active = activeSegment === item.href.replace('/', '');
 

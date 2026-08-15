@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Trash2, X, Trophy, MapPin, Calendar, Radio, CheckCircle, AlertTriangle, PauseCircle, Ban, Eye, Clock, MoreVertical } from 'lucide-react';
+import { Search, Filter, Trash2, X, Trophy, MapPin, Calendar, Radio, CheckCircle, AlertTriangle, PauseCircle, Ban, Eye, Clock, MoreVertical, RotateCcw, CalendarClock } from 'lucide-react';
 import { useGames } from '../../../context/GamesContext';
+import { useAuth } from '../../../context/AuthContext';
 import { BRAND } from '../../../config/brand';
 import Pagination, { paginate, PAGE_SIZE } from '../../../components/Pagination';
+import RescheduleModal from '../../games/components/RescheduleModal';
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
 
@@ -19,7 +21,13 @@ const STATUSES = ['all', 'upcoming', 'live', 'completed', 'postponed', 'suspende
 const CHANGE_STATUSES = ['postponed', 'suspended', 'cancelled'];
 
 export default function GamesManagement() {
-  const { games, deleteGame, updateGame } = useGames();
+  const { games: allGames, deleteGame, updateGame } = useGames();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  // A moderator only manages the games they were assigned at creation —
+  // firestore.rules already enforces this at the write layer, this just
+  // keeps them from seeing (and being tempted to act on) everyone else's.
+  const games = isAdmin ? allGames : allGames.filter(g => g.moderatorUid === user?.uid);
   const [search, setSearch]       = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [modal, setModal]         = useState(null); // 'delete' | 'status'
@@ -51,6 +59,7 @@ export default function GamesManagement() {
   const openDelete = (g) => { setSelected(g); setModal('delete'); };
   const openStatus = (g) => { setSelected(g); setNewStatus('postponed'); setReason(''); setModal('status'); };
   const openView   = (g) => { setSelected(g); setModal('view'); };
+  const openReschedule = (g) => { setSelected(g); setModal('reschedule'); };
   const closeModal = () => { setSelected(null); setModal(null); setReason(''); };
 
   const handleDelete = () => {
@@ -62,15 +71,38 @@ export default function GamesManagement() {
 
   const handleStatusChange = () => {
     if (!selected || !newStatus || !reason.trim()) return;
-    updateGame(selected.id, { status: newStatus, statusReason: reason.trim() });
+    const patch = { status: newStatus, statusReason: reason.trim() };
+    // Only capture the state a game was in *before* entering the
+    // postponed/suspended cycle — flipping between the two (or re-picking
+    // the same one) shouldn't overwrite the real original status Unsuspend
+    // or a postponed resume needs to restore.
+    if (!['postponed', 'suspended'].includes(selected.status)) {
+      patch.previousStatus = selected.status;
+    }
+    updateGame(selected.id, patch);
     closeModal();
+  };
+
+  // Suspended games don't need a reason to come back — restores whatever
+  // status the game was in before it was suspended (defaulting to
+  // 'upcoming' for older games written before previousStatus existed).
+  const handleUnsuspend = (g) => {
+    updateGame(g.id, { status: g.previousStatus || 'upcoming', statusReason: '', previousStatus: '' });
+    setOpenMenu(null);
+  };
+
+  const handleResumePostponed = (newDate) => {
+    if (!selected) return;
+    updateGame(selected.id, { startTime: newDate, status: 'upcoming', statusReason: '', previousStatus: '' });
   };
 
   return (
     <section className="px-2 py-2 md:p-4">
       <div className="py-4 md:py-8">
         <h2 className="text-xl md:text-2xl text-[#011B3B] uppercase tracking-widest" style={{ fontFamily: H }}>Games</h2>
-        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: B }}>Delete games that should no longer be accessible.</p>
+        <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: B }}>
+          {isAdmin ? 'Delete games that should no longer be accessible.' : 'Games assigned to you as moderator.'}
+        </p>
       </div>
 
       <div className="bg-white border border-gray-100 px-3 py-5 md:px-5 md:py-8">
@@ -135,6 +167,16 @@ export default function GamesManagement() {
                         <button onClick={() => { openStatus(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-yellow-700 hover:bg-yellow-50" style={{ fontFamily: B }}>
                           <AlertTriangle className="w-3.5 h-3.5" /> Change Status
                         </button>
+                        {g.status === 'suspended' && (
+                          <button onClick={() => handleUnsuspend(g)} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50" style={{ fontFamily: B }}>
+                            <RotateCcw className="w-3.5 h-3.5" /> Unsuspend
+                          </button>
+                        )}
+                        {g.status === 'postponed' && (
+                          <button onClick={() => { openReschedule(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-50" style={{ fontFamily: B }}>
+                            <CalendarClock className="w-3.5 h-3.5" /> Set New Date &amp; Time
+                          </button>
+                        )}
                         <div className="border-t border-gray-100 my-1" />
                         <button onClick={() => { openDelete(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#c81434] hover:bg-red-50" style={{ fontFamily: B }}>
                           <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -202,6 +244,16 @@ export default function GamesManagement() {
                             <button onClick={() => { openStatus(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-yellow-700 hover:bg-yellow-50" style={{ fontFamily: B }}>
                               <AlertTriangle className="w-3.5 h-3.5" /> Change Status
                             </button>
+                            {g.status === 'suspended' && (
+                              <button onClick={() => handleUnsuspend(g)} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50" style={{ fontFamily: B }}>
+                                <RotateCcw className="w-3.5 h-3.5" /> Unsuspend
+                              </button>
+                            )}
+                            {g.status === 'postponed' && (
+                              <button onClick={() => { openReschedule(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-50" style={{ fontFamily: B }}>
+                                <CalendarClock className="w-3.5 h-3.5" /> Set New Date &amp; Time
+                              </button>
+                            )}
                             <div className="border-t border-gray-100 my-1" />
                             <button onClick={() => { openDelete(g); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#c81434] hover:bg-red-50" style={{ fontFamily: B }}>
                               <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -312,6 +364,11 @@ export default function GamesManagement() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Resume Postponed Game — new date/time, flips status back to upcoming */}
+      {modal === 'reschedule' && selected && (
+        <RescheduleModal game={selected} onSave={handleResumePostponed} onClose={closeModal} />
       )}
 
       {/* Delete Confirmation Modal */}

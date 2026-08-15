@@ -130,14 +130,14 @@ const Footer = () => {
               className="mt-4 text-sm leading-relaxed"
               style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.4)' }}
             >
-              A two-ball, hand-controlled sport born in Accra, Ghana built to champion world oneness through sport.
+              A two-ball, hand-controlled sport born in Accra, Ghana — built to champion world oneness through sport.
             </p>
             <Link
               to="/login"
               className="mt-5 inline-block rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:opacity-90"
               style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary, color: '#fff' }}
             >
-              Join WAO
+              Join WAO →
             </Link>
           </div>
 

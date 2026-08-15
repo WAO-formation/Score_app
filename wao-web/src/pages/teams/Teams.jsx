@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
-import CreateGame from '../games/components/CreateGame';
-import { useGames } from '../../context/GamesContext';
 import * as teamsService from '../../services/teamsService';
 import { BRAND } from '../../config/brand';
 
@@ -25,8 +23,6 @@ function Teams() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState(null);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
-  const [showCreateGameModal, setShowCreateGameModal] = useState(false);
-  const { addGame } = useGames();
 
   const categories = ['all', 'Senior', 'Junior', 'Youth'];
 
@@ -116,7 +112,7 @@ function Teams() {
             <Users className="w-4 h-4" /> Create Team
           </button>
           <button
-            onClick={() => setShowCreateGameModal(true)}
+            onClick={() => navigate('/games/create')}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition"
             style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
             onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
@@ -325,7 +321,6 @@ function Teams() {
       )}
 
       <CreateTeam isOpen={showCreateTeamModal} onClose={() => setShowCreateTeamModal(false)} onCreateTeam={handleCreateTeam} />
-      <CreateGame isOpen={showCreateGameModal} onClose={() => setShowCreateGameModal(false)} onCreateGame={async (g) => { await addGame(g); }} />
     </section>
   );
 }

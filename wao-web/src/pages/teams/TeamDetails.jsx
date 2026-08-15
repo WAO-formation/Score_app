@@ -373,6 +373,23 @@ const TeamDetails = () => {
         </div>
       </div>
 
+      {/* Season Stats — teamStatistics/{teamId}, same schema wao_mobile's TeamStatistics writes/reads */}
+      <div className="bg-white border border-gray-100 mb-5 grid grid-cols-3 md:grid-cols-6 divide-x divide-gray-100">
+        {[
+          { label: 'Played', value: stats?.totalGamesPlayed ?? 0 },
+          { label: 'Won', value: stats?.wins ?? 0 },
+          { label: 'Drawn', value: stats?.draws ?? 0 },
+          { label: 'Lost', value: stats?.losses ?? 0 },
+          { label: 'Goal Diff', value: (stats?.goalsScored ?? 0) - (stats?.goalsConceded ?? 0) },
+          { label: 'Points', value: (stats?.wins ?? 0) * 3 + (stats?.draws ?? 0) },
+        ].map(({ label, value }) => (
+          <div key={label} className="p-3 md:p-4 text-center">
+            <p className="text-lg md:text-xl font-semibold text-[#011B3B]" style={{ fontFamily: H }}>{value}</p>
+            <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wide mt-0.5" style={{ fontFamily: B }}>{label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Tabs */}
       <div className="bg-white border border-gray-100 mb-5">
         <div className="flex border-b border-gray-100 overflow-x-auto scrollbar-hide">
@@ -400,19 +417,19 @@ const TeamDetails = () => {
         <div className="bg-white border border-gray-100 p-3 md:p-5">
           <div className="flex flex-col gap-2 mb-5">
             <h3 className="text-[#011B3B] uppercase tracking-widest text-sm" style={{ fontFamily: B }}>
-              Team Roster ({team.players.length}/12 Players)
+              Team Roster ({players.length}/12 Players)
             </h3>
             <button
               onClick={handleAddPlayer}
-              disabled={team.players.length >= 12}
+              disabled={players.length >= 12}
               className={`flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
-                team.players.length >= 12
+                players.length >= 12
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'text-white'
               }`}
-              style={team.players.length >= 12 ? { fontFamily: B } : { fontFamily: B, backgroundColor: BRAND.primary }}
-              onMouseEnter={e => { if (team.players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
-              onMouseLeave={e => { if (team.players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primary; }}
+              style={players.length >= 12 ? { fontFamily: B } : { fontFamily: B, backgroundColor: BRAND.primary }}
+              onMouseEnter={e => { if (players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
+              onMouseLeave={e => { if (players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primary; }}
             >
               <UserPlus className="w-4 h-4" />
               <span>Add Player</span>
@@ -423,29 +440,38 @@ const TeamDetails = () => {
           <div className="mb-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>Starting Seven</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {team.players.filter(p => p.role !== 'Substitute').map((player) => (
+              {players.filter(p => p.role !== 'Substitute').map((player) => (
                 <PlayerCard key={player.id} player={player} />
               ))}
             </div>
+            {players.filter(p => p.role !== 'Substitute').length === 0 && (
+              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No starters added yet.</p>
+            )}
           </div>
 
           {/* Substitutes */}
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>
-              Substitutes ({team.players.filter(p => p.role === 'Substitute').length}/5)
+              Substitutes ({players.filter(p => p.role === 'Substitute').length}/5)
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {team.players.filter(p => p.role === 'Substitute').map((player) => (
+              {players.filter(p => p.role === 'Substitute').map((player) => (
                 <PlayerCard key={player.id} player={player} />
               ))}
             </div>
+            {players.filter(p => p.role === 'Substitute').length === 0 && (
+              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No substitutes added yet.</p>
+            )}
           </div>
         </div>
       )}
 
       {activeTab === 'upcoming' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {team.upcomingGames.map((game) => (
+          {upcomingGames.length === 0 && (
+            <p className="text-sm text-gray-400 col-span-full py-8 text-center" style={{ fontFamily: B }}>No upcoming games scheduled.</p>
+          )}
+          {upcomingGames.map((game) => (
             <div key={game.id} className="bg-white border border-gray-100 p-4">
               {/* Championship */}
               <p className="text-xs text-gray-400 font-medium uppercase tracking-wide text-center mb-4" style={{ fontFamily: B }}>
@@ -483,7 +509,10 @@ const TeamDetails = () => {
 
       {activeTab === 'past' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {team.pastGames.map((game) => {
+          {pastGames.length === 0 && (
+            <p className="text-sm text-gray-400 col-span-full py-8 text-center" style={{ fontFamily: B }}>No past games yet.</p>
+          )}
+          {pastGames.map((game) => {
             const { label: resultLabel, bg: resultBg } = RESULT_STYLES[game.result] ?? RESULT_STYLES.draw;
             return (
               <div key={game.id} className="bg-white border border-gray-100 p-4 relative">

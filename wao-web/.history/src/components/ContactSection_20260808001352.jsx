@@ -58,7 +58,7 @@ const ContactSection = () => {
             Questions? Let&apos;s Talk.
           </h2>
           <p className="mt-1 text-base leading-relaxed text-white/60" style={{ fontFamily: BRAND.font.body }}>
-            Whether you want to join a clinic, bring WAO! to your school, or just know more reach out.
+            Whether you want to join a clinic, bring WAO! to your school, or just know more — reach out.
           </p>
         </div>
 

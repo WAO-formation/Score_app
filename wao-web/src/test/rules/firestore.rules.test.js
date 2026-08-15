@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment, assertSucceeds, assertFails,
 } from '@firebase/rules-unit-testing';
 import {
-  doc, setDoc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp, Timestamp,
+  doc, getDoc, getDocs, query, where, setDoc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp, Timestamp,
 } from 'firebase/firestore';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -145,6 +145,35 @@ describe('matches — update: field whitelist and score bounds', () => {
     }));
   });
 
+  it('allows status + statusReason + previousStatus together (suspend, so Unsuspend can restore it)', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
+      status: 'suspended', statusReason: 'Crowd incident', previousStatus: 'upcoming', updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('allows resuming a postponed game (status back to upcoming + new startTime, previousStatus cleared)', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
+      status: 'upcoming', statusReason: '', previousStatus: '',
+      startTime: Timestamp.fromMillis(Date.now() + 86400000), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('allows the assigned moderator to reschedule a past-due game (new startTime)', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
+      startTime: Timestamp.fromMillis(Date.now() + 86400000), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('allows updating venue alongside a reschedule', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
+      venue: 'New Venue', updatedAt: serverTimestamp(),
+    }));
+  });
+
   it('rejects a negative score', async () => {
     await seedMatch();
     await assertFails(updateDoc(doc(asModA(), 'matches', 'match1'), {
@@ -217,20 +246,43 @@ describe('matches/private/access — accessCode visibility', () => {
 
   it('the assigned moderator can read the access code', async () => {
     await seedAccessCode();
-    const { getDoc } = await import('firebase/firestore');
     await assertSucceeds(getDoc(doc(asModA(), 'matches', 'match1', 'private', 'access')));
   });
 
   it('admin can read the access code for any match', async () => {
     await seedAccessCode();
-    const { getDoc } = await import('firebase/firestore');
     await assertSucceeds(getDoc(doc(asAdmin(), 'matches', 'match1', 'private', 'access')));
   });
 
   it('a different moderator cannot read the access code', async () => {
     await seedAccessCode();
-    const { getDoc } = await import('firebase/firestore');
     await assertFails(getDoc(doc(asModB(), 'matches', 'match1', 'private', 'access')));
+  });
+});
+
+describe('users — read boundaries', () => {
+  it('a moderator can read their own profile', async () => {
+    await assertSucceeds(getDoc(doc(asModA(), 'users', MOD_A)));
+  });
+
+  it('a fan cannot read another user\'s profile', async () => {
+    await assertFails(getDoc(doc(asFan(), 'users', MOD_A)));
+  });
+
+  it('admin can read any user\'s profile', async () => {
+    await assertSucceeds(getDoc(doc(asAdmin(), 'users', FAN)));
+  });
+
+  it('a moderator can read another user\'s profile (needed to look up moderators/judges when creating a game)', async () => {
+    await assertSucceeds(getDoc(doc(asModB(), 'users', MOD_A)));
+  });
+
+  it('a moderator can run the role-filtered query CreateGamePage uses to populate the moderator picker', async () => {
+    await assertSucceeds(getDocs(query(collection(asModA(), 'users'), where('role', '==', 'moderator'))));
+  });
+
+  it('a fan cannot run that same role-filtered query', async () => {
+    await assertFails(getDocs(query(collection(asFan(), 'users'), where('role', '==', 'moderator'))));
   });
 });
 

@@ -22,6 +22,7 @@ const DashboardLayout = () => {
         setIsSidebarOpen={setIsSidebarOpen}
         userName={userName}
         roleLabel={roleLabel}
+        role={user?.role}
       />
 
       {/* Main Content Area */}

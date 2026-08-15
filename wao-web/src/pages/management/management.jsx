@@ -8,13 +8,17 @@ import Users from './components/Users';
 import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
-const BASE_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games'];
+const ADMIN_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games', 'Users'];
+// Officials and Venues & Tournaments are admin-only concerns (staffing and
+// venue/championship setup) — a moderator only needs their own roster-facing
+// and game-facing tools here.
+const MODERATOR_TABS = ['Players', 'Reports', 'Games'];
 
 export default function Management() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const TABS = isAdmin ? [...BASE_TABS, 'Users'] : BASE_TABS;
-  const [tab, setTab] = useState('Officials');
+  const TABS = isAdmin ? ADMIN_TABS : MODERATOR_TABS;
+  const [tab, setTab] = useState(TABS[0]);
 
   return (
     <div className="px-2 py-2 md:p-4">

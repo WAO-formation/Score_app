@@ -6,9 +6,11 @@ import Dashboard from '../pages/dashboard/Dashboard';
 import Teams from '../pages/teams/Teams';
 import TeamDetails from '../pages/teams/TeamDetails';
 import Games from '../pages/games/Games';
+import CreateGamePage from '../pages/games/CreateGamePage';
 import GameDetails from '../pages/games/GameDetails';
 import GameSimulation from '../pages/games/components/LiveGame';
 import Management from '../pages/management/management';
+import MyGamesPage from '../pages/moderator/MyGamesPage';
 import Profile from '../pages/profile/Profile';
 import NotFound from '../pages/NotFound';
 import Login from '../pages/auth/Login';
@@ -35,9 +37,11 @@ const AppRoutes = () => {
           <Route path="teams" element={<Teams />} />
           <Route path="teams/:teamId" element={<TeamDetails />} />
           <Route path="games" element={<Games />} />
+          <Route path="games/create" element={<CreateGamePage />} />
           <Route path="games/:gameId" element={<GameDetails />} />
           <Route path="games/:gameId/simulate" element={<GameSimulation />} />
           <Route path="management" element={<Management />} />
+          <Route path="my-games" element={<MyGamesPage />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

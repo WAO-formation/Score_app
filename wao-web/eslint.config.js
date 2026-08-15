@@ -30,7 +30,7 @@ export default defineConfig([
     // Test/config files run under Node (Vitest, firebase-tools helper
     // scripts), not the browser — they need process/__dirname etc, which
     // the browser globals set above deliberately doesn't include.
-    files: ['**/*.test.js', 'src/test/**/*.js', 'vitest*.config.js'],
+    files: ['**/*.test.js', 'src/test/**/*.js', 'vitest*.config.js', 'scripts/**/*.js'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },

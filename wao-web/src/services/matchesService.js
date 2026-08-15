@@ -53,6 +53,10 @@ function docToGame(id, data) {
     awayScore: data.scoreB ?? 0,
     status: toAppStatus(data.status),
     statusReason: data.statusReason || '',
+    // Captured when a game moves to postponed/suspended so "Unsuspend"/
+    // resuming a postponed game knows what state to restore instead of
+    // always dropping back to a hardcoded 'upcoming'.
+    previousStatus: data.previousStatus || '',
     startTime,
     date: startTime ? startTime.toISOString().slice(0, 10) : '',
     time: startTime
@@ -143,6 +147,7 @@ const PATCH_MAPPERS = {
       : { status: fsStatus };
   },
   statusReason: (v) => ({ statusReason: v }),
+  previousStatus: (v) => ({ previousStatus: v }),
   homeScore: (v) => ({ scoreA: v }),
   awayScore: (v) => ({ scoreB: v }),
   quarters: (v) => ({ quarters: v }),
@@ -156,6 +161,8 @@ const PATCH_MAPPERS = {
   judges: (v) => ({ judges: v }),
   venue: (v) => ({ venue: v }),
   championship: (v) => ({ championshipName: v }),
+  // Rescheduling a past-due game to a new day/time — v is a JS Date.
+  startTime: (v) => ({ startTime: Timestamp.fromDate(v instanceof Date ? v : new Date(v)) }),
   scoring: (v) => ({
     teamAKingdom: v.kingdom.home, teamBKingdom: v.kingdom.away,
     teamAWorkout: v.workout.home, teamBWorkout: v.workout.away,

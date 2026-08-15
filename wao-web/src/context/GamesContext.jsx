@@ -28,6 +28,14 @@ export const GamesProvider = ({ children }) => {
   const gamesRef = useRef(games);
   const lastWriteRef = useRef({});
   const flushTimeoutRef = useRef({});
+  // Which fields an updateGame() call actually touched since the last flush,
+  // per game id — the throttled flush below only writes these (falling back
+  // to SYNC_KEYS when nothing was recorded, e.g. a flush triggered purely by
+  // the ticking clock). Without this, any updateGame() patch outside
+  // SYNC_KEYS (startTime, venue, moderatorUid/judges reassignment,
+  // previousStatus, ...) updated local state but was silently dropped from
+  // the actual Firestore write, reverting on the next snapshot.
+  const pendingFieldsRef = useRef({});
 
   useEffect(() => { timerStateRef.current = timerState; }, [timerState]);
   useEffect(() => { gamesRef.current = games; }, [games]);
@@ -76,7 +84,10 @@ export const GamesProvider = ({ children }) => {
       const current = gamesRef.current.find((g) => g.id === id);
       if (!current) return;
       const t = timerStateRef.current[id];
-      const patch = SYNC_KEYS.reduce((acc, k) => {
+      const fields = pendingFieldsRef.current[id];
+      delete pendingFieldsRef.current[id];
+      const keys = fields && fields.size ? [...fields] : SYNC_KEYS;
+      const patch = keys.reduce((acc, k) => {
         if (k in current) acc[k] = current[k];
         return acc;
       }, {});
@@ -97,6 +108,15 @@ export const GamesProvider = ({ children }) => {
     setGames((prev) =>
       prev.map((g) => (g.id === id ? (typeof updater === 'function' ? updater(g) : { ...g, ...updater }) : g))
     );
+    const set = pendingFieldsRef.current[id] || (pendingFieldsRef.current[id] = new Set());
+    if (typeof updater === 'function') {
+      // Function-form updaters are only ever used by the live-scoring hook
+      // to touch score/foul/quarter/timer state — safe to assume the full
+      // SYNC_KEYS set rather than inspecting what it actually changed.
+      SYNC_KEYS.forEach((k) => set.add(k));
+    } else {
+      Object.keys(updater).forEach((k) => set.add(k));
+    }
     scheduleSync(id);
   };
 

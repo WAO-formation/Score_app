@@ -137,7 +137,7 @@ const Footer = () => {
               className="mt-5 inline-block rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:opacity-90"
               style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary, color: '#fff' }}
             >
-              Join WAO
+              Join WAO →
             </Link>
           </div>
 
