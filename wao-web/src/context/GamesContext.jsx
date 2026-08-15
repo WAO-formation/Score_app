@@ -115,11 +115,19 @@ export const GamesProvider = ({ children }) => {
     return { isPlaying: false, currentQuarter: 1, timeRemaining: QUARTER_TIMES[1] };
   };
 
-  const setTimerStateForGame = (id, updater) =>
+  // Every caller of this (play/pause toggle, quarter advance, time adjust)
+  // represents a moderator-driven change that needs to reach Firestore on
+  // its own — previously these only got persisted by piggybacking on the
+  // next score/foul write or the next playing tick, so pausing and then
+  // walking away (e.g. after manually advancing a quarter) silently never
+  // synced at all.
+  const setTimerStateForGame = (id, updater) => {
     setTimerState((prev) => {
       const current = prev[id] ?? { isPlaying: false, currentQuarter: 1, timeRemaining: QUARTER_TIMES[1] };
       return { ...prev, [id]: typeof updater === 'function' ? updater(current) : { ...current, ...updater } };
     });
+    scheduleSync(id);
+  };
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');

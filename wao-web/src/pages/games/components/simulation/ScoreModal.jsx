@@ -42,7 +42,7 @@ const TeamPanel = ({ team, teamName, score, onScore, isHome, locked }) => (
   </div>
 );
 
-const ScoreModal = ({ game, isPlaying, gameEnded, canScore, judgesCanScore, onScore, onClose }) => {
+const ScoreModal = ({ game, isPlaying, gameEnded, canScore, onScore, onClose }) => {
   const [activeTab, setActiveTab] = useState(gameEnded ? 'judges' : 'kingdom');
   const activeCat = CATEGORIES.find((c) => c.id === activeTab);
 

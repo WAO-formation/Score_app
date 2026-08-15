@@ -199,6 +199,16 @@ export const generateAccessCode = () => Math.random().toString(36).substring(2, 
 // scheduled timestamp, not just the calendar date.
 export const canStartGame = (game) => !!game.startTime && Date.now() >= game.startTime.getTime();
 
+// True once the scheduled game DAY has fully gone by (not just the exact
+// kickoff time) and nobody ever started it — status is still 'upcoming'.
+// Purely a display classification: the Firestore status is left alone (an
+// admin can still manually start/postpone/cancel it), this just moves it
+// out of the "Upcoming" view into "Past" so stale games don't pile up next
+// to real upcoming fixtures. `date` is the same `YYYY-MM-DD` (UTC-derived)
+// string docToGame already exposes, so today's cutoff uses the same basis.
+export const isPastDue = (game) =>
+  game.status === 'upcoming' && !!game.date && game.date < new Date().toISOString().slice(0, 10);
+
 // Main Games list keeps a completed game visible for 7 days after it was
 // marked finished; after that it's still fully queryable, just no longer
 // surfaced there — Management > Games shows the full history, unfiltered.

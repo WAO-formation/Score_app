@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { Bell, Search, Menu, X, Radio, Calendar, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bell, Search, Menu, X, Radio, Calendar, CheckCircle2, Users, Trophy } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGames } from '../context/GamesContext';
+import { subscribeToTeams } from '../services/teamsService';
 import { BRAND } from '../config/brand';
+
+const MAX_RESULTS_PER_GROUP = 5;
 
 const PAGE_NAMES = {
   dashboard:  'Dashboard',
@@ -20,15 +23,100 @@ const getInitials = (name) => {
     : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
+const SearchResults = ({ hasQuery, hasResults, matchedTeams, matchedGames, onSelectTeam, onSelectGame }) => {
+  if (!hasQuery) return null;
+  return (
+    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-100 shadow-lg rounded-sm max-h-96 overflow-y-auto z-50">
+      {!hasResults ? (
+        <p className="px-4 py-3 text-sm text-gray-400" style={{ fontFamily: BRAND.font.body }}>No results found</p>
+      ) : (
+        <>
+          {matchedTeams.length > 0 && (
+            <div className="py-1.5">
+              <p className="px-4 py-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>Teams</p>
+              {matchedTeams.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => onSelectTeam(t.id)}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <Users className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate" style={{ fontFamily: BRAND.font.body }}>{t.name}</p>
+                    {t.coach && <p className="text-xs text-gray-400 truncate" style={{ fontFamily: BRAND.font.body }}>Coach: {t.coach}</p>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          {matchedGames.length > 0 && (
+            <div className="py-1.5 border-t border-gray-50">
+              <p className="px-4 py-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>Games</p>
+              {matchedGames.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => onSelectGame(g.id)}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <Trophy className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate" style={{ fontFamily: BRAND.font.body }}>{g.homeTeam} vs {g.awayTeam}</p>
+                    <p className="text-xs text-gray-400 truncate" style={{ fontFamily: BRAND.font.body }}>{g.venue}{g.venue && g.date ? ' · ' : ''}{g.date}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 const Header = ({ onMenuClick, userName = 'Account', roleLabel = 'Admin' }) => {
   const [mobileSearch, setMobileSearch] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [search, setSearch] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [teams, setTeams] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const { games } = useGames();
 
+  useEffect(() => subscribeToTeams(setTeams, () => setTeams([])), []);
+
+  // Close the results dropdown on an outside click — matches the
+  // data-attribute + closest() pattern used for the other dropdown menus
+  // in this app (e.g. TeamDetails' player actions menu).
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (!e.target.closest('[data-global-search]')) setShowResults(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
   const segment = location.pathname.split('/')[1] || 'dashboard';
   const pageTitle = PAGE_NAMES[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
+
+  const query = search.trim().toLowerCase();
+  const matchedTeams = query
+    ? teams.filter((t) => t.name.toLowerCase().includes(query) || (t.coach || '').toLowerCase().includes(query)).slice(0, MAX_RESULTS_PER_GROUP)
+    : [];
+  const matchedGames = query
+    ? games.filter((g) =>
+        g.homeTeam.toLowerCase().includes(query) ||
+        g.awayTeam.toLowerCase().includes(query) ||
+        (g.venue || '').toLowerCase().includes(query)
+      ).slice(0, MAX_RESULTS_PER_GROUP)
+    : [];
+  const hasQuery = query.length > 0;
+  const hasResults = matchedTeams.length > 0 || matchedGames.length > 0;
+
+  const handleSearchChange = (v) => { setSearch(v); setShowResults(true); };
+  const closeSearch = () => { setSearch(''); setShowResults(false); setMobileSearch(false); };
+  const goToTeam = (id) => { closeSearch(); navigate(`/teams/${id}`); };
+  const goToGame = (id) => { closeSearch(); navigate(`/games/${id}`); };
 
   const isToday = (dateStr) => {
     const d = new Date(dateStr);
@@ -85,15 +173,26 @@ const Header = ({ onMenuClick, userName = 'Account', roleLabel = 'Admin' }) => {
       {/* Mobile search expanded */}
       {mobileSearch && (
         <div className="md:hidden flex-1 mx-3">
-          <div className="relative">
+          <div className="relative" data-global-search>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search teams, games..."
               autoFocus
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onFocus={() => setShowResults(true)}
+              onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors"
               style={{ fontFamily: BRAND.font.body }}
             />
+            {showResults && (
+              <SearchResults
+                hasQuery={hasQuery} hasResults={hasResults}
+                matchedTeams={matchedTeams} matchedGames={matchedGames}
+                onSelectTeam={goToTeam} onSelectGame={goToGame}
+              />
+            )}
           </div>
         </div>
       )}
@@ -102,14 +201,25 @@ const Header = ({ onMenuClick, userName = 'Account', roleLabel = 'Admin' }) => {
       <div className="flex items-center gap-2">
         {/* Desktop search */}
         <div className="hidden md:flex items-center">
-          <div className="relative">
+          <div className="relative" data-global-search>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search teams, games..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onFocus={() => setShowResults(true)}
+              onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
               className="w-48 lg:w-64 pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 transition-colors bg-gray-50"
               style={{ fontFamily: BRAND.font.body }}
             />
+            {showResults && (
+              <SearchResults
+                hasQuery={hasQuery} hasResults={hasResults}
+                matchedTeams={matchedTeams} matchedGames={matchedGames}
+                onSelectTeam={goToTeam} onSelectGame={goToGame}
+              />
+            )}
           </div>
         </div>
 

@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Where can I play or watch WAO!?',
-    a: 'Community games and clinics run across Accra, including Cornerstone Baptist Church Court in Dome and TBC Court in Tesano check Upcoming Games for the next one.',
+    a: 'Community games and clinics run across Accra, including Cornerstone Baptist Church Court in Dome and TBC Court in Tesano — check Upcoming Games for the next one.',
   },
   {
     q: 'Is there a WAO! app?',

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Save, Camera, Shield, LogOut } from 'lucide-react';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
-import { teamsData, officialsData, gamesData } from '../../config/constants';
+import { subscribeToTeams } from '../../services/teamsService';
 import { useAuth } from '../../context/AuthContext';
+import { useGames } from '../../context/GamesContext';
 import { auth, db } from '../../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { BRAND } from '../../config/brand';
@@ -15,7 +16,16 @@ const ROLE_LABELS = { admin: 'Administrator', moderator: 'Moderator' };
 
 export default function Profile() {
   const { user, logout, refreshProfile } = useAuth();
+  const { games } = useGames();
   const navigate = useNavigate();
+
+  const [teamsCount, setTeamsCount] = useState(0);
+  const [officialsCount, setOfficialsCount] = useState(0);
+  useEffect(() => subscribeToTeams((list) => setTeamsCount(list.length), () => setTeamsCount(0)), []);
+  useEffect(() => {
+    const q = query(collection(db, 'users'), where('role', '==', 'official'));
+    return onSnapshot(q, (snap) => setOfficialsCount(snap.size), () => setOfficialsCount(0));
+  }, []);
 
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ name: user?.displayName || '', phone: user?.phone || '', bio: user?.bio || '' });
@@ -84,9 +94,9 @@ export default function Profile() {
   const handleLogout = async () => { await logout(); navigate('/login', { replace: true }); };
 
   const stats = [
-    { label: 'Total Teams', value: teamsData.length,     color: 'bg-blue-50 text-blue-600' },
-    { label: 'Total Games', value: gamesData.length,     color: 'bg-red-50 text-[#c81434]' },
-    { label: 'Officials',   value: officialsData.length, color: 'bg-green-50 text-green-600' },
+    { label: 'Total Teams', value: teamsCount,     color: 'bg-blue-50 text-blue-600' },
+    { label: 'Total Games', value: games.length,   color: 'bg-red-50 text-[#c81434]' },
+    { label: 'Officials',   value: officialsCount, color: 'bg-green-50 text-green-600' },
   ];
 
   const inputCls = (active) =>

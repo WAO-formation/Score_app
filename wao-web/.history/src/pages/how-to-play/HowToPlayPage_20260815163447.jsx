@@ -264,7 +264,7 @@ const HowToPlayPage = () => {
             className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base"
             style={{ fontFamily: BRAND.font.body, color: BRAND.muted }}
           >
-            A two-ball, hand-controlled contact sport played on the WaoSphere. Teams compete for a share of 100% the team that covers more of the game wins.
+            A two-ball, hand-controlled contact sport played on the WaoSphere. Teams compete for a share of 100% — the team that covers more of the game wins.
           </p>
         </div>
 

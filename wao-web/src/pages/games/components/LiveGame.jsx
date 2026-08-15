@@ -278,7 +278,6 @@ const GameSimulation = () => {
           isPlaying={isPlaying}
           gameEnded={gameEnded}
           canScore={canScore}
-          judgesCanScore={judgesCanScore}
           onScore={(team, cat, pts) => { addScore(team, cat, pts, formatTime(timeRemaining)); setShowScoreModal(false); }}
           onClose={() => setShowScoreModal(false)}
         />

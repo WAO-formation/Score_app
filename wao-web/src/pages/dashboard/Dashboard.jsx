@@ -1,6 +1,7 @@
 import { Trophy, Users, Zap, CheckCircle, Calendar, MapPin, ArrowRight, Radio } from "lucide-react";
-import React, { useState } from "react";
-import { recentTeams, teamsData } from "../../config/constants";
+import React, { useState, useEffect } from "react";
+import { subscribeToTeams } from "../../services/teamsService";
+import { isPastDue } from "../../services/matchesService";
 import { useGames } from "../../context/GamesContext";
 import { useNavigate } from "react-router-dom";
 import CreateGame from "../games/components/CreateGame";
@@ -12,8 +13,11 @@ function Dashboard() {
   const navigate = useNavigate();
   const [showCreateGameModal, setShowCreateGameModal] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+  const [teams, setTeams] = useState([]);
 
-  const upcomingGames = games.filter((g) => g.status === "upcoming");
+  useEffect(() => subscribeToTeams(setTeams, () => setTeams([])), []);
+
+  const upcomingGames = games.filter((g) => g.status === "upcoming" && !isPastDue(g));
   const liveGames = games.filter((g) => g.status === "live");
   const completedGames = games.filter((g) => g.status === "completed");
 
@@ -39,7 +43,7 @@ function Dashboard() {
           {/* Hero Stats */}
           <div className="flex gap-3 flex-wrap">
             {[
-              { label: "Total Teams", value: teamsData.length, color: "bg-white/10" },
+              { label: "Total Teams", value: teams.length, color: "bg-white/10" },
               { label: "Live Now", value: liveGames.length, color: "bg-[#D30336]/80" },
               { label: "Upcoming", value: upcomingGames.length, color: "bg-white/10" },
             ].map((s) => (
@@ -230,24 +234,31 @@ function Dashboard() {
                 View all <ArrowRight className="w-3 h-3" />
               </button>
             </div>
-            <div className="space-y-2">
-              {recentTeams.map((team) => (
-                <div key={team.id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-xs">{team.name.substring(0, 2).toUpperCase()}</span>
+            {teams.length > 0 ? (
+              <div className="space-y-2">
+                {teams.slice(0, 4).map((team) => {
+                  const memberCount = Object.values(team.roster).flat().length;
+                  return (
+                    <div key={team.id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => navigate(`/teams/${team.id}`)}>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 bg-gradient-to-br from-[#D30336] to-[#a8022b] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-xs">{team.name.substring(0, 2).toUpperCase()}</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-[#011B3B] text-sm">{team.name}</p>
+                          <p className="text-xs text-gray-400">{memberCount} {memberCount === 1 ? 'member' : 'members'}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                        {team.category}
+                      </span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-[#011B3B] text-sm">{team.name}</p>
-                      <p className="text-xs text-gray-400">{team.members} members</p>
-                    </div>
-                  </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${team.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {team.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-4">No teams yet</p>
+            )}
           </div>
 
           {/* Quick Actions */}

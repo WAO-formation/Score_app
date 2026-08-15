@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Plus, Search, Radio, Calendar, CheckCircle } from 'lucide-react';
+import { Trophy, Plus, Search, Radio, Calendar, CheckCircle, History } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
-import { isRecentOrActive } from '../../services/matchesService';
+import { isRecentOrActive, isPastDue } from '../../services/matchesService';
 import CreateGame from './components/CreateGame';
 import GameCard from './components/GameCard';
 import { BRAND } from '../../config/brand';
 const B = BRAND.font.body;
 const H = BRAND.font.heading;
 
-const TABS = ['upcoming', 'live', 'completed'];
+const TABS = ['upcoming', 'live', 'completed', 'past'];
 
 const TAB_CONFIG = {
   upcoming: { icon: Calendar, color: 'text-blue-500' },
   live:     { icon: Radio,    color: 'text-[#D30336]' },
   completed:{ icon: CheckCircle, color: 'text-green-500' },
+  past:     { icon: History,  color: 'text-gray-400' },
 };
 
 function Games() {
@@ -28,14 +29,22 @@ function Games() {
   // full history stays available under Management > Games, never deleted.
   const games = allGames.filter(isRecentOrActive);
 
-  const byStatus = (status) => games.filter((g) => g.status === status);
+  // "Upcoming" never includes a game whose scheduled day has already
+  // passed with nobody starting it — that goes to "Past" instead so stale
+  // fixtures don't sit at the top of the list forever.
+  const gamesByTab = {
+    upcoming: games.filter((g) => g.status === 'upcoming' && !isPastDue(g)),
+    live: games.filter((g) => g.status === 'live'),
+    completed: games.filter((g) => g.status === 'completed'),
+    past: games.filter(isPastDue),
+  };
 
-  const filteredGames = games.filter((g) => {
+  const filteredGames = gamesByTab[activeTab].filter((g) => {
     const q = searchQuery.toLowerCase();
-    return g.status === activeTab && (!q ||
+    return !q ||
       g.homeTeam.toLowerCase().includes(q) ||
       g.awayTeam.toLowerCase().includes(q) ||
-      g.venue.toLowerCase().includes(q));
+      g.venue.toLowerCase().includes(q);
   });
 
   return (
@@ -59,9 +68,9 @@ function Games() {
 
           <div className="flex gap-3 flex-wrap">
             {[
-              { label: 'Upcoming', value: byStatus('upcoming').length, color: 'bg-white/10' },
-              { label: 'Live Now', value: byStatus('live').length,     color: 'bg-[#D30336]/80' },
-              { label: 'Completed', value: byStatus('completed').length, color: 'bg-white/10' },
+              { label: 'Upcoming', value: gamesByTab.upcoming.length, color: 'bg-white/10' },
+              { label: 'Live Now', value: gamesByTab.live.length,     color: 'bg-[#D30336]/80' },
+              { label: 'Completed', value: gamesByTab.completed.length, color: 'bg-white/10' },
             ].map((s) => (
               <div key={s.label} className={`${s.color} backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]`}>
                 <p className="text-2xl font-bold text-white" style={{ fontFamily: H }}>{s.value}</p>
@@ -100,7 +109,7 @@ function Games() {
                   style={{ fontFamily: B }}
                 >
                   <Icon className={`w-3.5 h-3.5 ${activeTab === tab ? 'text-[#c81434]' : 'text-gray-400'}`} />
-                  {tab} <span className="text-xs opacity-60">({byStatus(tab).length})</span>
+                  {tab} <span className="text-xs opacity-60">({gamesByTab[tab].length})</span>
                 </button>
               );
             })}

@@ -14,7 +14,7 @@ const TABS = [
 ];
 
 const ZONES = [
-  { weight: '30%', name: 'Kingdom',              desc: "Invade the opponent's Kingdom and bounce the ball inside it 1 point per bounce, kept to a steady rhythm (at least 1/sec).", color: BRAND.primary },
+  { weight: '30%', name: 'Kingdom',              desc: "Invade the opponent's Kingdom and bounce the ball inside it — 1 point per bounce, kept to a steady rhythm (at least 1/sec).", color: BRAND.primary },
   { weight: '30%', name: 'Workout',              desc: 'Hold your own Workout zone and score for time spent there showing skill.', color: '#2563eb' },
   { weight: '30%', name: 'Goalpost (OvalCrown)', desc: '4 OvalCrowns on the pitch (2 to defend, 2 to attack). A clean goal = 1 point.', color: '#16a34a' },
   { weight: '10%', name: 'Hi-Court',             desc: 'Enter the Hi-Court and appeal to the Judges a 6-judge panel scores skill and showmanship.', color: '#d97706' },
@@ -22,7 +22,7 @@ const ZONES = [
 
 const SPECIALS = [
   { name: 'Sacrifice',    icon: '⚡', desc: 'Suspend a teammate to score: 3 points, or 33 points if a second ball scores within 7 seconds.' },
-  { name: 'Goal-Setting', icon: '🎯', desc: "Scoring from the opponent's Goal-Setting area transfers a point a net technical +2." },
+  { name: 'Goal-Setting', icon: '🎯', desc: "Scoring from the opponent's Goal-Setting area transfers a point — a net technical +2." },
   { name: 'Dominion',     icon: '🏰', desc: "A team's home turf. Losing it signals weakness and shifts momentum." },
 ];
 
@@ -37,12 +37,12 @@ const FORMAT = [
 
 const ROLES = [
   { name: 'King',       focus: 'Defense',       desc: 'Anchors the defense and commands the Kingdom zone.' },
-  { name: 'Warrior',    focus: 'Offense',        desc: 'Leads the offensive push first into combat for every ball.' },
-  { name: 'Worker',     focus: 'Workout',        desc: 'The star performer racks up Workout points through skill.' },
-  { name: 'Protaque',   focus: 'Support',        desc: 'The protagonist holds Dominion and sets up teammates.' },
-  { name: 'Antaque',    focus: 'Disruption',     desc: 'The antagonist lives to obstruct and disrupt the opposing play.' },
-  { name: 'Servitor',   focus: 'Floor General',  desc: 'Servant to the whole team keeps everyone moving and covered.' },
-  { name: 'Sacrificer', focus: 'Special Plays',  desc: "Executes the Sacrifice the sport's highest-risk, highest-reward move." },
+  { name: 'Warrior',    focus: 'Offense',        desc: 'Leads the offensive push — first into combat for every ball.' },
+  { name: 'Worker',     focus: 'Workout',        desc: 'The star performer — racks up Workout points through skill.' },
+  { name: 'Protaque',   focus: 'Support',        desc: 'The protagonist — holds Dominion and sets up teammates.' },
+  { name: 'Antaque',    focus: 'Disruption',     desc: 'The antagonist — lives to obstruct and disrupt the opposing play.' },
+  { name: 'Servitor',   focus: 'Floor General',  desc: 'Servant to the whole team — keeps everyone moving and covered.' },
+  { name: 'Sacrificer', focus: 'Special Plays',  desc: "Executes the Sacrifice — the sport's highest-risk, highest-reward move." },
 ];
 
 const FOCUS_COLORS = {
@@ -186,7 +186,7 @@ const PANELS = {
         </p>
         <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed sm:text-base" style={{ fontFamily: BRAND.font.body, color: BRAND.muted }}>
           Whichever team is closest to <strong style={{ color: BRAND.dark }}>100%</strong> across all four zones when time runs out wins the match.
-          There's no fixed score to chase just more of the pitch than the other team.
+          There's no fixed score to chase — just more of the pitch than the other team.
         </p>
       </div>
       {/* Quick summary pills */}
@@ -264,7 +264,7 @@ const HowToPlayPage = () => {
             className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base"
             style={{ fontFamily: BRAND.font.body, color: BRAND.muted }}
           >
-            A two-ball, hand-controlled contact sport played on the WaoSphere. Teams compete for a share of 100% the team that covers more of the game wins.
+            A two-ball, hand-controlled contact sport played on the WaoSphere. Teams compete for a share of 100% — the team that covers more of the game wins.
           </p>
         </div>
 

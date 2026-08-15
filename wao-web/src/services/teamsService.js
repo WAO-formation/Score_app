@@ -10,9 +10,9 @@
 // capitalized role labels, a flat `players` list instead of role-keyed id
 // arrays, etc).
 import {
-  collection, doc, addDoc, updateDoc, deleteDoc, getDoc, onSnapshot,
+  collection, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, onSnapshot,
   query, orderBy, where, documentId, writeBatch,
-  arrayUnion, arrayRemove, serverTimestamp,
+  arrayUnion, arrayRemove, serverTimestamp, Timestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -197,6 +197,65 @@ export async function updateTeam(id, patch) {
 // roster" via the team's own roster arrays, not via this field).
 export async function deleteTeam(id) {
   await deleteDoc(doc(db, TEAMS, id));
+}
+
+// ── Match results ───────────────────────────────────────────────────────
+
+// Mirrors wao_mobile's TeamService.updateTeamStatisticsAfterGame (see
+// wao_mobile/lib/Model/teams_games/team/team_stat.dart for the exact
+// GameResult/TeamStatistics shape) — that method is only ever called from
+// the Flutter app's own match-ending flow, so a game ended from wao-web
+// left both teams' wins/losses/recentGames stale until this existed.
+// Not transactional, same as the Dart original: a read followed by a set.
+async function bumpTeamStats(teamId, { gameId, opponentTeamId, opponentTeamName, teamScore, opponentScore, isHomeGame, playedAt }) {
+  const ref = doc(db, TEAM_STATS, teamId);
+  const snap = await getDoc(ref);
+  const current = snap.exists() ? snap.data() : {};
+
+  const isWin = teamScore > opponentScore;
+  const isDraw = teamScore === opponentScore;
+
+  // serverTimestamp() can't be used inside an array element, so recentGames
+  // entries get a concrete Timestamp instead (matches Dart's DateTime.now()
+  // capture-at-call-time semantics).
+  const recentGames = [
+    { gameId, opponentTeamId, opponentTeamName, teamScore, opponentScore, playedAt, isHomeGame },
+    ...(current.recentGames || []),
+  ].slice(0, 10);
+
+  await setDoc(ref, {
+    teamId,
+    totalGamesPlayed: (current.totalGamesPlayed || 0) + 1,
+    wins: (current.wins || 0) + (isWin ? 1 : 0),
+    draws: (current.draws || 0) + (isDraw ? 1 : 0),
+    losses: (current.losses || 0) + (!isWin && !isDraw ? 1 : 0),
+    goalsScored: (current.goalsScored || 0) + teamScore,
+    goalsConceded: (current.goalsConceded || 0) + opponentScore,
+    activePlayers: current.activePlayers || 0,
+    inactivePlayers: current.inactivePlayers || 0,
+    totalFollowers: current.totalFollowers || 0,
+    recentGames,
+    lastGameDate: playedAt,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// Call once, right when a match flips to completed. Silently no-ops if
+// either team id is missing (e.g. a legacy/malformed match doc) rather than
+// throwing — a missing stats update shouldn't block the game from ending.
+export async function recordGameResult({ gameId, homeTeamId, awayTeamId, homeTeam, awayTeam, homeScore, awayScore }) {
+  if (!homeTeamId || !awayTeamId) return;
+  const playedAt = Timestamp.now();
+  await Promise.all([
+    bumpTeamStats(homeTeamId, {
+      gameId, opponentTeamId: awayTeamId, opponentTeamName: awayTeam,
+      teamScore: homeScore ?? 0, opponentScore: awayScore ?? 0, isHomeGame: true, playedAt,
+    }),
+    bumpTeamStats(awayTeamId, {
+      gameId, opponentTeamId: homeTeamId, opponentTeamName: homeTeam,
+      teamScore: awayScore ?? 0, opponentScore: homeScore ?? 0, isHomeGame: false, playedAt,
+    }),
+  ]);
 }
 
 // ── Players / roster ───────────────────────────────────────────────────

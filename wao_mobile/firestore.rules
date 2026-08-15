@@ -135,16 +135,21 @@ service cloud.firestore {
                     && stampsServerTime();
 
       // Split into two update shapes rather than one blanket "official can
-      // write anything": scoring/status changes are official-only and rate
-      // limited; favoriting is a self-service action open to any signed-in
-      // user but can only ever touch the isFavorite field.
+      // write anything": scoring/status changes are restricted to an admin
+      // or the specific moderator assigned to *this* match (moderatorUid,
+      // set at creation) — not just any official-tier account, since the
+      // web simulate screen has no other gate keeping a moderator out of a
+      // match they weren't assigned. Favoriting is a self-service action
+      // open to any signed-in user but can only ever touch the isFavorite
+      // field.
       allow update: if
         (isOfficial()
+          && (isAdmin() || resource.data.moderatorUid == request.auth.uid)
           && stampsServerTime()
           && pastCooldown(resource.data, 2)
           && request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly([
-                 'scoreA', 'scoreB', 'status',
+                 'scoreA', 'scoreB', 'status', 'statusReason',
                  'teamAKingdom', 'teamBKingdom',
                  'teamAWorkout', 'teamBWorkout',
                  'teamAGoalSetting', 'teamBGoalSetting',

@@ -9,15 +9,15 @@ gsap.registerPlugin(ScrollTrigger);
 const FAQS = [
   {
     q: 'What exactly is WAO!?',
-    a: 'WAO! is a two-ball, hand-controlled contact sport played across every zone of the pitch the WaoSphere where both teams chase one score: 100%.',
+    a: 'WAO! is a two-ball, hand-controlled contact sport played across every zone of the pitch the WaoSphere — where both teams chase one score: 100%.',
   },
   {
     q: 'Do I need experience to play?',
-    a: "No. WAO! clinics are built for first-timers you'll learn the basics and can be playing your first session.",
+    a: "No. WAO! clinics are built for first-timers — you'll learn the basics and can be playing your first session.",
   },
   {
     q: 'How is a match scored?',
-    a: 'Every match is split across four zones Kingdom, Workout, Goalpost, and Hi-Court each worth a share of 100%. Whoever is closest to full coverage when time runs out wins.',
+    a: 'Every match is split across four zones — Kingdom, Workout, Goalpost, and Hi-Court — each worth a share of 100%. Whoever is closest to full coverage when time runs out wins.',
   },
   {
     q: 'How long does a match last?',
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Where can I play or watch WAO!?',
-    a: 'Community games and clinics run across Accra, including Cornerstone Baptist Church Court in Dome and TBC Court in Tesano check Upcoming Games for the next one.',
+    a: 'Community games and clinics run across Accra, including Cornerstone Baptist Church Court in Dome and TBC Court in Tesano — check Upcoming Games for the next one.',
   },
   {
     q: 'Is there a WAO! app?',

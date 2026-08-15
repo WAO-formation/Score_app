@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 const REASONS = [
   {
     title: 'Every Skill Counts',
-    desc: 'Four scoring zones mean speed, stamina, strategy, and showmanship all matter there’s a role for every kind of athlete.',
+    desc: 'Four scoring zones mean speed, stamina, strategy, and showmanship all matter — there’s a role for every kind of athlete.',
   },
   {
     title: 'No Experience Required',
@@ -21,7 +21,7 @@ const REASONS = [
   },
   {
     title: 'A Real Community',
-    desc: 'Train and play alongside a growing circle of teams across Accra not just a name on a scoreboard.',
+    desc: 'Train and play alongside a growing circle of teams across Accra — not just a name on a scoreboard.',
   },
   {
     title: 'Be Part Of The Origin Story',
@@ -29,7 +29,7 @@ const REASONS = [
   },
   {
     title: 'Ghanaian-Born, World-Bound',
-    desc: 'Join a sport built from scratch in Accra with a vision to go global and say you were part of it from the start.',
+    desc: 'Join a sport built from scratch in Accra with a vision to go global — and say you were part of it from the start.',
   },
 ];
 
