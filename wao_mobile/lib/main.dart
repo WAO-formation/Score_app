@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wao_mobile/core/services/Seeding_service.dart';
 import 'package:wao_mobile/core/theme/app_theme.dart';
 import 'package:wao_mobile/core/theme/theme_provider.dart';
-import 'package:wao_mobile/system_admin/presentation/Teams/model/state_management.dart';
+import 'package:wao_mobile/core/providers/live_score_provider.dart';
 import 'Model/user_provider.dart';
 import 'ViewModel/news_viewmodel/news_viewmodel.dart';
 import 'ViewModel/teams_games/championship_viewmodel.dart';
@@ -12,12 +14,20 @@ import 'ViewModel/teams_games/team_viewmodel.dart';
 import 'core/auth_rouths/auth_gate.dart';
 import 'core/services/news/news_service.dart';
 
-void main() async {
-  // Ensure Flutter is initialized
-  WidgetsFlutterBinding.ensureInitialized();
+Future<void> _runSeedOnce() async {
+  try {
+    await SeedingService().seedAll();
+  } catch (e) {
+    print('Seed on launch failed: $e');
+  }
+}
 
-  // Initialize Firebase
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Seed demo data once on first launch (creates auth account + Firestore data)
+  await _runSeedOnce();
 
   runApp(
     MultiProvider(

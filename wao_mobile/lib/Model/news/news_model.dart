@@ -39,7 +39,9 @@ class NewsModel {
           .map((p) => NewsParagraph.fromJson(p as Map<String, dynamic>))
           .toList()
           : null,
-      publishedDate: (json['publishedDate'] as Timestamp).toDate(),
+      publishedDate: json['publishedDate'] != null
+          ? (json['publishedDate'] as Timestamp).toDate()
+          : DateTime.now(),
       author: json['author'] as String?,
       category: json['category'] as String?,
     );

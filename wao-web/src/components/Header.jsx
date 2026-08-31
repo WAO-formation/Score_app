@@ -1,10 +1,21 @@
 import React, { useState } from "react";
 import { Bell, Search, Menu, User, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
-const Header = ({ onMenuClick, currentPage = "Dashboard", userName = "Afanyu Emmanuel" }) => {
+const PAGE_NAMES = {
+  dashboard:  'Dashboard',
+  teams:      'Teams',
+  games:      'Games',
+  management: 'Management',
+  profile:    'Profile',
+};
+
+const Header = ({ onMenuClick, userName = "Afanyu Emmanuel" }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const location = useLocation();
 
-
+  const segment = location.pathname.split('/')[1] || 'dashboard';
+  const currentPage = PAGE_NAMES[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
   const getInitials = (name) => {
     if (!name) return "U";
     const names = name.trim().split(" ");

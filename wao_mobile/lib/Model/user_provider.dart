@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wao_mobile/Model/user_model.dart';
@@ -8,6 +9,7 @@ class UserProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   UserProfile? _userProfile;
   bool _isLoading = false;
+  StreamSubscription<UserProfile?>? _profileSub;
 
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -22,6 +24,8 @@ class UserProvider extends ChangeNotifier {
       if (user != null) {
         loadUserProfile(user.uid);
       } else {
+        _profileSub?.cancel();
+        _profileSub = null;
         _userProfile = null;
         notifyListeners();
       }
@@ -29,20 +33,31 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> loadUserProfile(String uid) async {
+    // Cancel any existing subscription before creating a new one
+    await _profileSub?.cancel();
+    _profileSub = null;
+
     _isLoading = true;
     notifyListeners();
 
-    try {
-      _authService.getUserProfile(uid).listen((profile) {
+    _profileSub = _authService.getUserProfile(uid).listen(
+      (profile) {
         _userProfile = profile;
         _isLoading = false;
         notifyListeners();
-      });
-    } catch (e) {
-      print('Error loading user profile: $e');
-      _isLoading = false;
-      notifyListeners();
-    }
+      },
+      onError: (e) {
+        print('Error loading user profile: $e');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _profileSub?.cancel();
+    super.dispose();
   }
 
   Future<void> updateProfile(Map<String, dynamic> updates) async {

@@ -11,11 +11,14 @@ class ChampionshipViewModel extends ChangeNotifier {
   Stream<List<WaoChampionship>> getAllChampionships() {
     return _db
         .collection('championships')
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs
-        .map((doc) => WaoChampionship.fromFirestore(doc.data(), doc.id))
-        .toList());
+        .map((snap) {
+      final list = snap.docs
+          .map((doc) => WaoChampionship.fromFirestore(doc.data(), doc.id))
+          .toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
   }
 
   // Create a new championship/league

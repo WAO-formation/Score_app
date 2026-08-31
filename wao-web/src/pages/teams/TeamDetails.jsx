@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { 
   ArrowLeft, 
@@ -258,7 +259,7 @@ const TeamDetails = () => {
   };
 
   return (
-    <section className="scrollbar-hide p-2 pb-8">
+    <section className="scrollbar-hide px-2 py-4 md:p-4 pb-8">
       {/* Header Section */}
       <div className="bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-lg shadow-lg p-6 mb-6 relative overflow-hidden">
         {/* Background Ball */}
@@ -281,85 +282,28 @@ const TeamDetails = () => {
           </button>
 
           {/* Team Info */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">{team.icon}</span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-white font-bold text-lg md:text-2xl">{team.icon}</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-1">{team.name}</h1>
-                <div className="flex items-center gap-4 text-white/80 text-sm">
+                <h1 className="text-xl md:text-3xl font-bold text-white mb-1">{team.name}</h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-white/80 text-xs md:text-sm">
                   <span>Coach: {team.coach}</span>
-                  <span>•</span>
+                  <span className="hidden sm:inline">•</span>
                   <span>{team.category}</span>
-                  <span>•</span>
-                  <span>Founded {team.founded}</span>
                 </div>
               </div>
             </div>
-
-            <button 
+            <button
               onClick={handleEditTeam}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#011B3B] font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
+              className="flex items-center gap-1.5 px-3 py-2 md:px-6 md:py-3 bg-white text-[#011B3B] font-semibold rounded-lg hover:shadow-lg transition-all duration-200 text-sm flex-shrink-0"
             >
               <Edit className="w-4 h-4" />
-              <span>Edit Team</span>
+              <span>Edit</span>
             </button>
           </div>
-
-          {/* Description */}
-          <p className="text-white/70 mt-4 max-w-2xl">{team.description}</p>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Trophy className="w-5 h-5 text-green-600" />
-          </div>
-          <p className="text-2xl font-bold text-green-600">{team.stats.wins}</p>
-          <p className="text-xs text-gray-600">Wins</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-          </div>
-          <p className="text-2xl font-bold text-red-600">{team.stats.losses}</p>
-          <p className="text-xs text-gray-600">Losses</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Award className="w-5 h-5 text-yellow-600" />
-          </div>
-          <p className="text-2xl font-bold text-yellow-600">{team.stats.draws}</p>
-          <p className="text-xs text-gray-600">Draws</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <AlertCircle className="w-5 h-5 text-orange-600" />
-          </div>
-          <p className="text-2xl font-bold text-orange-600">{team.stats.penalties}</p>
-          <p className="text-xs text-gray-600">Penalties</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Trophy className="w-5 h-5 text-blue-600" />
-          </div>
-          <p className="text-2xl font-bold text-blue-600">{team.stats.goalsScored}</p>
-          <p className="text-xs text-gray-600">Goals For</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Shield className="w-5 h-5 text-purple-600" />
-          </div>
-          <p className="text-2xl font-bold text-purple-600">{team.stats.goalsConceded}</p>
-          <p className="text-xs text-gray-600">Goals Against</p>
         </div>
       </div>
 
@@ -401,13 +345,13 @@ const TeamDetails = () => {
 
       {/* Tab Content */}
       {activeTab === 'roster' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-3 md:p-6">
+          <div className="flex flex-col gap-2 mb-4">
             <h3 className="text-lg font-bold text-[#011B3B]">Team Roster ({team.players.length}/12 Players)</h3>
-            <button 
+            <button
               onClick={handleAddPlayer}
               disabled={team.players.length >= 12}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-medium transition-all ${
                 team.players.length >= 12
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-br from-[#FFC600] to-[#FF6B35] text-white hover:shadow-lg'
@@ -503,28 +447,27 @@ const TeamDetails = () => {
       )}
 
       {activeTab === 'upcoming' && (
-        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-            {team.upcomingGames.map((game) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {team.upcomingGames.map((game) => (
               <div
                 key={game.id}
-                className="w-[320px] bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden flex-shrink-0 shadow-sm border border-gray-100"
+                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 overflow-hidden shadow-sm border border-gray-100"
               >
-                {/* Background Ball */}
-                <div className="absolute -right-12 -bottom-12 opacity-5 pointer-events-none">
-                  <img
-                    src="/assets/design/wao-ball.png"
-                    alt="ball gradient"
-                    className="w-40 h-40 object-contain"
-                  />
-                </div>
-
                 {/* Teams Section */}
                 <div className="flex items-center justify-between mb-4 relative z-10">
                   {/* Team 1 */}
                   <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center mb-2 shadow-md">
-                      <span className="text-white font-bold text-sm">
+                    <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
+                      {/* Small ball image cutting into the team icon */}
+                      <div className="absolute -left-15 -top-18 w-30 h-30 opacity-40 pointer-events-none">
+                        <img
+                          src="/assets/design/wao-ball.png"
+                          alt="ball"
+                          className="w-full h-full object-contain brightness-0 invert opacity-80"
+                        />
+                      </div>
+
+                      <span className="text-white font-bold text-sm relative z-10">
                         {game.team1.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -545,8 +488,17 @@ const TeamDetails = () => {
 
                   {/* Team 2 */}
                   <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 shadow-md">
-                      <span className="text-white font-bold text-sm">
+                    <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
+                      {/* Small ball image cutting into the team icon */}
+                      <div className="absolute -right-15 -bottom-18 w-30 h-30 opacity-40 pointer-events-none">
+                        <img
+                          src="/assets/design/wao-ball.png"
+                          alt="ball"
+                          className="w-full h-full object-contain brightness-0 invert opacity-80"
+                        />
+                      </div>
+
+                      <span className="text-white font-bold text-sm relative z-10">
                         {game.team2.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -579,27 +531,16 @@ const TeamDetails = () => {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       )}
 
       {activeTab === 'past' && (
-        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-            {team.pastGames.map((game) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {team.pastGames.map((game) => (
               <div
                 key={game.id}
-                className="w-[320px] bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden flex-shrink-0 shadow-sm border border-gray-100"
+                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden shadow-sm border border-gray-100"
               >
-                {/* Background Ball */}
-                <div className="absolute -right-12 -bottom-12 opacity-5 pointer-events-none">
-                  <img
-                    src="/assets/design/wao-ball.png"
-                    alt="ball gradient"
-                    className="w-40 h-40 object-contain"
-                  />
-                </div>
-
                 {/* Win/Loss/Draw Badge */}
                 <div className="absolute top-4 right-4 z-10">
                   <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
@@ -612,7 +553,7 @@ const TeamDetails = () => {
                 </div>
 
                 {/* Teams Section with Scores */}
-                <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center justify-between mb-4 mt-8 relative z-10">
                   {/* Team 1 */}
                   <div className="flex flex-col items-center flex-1">
                     <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center mb-2 shadow-md">
@@ -635,8 +576,17 @@ const TeamDetails = () => {
 
                   {/* Team 2 */}
                   <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 shadow-md">
-                      <span className="text-white font-bold text-sm">
+                   <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
+                      {/* Small ball image cutting into the team icon */}
+                      <div className="absolute -right-15 -bottom-18 w-30 h-30 opacity-40 pointer-events-none">
+                        <img
+                          src="/assets/design/wao-ball.png"
+                          alt="ball"
+                          className="w-full h-full object-contain brightness-0 invert opacity-80"
+                        />
+                      </div>
+
+                      <span className="text-white font-bold text-sm relative z-10">
                         {game.team2.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -670,13 +620,12 @@ const TeamDetails = () => {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       )}
 
       {/* Edit Team Modal */}
       {showEditTeamModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowEditTeamModal(false)}
@@ -731,26 +680,6 @@ const TeamDetails = () => {
                   <option value="Youth">Youth</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Founded Year</label>
-                <input
-                  type="text"
-                  value={teamForm.founded}
-                  onChange={(e) => setTeamForm({...teamForm, founded: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  value={teamForm.description}
-                  onChange={(e) => setTeamForm({...teamForm, description: e.target.value})}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                />
-              </div>
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -774,7 +703,7 @@ const TeamDetails = () => {
 
       {/* Add Player Modal */}
       {showAddPlayerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
             <button
               onClick={() => setShowAddPlayerModal(false)}
@@ -818,7 +747,7 @@ const TeamDetails = () => {
                   onChange={(e) => setPlayerForm({...playerForm, number: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
                   min="1"
-                  max="99"
+                  max="14"
                 />
               </div>
 
@@ -856,7 +785,7 @@ const TeamDetails = () => {
 
       {/* Edit Player Modal */}
       {showEditPlayerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
             <button
               onClick={() => setShowEditPlayerModal(false)}
@@ -937,7 +866,7 @@ const TeamDetails = () => {
 
       {/* Delete Player Modal */}
       {showDeletePlayerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
             <button
               onClick={() => setShowDeletePlayerModal(false)}

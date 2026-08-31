@@ -1,22 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../Model/teams_games/team/team_stat.dart';
 import '../../Model/teams_games/team/wao_player.dart';
 import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/player_viewmodel.dart';
+import 'match_team_service/match_service.dart';
 import 'match_team_service/team_service.dart';
+import 'news/news_service.dart';
 
 class SeedingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TeamService _teamService = TeamService();
   final PlayerService _playerService = PlayerService();
+  final MatchService _matchService = MatchService();
+  final NewsService _newsService = NewsService();
 
   // ==================== SEED PLAYERS ====================
 
   Future<Map<String, String>> seedPlayers() async {
     print('🌱 Starting to seed players...');
 
-    final Map<String, String> playerMap = {}; // name -> playerId mapping
+    // If players already exist, load them into the map and skip
+    final existing = await _firestore.collection('players').get();
+    if (existing.docs.isNotEmpty) {
+      print('ℹ️  Players already seeded, loading existing...');
+      final Map<String, String> playerMap = {};
+      for (var doc in existing.docs) {
+        final name = doc.data()['name'] as String?;
+        if (name != null) playerMap[name] = doc.id;
+      }
+      return playerMap;
+    }
+
+    final Map<String, String> playerMap = {};
 
     final List<Map<String, dynamic>> playersData = [
       // Kings
@@ -142,6 +159,12 @@ class SeedingService {
 
   Future<void> seedTeams(Map<String, String> playerMap) async {
     print('🌱 Starting to seed teams...');
+
+    final existingTeams = await _firestore.collection('teams').get();
+    if (existingTeams.docs.isNotEmpty) {
+      print('ℹ️  Teams already seeded, skipping...');
+      return;
+    }
 
     final List<Map<String, dynamic>> teamsData = [
       {
@@ -352,6 +375,13 @@ class SeedingService {
   Future<void> seedSampleGames() async {
     print('🌱 Starting to seed sample games...');
 
+    final existingStats = await _firestore.collection('teamStatistics')
+        .where('gamesPlayed', isGreaterThan: 0).limit(1).get();
+    if (existingStats.docs.isNotEmpty) {
+      print('ℹ️  Sample games already seeded, skipping...');
+      return;
+    }
+
     final List<Map<String, dynamic>> gamesData = [
       {
         'teamId': 'ug_warriors',
@@ -454,6 +484,68 @@ class SeedingService {
     }
   }
 
+  // ==================== SEED ADMIN PROFILE ====================
+
+  Future<void> seedAdminProfile() async {
+    print('🌱 Seeding admin profile...');
+    const email = 'afanyuemma2002@gmail.com';
+    const password = 'Wao@2024Demo';
+
+    String uid;
+
+    // Check if Firestore profile already exists by querying email
+    final existing = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
+
+    if (existing.docs.isNotEmpty) {
+      print('ℹ️  Admin profile already exists, skipping...');
+      return;
+    }
+
+    try {
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      uid = credential.user!.uid;
+      await credential.user!.updateDisplayName('Afanyu Emmanuel');
+      // Sign out immediately so app auth state is not affected
+      await FirebaseAuth.instance.signOut();
+      print('✅ Firebase Auth account created');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        print('ℹ️  Auth account already exists, fetching UID...');
+        final credential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+        uid = credential.user!.uid;
+        await FirebaseAuth.instance.signOut();
+      } else {
+        rethrow;
+      }
+    }
+
+    await _firestore.collection('users').doc(uid).set({
+      'username': 'afanyuemma',
+      'email': email,
+      'displayName': 'Afanyu Emmanuel',
+      'photoUrl': null,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'favoriteTeamIds': [],
+      'favoriteMatchIds': [],
+      'totalMatches': 0,
+      'totalTeams': 0,
+      'themePreference': 'system',
+      'notificationsEnabled': true,
+      'emailNotifications': false,
+      'language': 'English',
+      'role': 'admin',
+    }, SetOptions(merge: true));
+
+    print('✅ Admin profile ready — email: $email  password: $password');
+  }
+
   // ==================== MASTER SEED FUNCTION ====================
 
   Future<void> seedAll() async {
@@ -464,19 +556,44 @@ class SeedingService {
     print('');
 
     try {
-      // Step 1: Seed Players
-      print('📍 Step 1/3: Seeding Players...');
+      // Step 1: Seed Admin Profile
+      print('📍 Step 1/5: Seeding Admin Profile...');
+      await seedAdminProfile();
+      print('');
+
+      // Step 2: Seed Players
+      print('📍 Step 2/5: Seeding Players...');
       final playerMap = await seedPlayers();
       print('');
 
-      // Step 2: Seed Teams
-      print('📍 Step 2/3: Seeding Teams...');
+      // Step 3: Seed Teams
+      print('📍 Step 3/5: Seeding Teams...');
       await seedTeams(playerMap);
       print('');
 
-      // Step 3: Seed Sample Games
-      print('📍 Step 3/3: Seeding Sample Games...');
+      // Step 4: Seed Sample Games
+      print('📍 Step 4/5: Seeding Sample Games...');
       await seedSampleGames();
+      print('');
+
+      // Step 5: Seed Matches
+      print('📍 Step 5/6: Seeding Matches...');
+      final matchesEmpty = await _matchService.isMatchesEmpty();
+      if (matchesEmpty) {
+        await _matchService.seedMatches();
+      } else {
+        print('ℹ️  Matches already seeded, skipping...');
+      }
+      print('');
+
+      // Step 6: Seed News
+      print('📍 Step 6/6: Seeding News...');
+      final newsEmpty = (await _firestore.collection('news').limit(1).get()).docs.isEmpty;
+      if (newsEmpty) {
+        await _newsService.addSampleNews();
+      } else {
+        print('ℹ️  News already seeded, skipping...');
+      }
       print('');
 
       print('🎉 ========================================');
@@ -484,9 +601,12 @@ class SeedingService {
       print('🎉 ========================================');
       print('');
       print('📊 Summary:');
+      print('   - Admin profile: Afanyu Emmanuel');
       print('   - ${playerMap.length} players created');
       print('   - 6 teams created');
       print('   - Sample game history added');
+      print('   - Matches seeded (live, upcoming, finished)');
+      print('   - News articles seeded');
       print('');
     } catch (e) {
       print('');

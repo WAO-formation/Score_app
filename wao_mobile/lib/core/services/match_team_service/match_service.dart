@@ -8,11 +8,14 @@ class MatchService {
   Stream<List<WaoMatch>> getAllMatches() {
     return _db
         .collection('matches')
-        .orderBy('startTime', descending: true)
         .snapshots()
-        .map((snap) => snap.docs
-        .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-        .toList());
+        .map((snap) {
+      final matches = snap.docs
+          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+          .toList();
+      matches.sort((a, b) => b.startTime.compareTo(a.startTime));
+      return matches;
+    });
   }
 
   Stream<List<WaoMatch>> getMatchesByStatus(MatchStatus status) {
@@ -718,17 +721,15 @@ class MatchService {
 
     return _db
         .collection('matches')
-        .where('isFavorite', isEqualTo: true)
         .where('startTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
         .where('startTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
         .snapshots()
         .map((snap) {
-      final matches = snap.docs
+      return snap.docs
           .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-          .toList();
-
-      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
-      return matches;
+          .where((m) => m.isFavorite)
+          .toList()
+        ..sort((a, b) => a.startTime.compareTo(b.startTime));
     });
   }
 

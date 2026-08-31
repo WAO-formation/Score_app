@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { menuItems } from "../config/constants";
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, LogOut } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const SideNav = ({
   isSidebarOpen,
@@ -10,6 +11,7 @@ const SideNav = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   // Determine active item based on current route
   const getActiveItem = () => {
@@ -34,14 +36,14 @@ const SideNav = ({
   const userInitials = getInitials(userName);
 
   const handleNavigation = (itemName) => {
-    // Convert item name to route path (e.g., "Teams" -> "/teams")
     const route = `/${itemName.toLowerCase()}`;
     navigate(route);
-    
-    // Close mobile menu after selecting
-    if (window.innerWidth < 1024) {
-      setIsSidebarOpen(false);
-    }
+    if (window.innerWidth < 1024) setIsSidebarOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -49,7 +51,7 @@ const SideNav = ({
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 z-40 backdrop-blur-sm bg-[#011B3B]/40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -132,19 +134,17 @@ const SideNav = ({
         {/* User Profile Section */}
         {isSidebarOpen && (
           <div className="p-4 border-t border-white/10">
-            <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
+            <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors" onClick={() => navigate('/profile')}>
               <div className="w-10 h-10 bg-[#FFC600] rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-yellow-100 font-bold ">
-                  {userInitials}
-                </span>
+                <span className="text-yellow-100 font-bold">{userInitials}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">
-                  {userName}
-                </p>
+                <p className="text-white text-sm font-medium truncate">{userName}</p>
                 <p className="text-white/60 text-xs truncate">Admin</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-white/60 flex-shrink-0" />
+              <button onClick={(e) => { e.stopPropagation(); handleLogout(); }} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" title="Logout">
+                <LogOut className="w-4 h-4 text-white/60 hover:text-white" />
+              </button>
             </div>
           </div>
         )}
