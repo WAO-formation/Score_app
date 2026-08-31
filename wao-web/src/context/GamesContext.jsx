@@ -1,35 +1,153 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { setInterval, clearInterval } from 'worker-timers';
-import { gamesData } from '../config/constants';
+import { subscribeToMatches, createMatch, updateMatch, deleteMatch } from '../services/matchesService';
 
 export const QUARTER_TIMES = { 1: 17 * 60, 2: 17 * 60, 3: 13 * 60, 4: 13 * 60 };
+
+// firestore.rules enforces a 2s per-document cooldown on official-tier match
+// writes (rate limiting added deliberately — see pastCooldown() in the
+// rules). Live scoring needs to feel instant, so local state updates apply
+// immediately and Firestore writes are coalesced to at most one per game
+// every WRITE_INTERVAL_MS, always reading the freshest local state at flush
+// time rather than the value captured when the write was first requested.
+const WRITE_INTERVAL_MS = 2200;
+const SYNC_KEYS = [
+  'status', 'statusReason',
+  'homeScore', 'awayScore', 'scoring',
+  'quarters', 'fouls', 'events',
+  'currentQuarter', 'timeRemaining', 'isPlaying',
+];
 
 const GamesContext = createContext(null);
 
 export const GamesProvider = ({ children }) => {
-  const [games, setGames] = useState(gamesData);
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [timerState, setTimerState] = useState({});
   const timerStateRef = useRef(timerState);
-  const intervalsRef = useRef({});
+  const gamesRef = useRef(games);
+  const lastWriteRef = useRef({});
+  const flushTimeoutRef = useRef({});
+  // Which fields an updateGame() call actually touched since the last flush,
+  // per game id — the throttled flush below only writes these (falling back
+  // to SYNC_KEYS when nothing was recorded, e.g. a flush triggered purely by
+  // the ticking clock). Without this, any updateGame() patch outside
+  // SYNC_KEYS (startTime, venue, moderatorUid/judges reassignment,
+  // previousStatus, ...) updated local state but was silently dropped from
+  // the actual Firestore write, reverting on the next snapshot.
+  const pendingFieldsRef = useRef({});
 
   useEffect(() => { timerStateRef.current = timerState; }, [timerState]);
+  useEffect(() => { gamesRef.current = games; }, [games]);
 
-  const getGame = (id) => games.find((g) => g.id === parseInt(id));
-  const addGame = (game) => setGames((prev) => [...prev, game]);
-  const deleteGame = (id) => setGames((prev) => prev.filter((g) => g.id !== parseInt(id)));
-  const updateGame = (id, updater) =>
-    setGames((prev) =>
-      prev.map((g) => (g.id === parseInt(id) ? (typeof updater === 'function' ? updater(g) : { ...g, ...updater }) : g))
+  useEffect(() => {
+    return subscribeToMatches(
+      (list) => { setGames(list); setLoading(false); },
+      (err) => { console.error('Failed to load games:', err); setLoading(false); }
     );
+  }, []);
 
-  const getTimerState = (id) =>
-    timerState[id] ?? { isPlaying: false, currentQuarter: 1, timeRemaining: QUARTER_TIMES[1] };
+  const parseTimeToSeconds = (str) => {
+    if (typeof str === 'number') return str;
+    const [m, s] = (str || '17:00').split(':').map(Number);
+    return (m || 0) * 60 + (s || 0);
+  };
 
-  const setTimerStateForGame = (id, updater) =>
+  // On games load, seed timerState for any live game not yet tracked
+  useEffect(() => {
+    if (!games.length) return;
+    setTimerState((prev) => {
+      const patch = {};
+      games.forEach((g) => {
+        if (prev[g.id]) return; // already tracked
+        const q = parseInt((g.currentQuarter || 'Q1').replace('Q', ''), 10) || 1;
+        patch[g.id] = {
+          isPlaying: g.isPlaying ?? false,
+          currentQuarter: q,
+          timeRemaining: parseTimeToSeconds(g.timeRemaining),
+        };
+      });
+      return Object.keys(patch).length ? { ...prev, ...patch } : prev;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [games.length]);
+
+  const getGame = (id) => games.find((g) => g.id === id);
+
+  const scheduleSync = (id) => {
+    if (flushTimeoutRef.current[id]) return;
+    const elapsed = Date.now() - (lastWriteRef.current[id] || 0);
+    const delay = Math.max(0, WRITE_INTERVAL_MS - elapsed);
+    flushTimeoutRef.current[id] = setTimeout(() => {
+      flushTimeoutRef.current[id] = null;
+      lastWriteRef.current[id] = Date.now();
+      const current = gamesRef.current.find((g) => g.id === id);
+      if (!current) return;
+      const t = timerStateRef.current[id];
+      const fields = pendingFieldsRef.current[id];
+      delete pendingFieldsRef.current[id];
+      const keys = fields && fields.size ? [...fields] : SYNC_KEYS;
+      const patch = keys.reduce((acc, k) => {
+        if (k in current) acc[k] = current[k];
+        return acc;
+      }, {});
+      // Merge live timer values — these aren't in the games array anymore
+      if (t) {
+        patch.isPlaying = t.isPlaying;
+        patch.currentQuarter = `Q${t.currentQuarter}`;
+        patch.timeRemaining = formatTime(t.timeRemaining);
+      }
+      updateMatch(id, patch).catch((err) => console.error('Failed to sync game update:', err));
+    }, delay);
+  };
+
+  const addGame = (gameInput) => createMatch(gameInput);
+  const deleteGame = (id) => deleteMatch(id);
+
+  const updateGame = (id, updater) => {
+    setGames((prev) =>
+      prev.map((g) => (g.id === id ? (typeof updater === 'function' ? updater(g) : { ...g, ...updater }) : g))
+    );
+    const set = pendingFieldsRef.current[id] || (pendingFieldsRef.current[id] = new Set());
+    if (typeof updater === 'function') {
+      // Function-form updaters are only ever used by the live-scoring hook
+      // to touch score/foul/quarter/timer state — safe to assume the full
+      // SYNC_KEYS set rather than inspecting what it actually changed.
+      SYNC_KEYS.forEach((k) => set.add(k));
+    } else {
+      Object.keys(updater).forEach((k) => set.add(k));
+    }
+    scheduleSync(id);
+  };
+
+  const getTimerState = (id) => {
+    if (timerState[id]) return timerState[id];
+    // Seed from Firestore data on first access (e.g. after a page refresh)
+    const game = games.find((g) => g.id === id);
+    if (game) {
+      const q = parseInt((game.currentQuarter || 'Q1').replace('Q', ''), 10) || 1;
+      return {
+        isPlaying: game.isPlaying ?? false,
+        currentQuarter: q,
+        timeRemaining: parseTimeToSeconds(game.timeRemaining),
+      };
+    }
+    return { isPlaying: false, currentQuarter: 1, timeRemaining: QUARTER_TIMES[1] };
+  };
+
+  // Every caller of this (play/pause toggle, quarter advance, time adjust)
+  // represents a moderator-driven change that needs to reach Firestore on
+  // its own — previously these only got persisted by piggybacking on the
+  // next score/foul write or the next playing tick, so pausing and then
+  // walking away (e.g. after manually advancing a quarter) silently never
+  // synced at all.
+  const setTimerStateForGame = (id, updater) => {
     setTimerState((prev) => {
       const current = prev[id] ?? { isPlaying: false, currentQuarter: 1, timeRemaining: QUARTER_TIMES[1] };
       return { ...prev, [id]: typeof updater === 'function' ? updater(current) : { ...current, ...updater } };
     });
+    scheduleSync(id);
+  };
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -37,7 +155,19 @@ export const GamesProvider = ({ children }) => {
     return `${m}:${s}`;
   };
 
-  // Global interval — ticks for every playing game regardless of which page is open
+  // Returns live-formatted { timeRemaining, currentQuarter } for a game,
+  // falling back to the Firestore-stored values when the timer isn't running.
+  const getFormattedTimer = (id) => {
+    const t = timerState[id];
+    if (t) return { timeRemaining: formatTime(t.timeRemaining), currentQuarter: `Q${t.currentQuarter}` };
+    const game = games.find((g) => g.id === id);
+    return {
+      timeRemaining: game?.timeRemaining ?? '17:00',
+      currentQuarter: game?.currentQuarter ?? 'Q1',
+    };
+  };
+
+  // Global interval — ticks for every playing game regardless of which page is open.
   useEffect(() => {
     const id = setInterval(() => {
       setTimerState((prev) => {
@@ -48,26 +178,17 @@ export const GamesProvider = ({ children }) => {
           if (!t.isPlaying || t.timeRemaining <= 0) return;
           changed = true;
           next[gameId] = { ...t, timeRemaining: t.timeRemaining - 1 };
+          scheduleSync(gameId);
         });
         return changed ? next : prev;
       });
     }, 1000);
     return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync timer values into games array so all pages see live time
-  useEffect(() => {
-    setGames((prev) =>
-      prev.map((g) => {
-        const t = timerState[g.id];
-        if (!t) return g;
-        return { ...g, timeRemaining: formatTime(t.timeRemaining), currentQuarter: `Q${t.currentQuarter}` };
-      })
-    );
-  }, [timerState]);
-
   return (
-    <GamesContext.Provider value={{ games, getGame, addGame, deleteGame, updateGame, getTimerState, setTimerStateForGame }}>
+    <GamesContext.Provider value={{ games, loading, getGame, addGame, deleteGame, updateGame, getTimerState, setTimerStateForGame, getFormattedTimer }}>
       {children}
     </GamesContext.Provider>
   );

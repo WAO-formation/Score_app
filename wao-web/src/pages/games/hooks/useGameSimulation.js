@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGames, QUARTER_TIMES } from '../../../context/GamesContext';
+import { useAuth } from '../../../context/AuthContext';
+import { recordGameResult } from '../../../services/teamsService';
 
 const buildInitialGame = (found) => ({
   ...found,
@@ -16,6 +18,7 @@ const buildInitialGame = (found) => ({
 export const useGameSimulation = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { getGame, updateGame, getTimerState, setTimerStateForGame } = useGames();
 
   const { isPlaying, currentQuarter, timeRemaining } = getTimerState(gameId);
@@ -44,23 +47,52 @@ export const useGameSimulation = () => {
 
   useEffect(() => { quarterRef.current = currentQuarter; }, [currentQuarter]);
 
-  // On mount: mark game as live only if not already live (don't reset scores on back+resume)
+  // On mount: mark game as live unless it's already live (don't reset scores
+  // on back+resume of an already-live game) or completed (don't resurrect it
+  // — re-entering a finished match's /simulate URL used to flip it straight
+  // back to 'live', which would also double-record team stats on the next
+  // end-game). Skipped for an unauthorized viewer — the redirect effect
+  // below bounces them before this would matter, but firestore.rules would
+  // reject the write anyway, so there's no point attempting it.
   useEffect(() => {
     const found = getGame(gameId);
-    if (found && found.status !== 'live') updateGame(gameId, buildInitialGame(found));
+    const authorized = found && (user?.role === 'admin' || (!!user?.uid && found.moderatorUid === user.uid));
+    if (authorized && found.status !== 'live' && found.status !== 'completed') updateGame(gameId, buildInitialGame(found));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId]);
+  }, [gameId, user]);
 
   // Derive game from context on every render — always fresh
   const game = getGame(gameId);
+
+  // Mirrors the firestore.rules write gate: only an admin or the specific
+  // moderator assigned to this match may run its live scoring. Everyone
+  // else who lands here (e.g. a moderator paging through /games) gets
+  // bounced before they can touch the scoreboard. A completed game is also
+  // routed away — nothing left to simulate, and staying here risks ending
+  // (and re-recording stats for) an already-finished match.
+  const isAuthorized = !!game && game.status !== 'completed'
+    && (user?.role === 'admin' || (!!user?.uid && game.moderatorUid === user.uid));
+  useEffect(() => {
+    if (game && !isAuthorized) navigate(`/games/${gameId}`, { replace: true });
+  }, [game, isAuthorized, gameId, navigate]);
 
   const handleEndGame = useCallback(() => {
     setIsPlaying(false);
     if (window.confirm('Game has ended. Save results?')) {
       updateGame(gameId, { status: 'completed' });
+      if (game) {
+        recordGameResult({
+          gameId,
+          homeTeamId: game.homeTeamId, awayTeamId: game.awayTeamId,
+          homeTeam: game.homeTeam, awayTeam: game.awayTeam,
+          homeScore: game.homeScore, awayScore: game.awayScore,
+        }).catch((err) => console.error('Failed to update team statistics:', err));
+      }
       navigate(`/games/${gameId}`);
     }
-  }, [gameId, navigate, updateGame]);
+    // If cancelled, isEndingRef (set by the caller when this fired from the
+    // Q4 buzzer) is deliberately left true — see handleQuarterEnd.
+  }, [gameId, navigate, updateGame, game]);
 
   const handleQuarterEnd = useCallback(() => {
     const q = quarterRef.current;
@@ -74,8 +106,11 @@ export const useGameSimulation = () => {
         isEndingRef.current = false;
       }, 3000);
     } else {
+      // Leave isEndingRef true: if the moderator cancels the "save results?"
+      // confirm below, Q4 is at 0:00 with nothing left to play, so resuming
+      // Play shouldn't silently re-fire this same confirm on the next tick.
+      // They have to use End Game (or adjust the clock) to try again.
       handleEndGame();
-      isEndingRef.current = false;
     }
   }, [handleEndGame]);
 
@@ -148,7 +183,7 @@ export const useGameSimulation = () => {
   }, []);
 
   return {
-    game, isPlaying, setIsPlaying, currentQuarter, timeRemaining,
+    game: isAuthorized ? game : null, isPlaying, setIsPlaying, currentQuarter, timeRemaining,
     setTime, resetQuarterTime, advanceQuarter, handleEndGame,
     addScore, addFoul, formatTime, showQuarterTransition, gameId, navigate,
   };

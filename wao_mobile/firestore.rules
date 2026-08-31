@@ -2,44 +2,216 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users — authenticated users can read/write their own profile
+    // ==================== HELPERS ====================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Reads the caller's own profile to find their role (fan/official/admin).
+    // Costs one extra read per rule evaluation but needs no separate
+    // custom-claims pipeline to stand up right now.
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && callerRole() == 'admin';
+    }
+
+    // Officials (mobile live-scoring) and moderators (wao-web back office)
+    // sit at the same Firestore write tier; admins can do everything either
+    // can, plus the admin-only actions below. Which humans get *into*
+    // wao-web at all (admin/moderator only, not official) is a separate,
+    // app-level gate in wao-web's AuthContext — not something rules decide.
+    function isOfficial() {
+      return isSignedIn() && (callerRole() == 'official' || callerRole() == 'moderator' || callerRole() == 'admin');
+    }
+
+    // True once at least `seconds` have passed since the document's last
+    // recorded write. Acts as a per-document cooldown — the closest thing
+    // to rate limiting Firestore rules can do without a Cloud Function
+    // holding server-side counters. Missing/legacy docs (no updatedAt yet)
+    // pass once, then fall under the cooldown from their first stamped write.
+    function pastCooldown(existingData, seconds) {
+      return request.time > existingData.get('updatedAt', timestamp.date(2000, 1, 1)) + duration.value(seconds, 's');
+    }
+
+    // The write must itself stamp updatedAt with the server time — stops a
+    // client from writing a stale/fake updatedAt to dodge the cooldown.
+    function stampsServerTime() {
+      return request.resource.data.updatedAt == request.time;
+    }
+
+    // ==================== USERS ====================
+
     match /users/{userId} {
-      allow read, write: if request.auth != null;
-      
-      // followedTeams subcollection
+      // isOfficial() already includes isAdmin() — widened from admin-only
+      // so a moderator creating a game can query for other moderator/
+      // official accounts to assign as judges (Management > Games needs
+      // this same lookup; a `where('role', '==', ...)` query is rejected
+      // outright by Firestore rules unless it can hold for every possible
+      // matching doc, not just the caller's own).
+      allow read: if isOwner(userId) || isOfficial();
+
+      // Self-registration: a user may create only their own profile, and
+      // only as the default 'fan' role — nobody can hand themselves a
+      // privileged role at signup. An admin may instead create a profile
+      // for *someone else's* uid with any role — that's how wao-web's
+      // "Add User" (Management > Users) provisions moderators/officials:
+      // the Auth account is created first, then this doc, while still
+      // signed in as the admin.
+      allow create: if (isOwner(userId) && request.resource.data.role == 'fan')
+                    || isAdmin();
+
+      // Self-service update: owner can edit their own display/preference
+      // fields, but role and createdAt aren't in the allow-list, so any
+      // attempt to touch them fails the whole write. An admin can still
+      // update anything (e.g. to grant a role).
+      allow update: if isAdmin()
+                    || (isOwner(userId)
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly([
+                               'username', 'email', 'displayName', 'photoUrl',
+                               'phone', 'bio', 'mustChangePassword',
+                               'favoriteTeamIds', 'favoriteMatchIds',
+                               'totalMatches', 'totalTeams', 'themePreference',
+                               'notificationsEnabled', 'emailNotifications',
+                               'language', 'updatedAt',
+                             ]));
+
+      allow delete: if isAdmin();
+
       match /followedTeams/{teamId} {
-        allow read, write: if request.auth != null;
+        allow read, write: if isOwner(userId);
       }
     }
 
-    // Teams — anyone authenticated can read, write allowed for seeding
+    // ==================== TEAMS ====================
+
     match /teams/{teamId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow create, update, delete: if isOfficial();
     }
 
-    // Team statistics
     match /teamStatistics/{teamId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+
+      // Derived data — officials write the match-driven fields today via
+      // TeamService; the real fix is a Cloud Function recomputing them
+      // after each finished match, so no client can hand-edit win/loss
+      // counts. totalFollowers is carved out separately because following
+      // a team is an ordinary-fan action (TeamService.updateFollowerCount),
+      // not an officiating one.
+      allow update: if isOfficial()
+                    || (isSignedIn()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['totalFollowers', 'updatedAt']));
+      allow create: if isOfficial();
+      allow delete: if isOfficial();
     }
 
-    // Players
+    match /teams/{teamId}/followers/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== PLAYERS ====================
+
     match /players/{playerId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow create, update, delete: if isOfficial();
     }
 
-    // Matches
+    // ==================== MATCHES ====================
+
     match /matches/{matchId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+
+      allow create: if isOfficial()
+                    && request.resource.data.scoreA == 0
+                    && request.resource.data.scoreB == 0
+                    && 'moderatorUid' in request.resource.data
+                    && request.resource.data.moderatorUid is string
+                    && request.resource.data.moderatorUid.size() > 0
+                    && stampsServerTime();
+
+      // Split into two update shapes rather than one blanket "official can
+      // write anything": scoring/status changes are restricted to an admin
+      // or the specific moderator assigned to *this* match (moderatorUid,
+      // set at creation) — not just any official-tier account, since the
+      // web simulate screen has no other gate keeping a moderator out of a
+      // match they weren't assigned. Favoriting is a self-service action
+      // open to any signed-in user but can only ever touch the isFavorite
+      // field.
+      allow update: if
+        (isOfficial()
+          && (isAdmin() || resource.data.moderatorUid == request.auth.uid)
+          && stampsServerTime()
+          && pastCooldown(resource.data, 2)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly([
+                 'scoreA', 'scoreB', 'status', 'statusReason', 'previousStatus',
+                 'teamAKingdom', 'teamBKingdom',
+                 'teamAWorkout', 'teamBWorkout',
+                 'teamAGoalSetting', 'teamBGoalSetting',
+                 'teamAJudges', 'teamBJudges',
+                 'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining', 'isPlaying',
+                 'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
+                 'startTime', 'venue',
+                 'updatedAt',
+               ])
+          && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0 && request.resource.data.scoreA <= 999
+          && request.resource.data.scoreB is int && request.resource.data.scoreB >= 0 && request.resource.data.scoreB <= 999)
+        ||
+        (isSignedIn()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isFavorite']));
+
+      allow delete: if isOfficial();
+
+      match /private/access {
+        // accessCode is how a game gets started/simulated. Anyone signed-in can
+        // read the parent matches doc, so the code can't live there — only an
+        // admin or the specific moderator assigned to *this* match may read it.
+        allow read: if isAdmin()
+                    || (isSignedIn()
+                        && get(/databases/$(database)/documents/matches/$(matchId)).data.moderatorUid == request.auth.uid);
+        allow write: if isOfficial();
+      }
     }
 
-    // News — anyone authenticated can read, write for seeding
-    match /news/{newsId} {
-      allow read, write: if request.auth != null;
-    }
+    // ==================== CHAMPIONSHIPS ====================
 
-    // Championships
     match /championships/{championshipId} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      // Higher-stakes, low-frequency writes — admin only, not officials.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==================== VENUES ====================
+
+    match /venues/{venueId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==================== REPORTS ====================
+
+    match /reports/{reportId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOfficial();
+      allow delete: if isAdmin();
+    }
+
+    // ==================== NEWS ====================
+
+    match /news/{newsId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
   }
 }

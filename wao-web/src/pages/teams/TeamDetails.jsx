@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  MapPin, 
-  Trophy, 
-  Users, 
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  Users,
   Award,
-  AlertCircle,
   Edit,
   Crown,
   Briefcase,
@@ -19,119 +17,132 @@ import {
   X,
   Plus,
   Save,
-  UserPlus
+  UserPlus,
+  MoreVertical
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BRAND } from '../../config/brand';
+import { useGames } from '../../context/GamesContext';
+import {
+  subscribeToTeam,
+  subscribeToTeamStats,
+  subscribeToPlayersByIds,
+  updateTeam,
+  addPlayerToTeam,
+  updatePlayer,
+  removePlayerFromTeam,
+} from '../../services/teamsService';
+
+const B = BRAND.font.body;
+const H = BRAND.font.heading;
+
+const ROLE_STYLES = {
+  King:       { icon: Crown,     bg: 'bg-violet-500' },
+  Worker:     { icon: Briefcase, bg: 'bg-sky-500' },
+  Protaque:   { icon: Shield,    bg: 'bg-emerald-500' },
+  Antaque:    { icon: Swords,    bg: 'bg-red-500' },
+  Warrior:    { icon: Zap,       bg: 'bg-amber-500' },
+  Servitor:   { icon: Heart,     bg: 'bg-pink-500' },
+  Sacrificer: { icon: Award,     bg: 'bg-fuchsia-500' },
+  Substitute: { icon: Users,     bg: 'bg-gray-400' },
+};
+
+const RESULT_STYLES = {
+  win:  { label: 'WIN',  bg: 'bg-emerald-500' },
+  loss: { label: 'LOSS', bg: 'bg-red-500' },
+  draw: { label: 'DRAW', bg: 'bg-amber-500' },
+};
+
+const INPUT = "w-full px-4 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 transition";
+const LABEL = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
 
 const TeamDetails = () => {
   const { teamId } = useParams();
   const navigate = useNavigate();
+  const { games } = useGames();
   const [activeTab, setActiveTab] = useState('roster');
-  
+
   // Modals state
   const [showEditTeamModal, setShowEditTeamModal] = useState(false);
   const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [openPlayerMenu, setOpenPlayerMenu] = useState(null);
 
-  // Sample team data - replace with your actual data source
-  const [team, setTeam] = useState({
-    id: 1,
-    name: "Thunder Lions",
-    coach: "John Smith",
-    category: "Senior",
-    gamesPlayed: 15,
-    icon: "TL",
-    description: "A powerhouse team known for aggressive gameplay and strong defensive strategies.",
-    founded: "2020",
-    stats: {
-      wins: 10,
-      losses: 3,
-      draws: 2,
-      penalties: 5,
-      goalsScored: 45,
-      goalsConceded: 23
-    },
-    players: [
-      { id: 1, name: "Marcus Johnson", role: "King", number: 1, age: 28 },
-      { id: 2, name: "David Chen", role: "Worker", number: 2, age: 25 },
-      { id: 3, name: "Alex Rodriguez", role: "Protaque", number: 3, age: 26 },
-      { id: 4, name: "James Wilson", role: "Antaque", number: 4, age: 27 },
-      { id: 5, name: "Michael Brown", role: "Warrior", number: 5, age: 29 },
-      { id: 6, name: "Chris Taylor", role: "Servitor", number: 6, age: 24 },
-      { id: 7, name: "Ryan Davis", role: "Sacrificer", number: 7, age: 26 },
-      { id: 8, name: "Kevin Lee", role: "Substitute", number: 8, age: 23 },
-      { id: 9, name: "Tom Harris", role: "Substitute", number: 9, age: 25 },
-      { id: 10, name: "Daniel White", role: "Substitute", number: 10, age: 24 },
-      { id: 11, name: "Sam Clark", role: "Substitute", number: 11, age: 22 },
-      { id: 12, name: "Jake Martin", role: "Substitute", number: 12, age: 23 }
-    ],
-    upcomingGames: [
-      {
-        id: 1,
-        team1: "Thunder Lions",
-        team2: "Phoenix Warriors",
-        date: "Feb 15, 2026",
-        time: "3:00 PM",
-        venue: "Main Arena",
-        championship: "Premier League"
-      },
-      {
-        id: 2,
-        team1: "Thunder Lions",
-        team2: "Storm Eagles",
-        date: "Feb 22, 2026",
-        time: "5:00 PM",
-        venue: "City Stadium",
-        championship: "Cup Tournament"
-      }
-    ],
-    pastGames: [
-      {
-        id: 1,
-        team1: "Thunder Lions",
-        team1Score: 3,
-        team2: "Blazing Tigers",
-        team2Score: 2,
-        date: "Feb 1, 2026",
-        venue: "Main Arena",
-        championship: "Premier League",
-        result: "win"
-      },
-      {
-        id: 2,
-        team1: "Ice Wolves",
-        team1Score: 2,
-        team2: "Thunder Lions",
-        team2Score: 2,
-        date: "Jan 25, 2026",
-        venue: "North Stadium",
-        championship: "Premier League",
-        result: "draw"
-      },
-      {
-        id: 3,
-        team1: "Thunder Lions",
-        team1Score: 1,
-        team2: "Dragon Force",
-        team2Score: 3,
-        date: "Jan 18, 2026",
-        venue: "Main Arena",
-        championship: "Cup Tournament",
-        result: "loss"
-      }
-    ]
-  });
+  useEffect(() => {
+    const closeMenu = (e) => {
+      if (!e.target.closest('[data-actions-menu]')) setOpenPlayerMenu(null);
+    };
+    document.addEventListener('click', closeMenu);
+    return () => document.removeEventListener('click', closeMenu);
+  }, []);
+
+  // Live Firestore data: the team doc itself, its teamStatistics doc (may
+  // not exist yet for a brand-new team — subscribeToTeamStats already
+  // normalizes that to all-zeros), and the actual player docs for every id
+  // across the 8 roster arrays.
+  const [team, setTeam] = useState(null);
+  const [teamLoading, setTeamLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [players, setPlayers] = useState([]);
+
+  useEffect(() => {
+    setTeamLoading(true);
+    return subscribeToTeam(
+      teamId,
+      (t) => { setTeam(t); setTeamLoading(false); },
+      () => setTeamLoading(false)
+    );
+  }, [teamId]);
+
+  useEffect(() => subscribeToTeamStats(teamId, setStats, () => setStats(null)), [teamId]);
+
+  const rosterIds = useMemo(
+    () => (team ? Object.values(team.roster).flat() : []),
+    [team]
+  );
+  const rosterKey = rosterIds.join(',');
+
+  useEffect(() => {
+    if (!team) { setPlayers([]); return undefined; }
+    return subscribeToPlayersByIds(rosterIds, setPlayers, () => setPlayers([]));
+    // rosterIds is recomputed every render; rosterKey is its stable identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [team?.id, rosterKey]);
+
+  // This team's games, reusing GamesContext's live `games` array instead of
+  // a separate query — see matchesService.docToGame for the full shape.
+  const teamGames = useMemo(
+    () => games.filter((g) => g.homeTeamId === teamId || g.awayTeamId === teamId),
+    [games, teamId]
+  );
+  const upcomingGames = useMemo(
+    () => teamGames
+      .filter((g) => g.status === 'upcoming')
+      .map((g) => ({ id: g.id, team1: g.homeTeam, team2: g.awayTeam, date: g.date, time: g.time, venue: g.venue, championship: g.championship })),
+    [teamGames]
+  );
+  const pastGames = useMemo(
+    () => teamGames
+      .filter((g) => g.status === 'completed')
+      .map((g) => {
+        const isHome = g.homeTeamId === teamId;
+        const ownScore = isHome ? g.homeScore : g.awayScore;
+        const oppScore = isHome ? g.awayScore : g.homeScore;
+        const result = ownScore === oppScore ? 'draw' : ownScore > oppScore ? 'win' : 'loss';
+        return {
+          id: g.id, team1: g.homeTeam, team2: g.awayTeam,
+          team1Score: g.homeScore, team2Score: g.awayScore,
+          date: g.date, venue: g.venue, championship: g.championship, result,
+        };
+      }),
+    [teamGames, teamId]
+  );
 
   // Form states
   const [teamForm, setTeamForm] = useState({
-    name: team.name,
-    coach: team.coach,
-    category: team.category,
-    description: team.description,
-    founded: team.founded,
-    icon: team.icon
+    name: '', coach: '', category: 'Senior', description: '', founded: '', icon: ''
   });
 
   const [playerForm, setPlayerForm] = useState({
@@ -143,35 +154,9 @@ const TeamDetails = () => {
 
   const availableRoles = ['King', 'Worker', 'Protaque', 'Antaque', 'Warrior', 'Servitor', 'Sacrificer', 'Substitute'];
 
-  const getRoleIcon = (role) => {
-    switch(role) {
-      case 'King': return <Crown className="w-4 h-4" />;
-      case 'Worker': return <Briefcase className="w-4 h-4" />;
-      case 'Protaque': return <Shield className="w-4 h-4" />;
-      case 'Antaque': return <Swords className="w-4 h-4" />;
-      case 'Warrior': return <Zap className="w-4 h-4" />;
-      case 'Servitor': return <Heart className="w-4 h-4" />;
-      case 'Sacrificer': return <Award className="w-4 h-4" />;
-      default: return <Users className="w-4 h-4" />;
-    }
-  };
-
-  const getRoleColor = (role) => {
-    const colors = {
-      'King': 'from-purple-500 to-purple-700',
-      'Worker': 'from-blue-500 to-blue-700',
-      'Protaque': 'from-green-500 to-green-700',
-      'Antaque': 'from-red-500 to-red-700',
-      'Warrior': 'from-orange-500 to-orange-700',
-      'Servitor': 'from-pink-500 to-pink-700',
-      'Sacrificer': 'from-yellow-500 to-yellow-700',
-      'Substitute': 'from-gray-400 to-gray-600'
-    };
-    return colors[role] || 'from-gray-400 to-gray-600';
-  };
-
   // Team CRUD Functions
   const handleEditTeam = () => {
+    if (!team) return;
     setTeamForm({
       name: team.name,
       coach: team.coach,
@@ -183,12 +168,20 @@ const TeamDetails = () => {
     setShowEditTeamModal(true);
   };
 
-  const handleSaveTeam = () => {
-    setTeam({
-      ...team,
-      ...teamForm
-    });
-    setShowEditTeamModal(false);
+  const handleSaveTeam = async () => {
+    try {
+      await updateTeam(teamId, {
+        name: teamForm.name,
+        coach: teamForm.coach,
+        category: teamForm.category.toLowerCase(),
+        description: teamForm.description,
+        founded: teamForm.founded,
+        icon: teamForm.icon.toUpperCase(),
+      });
+      setShowEditTeamModal(false);
+    } catch (err) {
+      alert('Failed to update team. Please try again.');
+    }
   };
 
   // Player CRUD Functions
@@ -196,30 +189,30 @@ const TeamDetails = () => {
     setPlayerForm({
       name: '',
       role: 'Substitute',
-      number: team.players.length + 1,
+      number: players.length + 1,
       age: ''
     });
     setShowAddPlayerModal(true);
   };
 
-  const handleSaveNewPlayer = () => {
+  const handleSaveNewPlayer = async () => {
     if (!playerForm.name || !playerForm.age) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const newPlayer = {
-      id: team.players.length + 1,
-      ...playerForm,
-      number: parseInt(playerForm.number),
-      age: parseInt(playerForm.age)
-    };
-
-    setTeam({
-      ...team,
-      players: [...team.players, newPlayer]
-    });
-    setShowAddPlayerModal(false);
+    try {
+      await addPlayerToTeam(teamId, {
+        name: playerForm.name,
+        role: playerForm.role,
+        number: playerForm.number,
+        age: playerForm.age,
+        teamName: team?.name,
+      });
+      setShowAddPlayerModal(false);
+    } catch (err) {
+      alert('Failed to add player. Please try again.');
+    }
   };
 
   const handleEditPlayer = (player) => {
@@ -230,450 +223,387 @@ const TeamDetails = () => {
       number: player.number,
       age: player.age
     });
+    setOpenPlayerMenu(null);
     setShowEditPlayerModal(true);
   };
 
-  const handleSavePlayer = () => {
-    setTeam({
-      ...team,
-      players: team.players.map(p => 
-        p.id === selectedPlayer.id 
-          ? { ...p, ...playerForm, number: parseInt(playerForm.number), age: parseInt(playerForm.age) }
-          : p
-      )
-    });
-    setShowEditPlayerModal(false);
+  const handleSavePlayer = async () => {
+    if (!selectedPlayer) return;
+    try {
+      await updatePlayer(
+        selectedPlayer.id,
+        { name: playerForm.name, role: playerForm.role, number: playerForm.number, age: playerForm.age },
+        { teamId, previousRoleValue: selectedPlayer.roleValue }
+      );
+      setShowEditPlayerModal(false);
+    } catch (err) {
+      alert('Failed to update player. Please try again.');
+    }
   };
 
   const handleDeletePlayerConfirm = (player) => {
     setSelectedPlayer(player);
+    setOpenPlayerMenu(null);
     setShowDeletePlayerModal(true);
   };
 
-  const handleDeletePlayer = () => {
-    setTeam({
-      ...team,
-      players: team.players.filter(p => p.id !== selectedPlayer.id)
-    });
-    setShowDeletePlayerModal(false);
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer) return;
+    try {
+      await removePlayerFromTeam(teamId, selectedPlayer.id, selectedPlayer.roleValue);
+      setShowDeletePlayerModal(false);
+    } catch (err) {
+      alert('Failed to remove player. Please try again.');
+    }
   };
 
-  return (
-    <section className="scrollbar-hide px-2 py-4 md:p-4 pb-8">
-      {/* Header Section */}
-      <div className="bg-gradient-to-br from-[#011B3B] to-[#022d5f] rounded-lg shadow-lg p-6 mb-6 relative overflow-hidden">
-        {/* Background Ball */}
-        <div className="absolute -right-20 -top-20 opacity-10">
-          <img
-            src="/assets/design/wao-ball.png"
-            alt="ball gradient"
-            className="w-60 h-60 object-contain"
-          />
+  const PlayerCard = ({ player }) => {
+    const { icon: RoleIcon, bg } = ROLE_STYLES[player.role] ?? ROLE_STYLES.Substitute;
+    return (
+      <div className="bg-gray-50 border border-gray-100 p-4 hover:bg-gray-100 transition-colors">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-11 h-11 ${bg} flex items-center justify-center text-white font-bold flex-shrink-0`} style={{ fontFamily: H }}>
+              {player.number}
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-[#011B3B] text-sm truncate" style={{ fontFamily: B }}>{player.name}</p>
+              <div className="flex items-center gap-1 text-xs text-gray-500" style={{ fontFamily: B }}>
+                <RoleIcon className="w-3 h-3" />
+                <span>{player.role}</span>
+                <span>·</span>
+                <span>{player.age}y</span>
+              </div>
+            </div>
+          </div>
+          <div className="relative flex-shrink-0" data-actions-menu>
+            <button
+              onClick={(e) => { e.stopPropagation(); setOpenPlayerMenu(openPlayerMenu === player.id ? null : player.id); }}
+              className="p-1.5 hover:bg-gray-200 rounded transition-colors"
+              title="Actions"
+            >
+              <MoreVertical className="w-4 h-4 text-gray-400" />
+            </button>
+            {openPlayerMenu === player.id && (
+              <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-100 shadow-lg rounded-sm z-20" data-actions-menu>
+                <button onClick={() => handleEditPlayer(player)} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50" style={{ fontFamily: B }}>
+                  <Edit className="w-3.5 h-3.5" /> Edit
+                </button>
+                <button onClick={() => handleDeletePlayerConfirm(player)} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 border-t border-gray-50" style={{ fontFamily: B }}>
+                  <Trash2 className="w-3.5 h-3.5" /> Remove
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+    );
+  };
+
+  if (teamLoading) {
+    return (
+      <section className="flex items-center justify-center py-24">
+        <p className="text-gray-400 text-sm" style={{ fontFamily: B }}>Loading team...</p>
+      </section>
+    );
+  }
+
+  if (!team) {
+    return (
+      <section className="flex flex-col items-center justify-center gap-3 py-24">
+        <p className="text-gray-500 text-sm" style={{ fontFamily: B }}>Team not found.</p>
+        <button
+          onClick={() => navigate('/teams')}
+          className="text-sm text-[#011B3B] underline"
+          style={{ fontFamily: B }}
+        >
+          Back to Teams
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className="scrollbar-hide px-2 py-2 md:p-4 pb-8">
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-[#011B3B] to-[#022d5f] shadow-lg p-5 mb-5 relative overflow-hidden">
+        {/* Background Ball */}
+        <img
+          src="/assets/design/wao-ball.png"
+          alt=""
+          aria-hidden
+          className="absolute -right-16 -top-16 w-64 h-64 object-contain opacity-10 pointer-events-none"
+        />
 
         <div className="relative z-10">
           {/* Back Button */}
           <button
             onClick={() => navigate('/teams')}
-            className="flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-1.5 text-white/70 hover:text-white mb-4 text-sm transition-colors"
+            style={{ fontFamily: B }}
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm">Back to Teams</span>
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Teams</span>
           </button>
 
           {/* Team Info */}
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                <span className="text-white font-bold text-lg md:text-2xl">{team.icon}</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-amber-400 flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-medium text-lg md:text-xl" style={{ fontFamily: H }}>{team.icon}</span>
               </div>
-              <div>
-                <h1 className="text-xl md:text-3xl font-bold text-white mb-1">{team.name}</h1>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-white/80 text-xs md:text-sm">
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl text-white truncate" style={{ fontFamily: H }}>{team.name}</h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-white/60 text-xs md:text-sm mt-1" style={{ fontFamily: B }}>
                   <span>Coach: {team.coach}</span>
-                  <span className="hidden sm:inline">•</span>
+                  <span className="hidden sm:inline">·</span>
                   <span>{team.category}</span>
                 </div>
               </div>
             </div>
             <button
               onClick={handleEditTeam}
-              className="flex items-center gap-1.5 px-3 py-2 md:px-6 md:py-3 bg-white text-[#011B3B] font-semibold rounded-lg hover:shadow-lg transition-all duration-200 text-sm flex-shrink-0"
+              className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white text-[#011B3B] font-semibold uppercase tracking-wide hover:bg-gray-100 transition-colors text-xs md:text-sm flex-shrink-0"
+              style={{ fontFamily: B }}
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
               <span>Edit</span>
             </button>
           </div>
         </div>
       </div>
 
+      {/* Season Stats — teamStatistics/{teamId}, same schema wao_mobile's TeamStatistics writes/reads */}
+      <div className="bg-white border border-gray-100 mb-5 grid grid-cols-3 md:grid-cols-6 divide-x divide-gray-100">
+        {[
+          { label: 'Played', value: stats?.totalGamesPlayed ?? 0 },
+          { label: 'Won', value: stats?.wins ?? 0 },
+          { label: 'Drawn', value: stats?.draws ?? 0 },
+          { label: 'Lost', value: stats?.losses ?? 0 },
+          { label: 'Goal Diff', value: (stats?.goalsScored ?? 0) - (stats?.goalsConceded ?? 0) },
+          { label: 'Points', value: (stats?.wins ?? 0) * 3 + (stats?.draws ?? 0) },
+        ].map(({ label, value }) => (
+          <div key={label} className="p-3 md:p-4 text-center">
+            <p className="text-lg md:text-xl font-semibold text-[#011B3B]" style={{ fontFamily: H }}>{value}</p>
+            <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wide mt-0.5" style={{ fontFamily: B }}>{label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow-sm mb-6">
-        <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
-          <button
-            onClick={() => setActiveTab('roster')}
-            className={`px-6 py-4 font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'roster'
-                ? 'text-[#D30336] border-b-2 border-[#D30336]'
-                : 'text-gray-600 hover:text-[#011B3B]'
-            }`}
-          >
-            Team Roster
-          </button>
-          <button
-            onClick={() => setActiveTab('upcoming')}
-            className={`px-6 py-4 font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'upcoming'
-                ? 'text-[#D30336] border-b-2 border-[#D30336]'
-                : 'text-gray-600 hover:text-[#011B3B]'
-            }`}
-          >
-            Upcoming Games
-          </button>
-          <button
-            onClick={() => setActiveTab('past')}
-            className={`px-6 py-4 font-medium whitespace-nowrap transition-colors ${
-              activeTab === 'past'
-                ? 'text-[#D30336] border-b-2 border-[#D30336]'
-                : 'text-gray-600 hover:text-[#011B3B]'
-            }`}
-          >
-            Past Games
-          </button>
+      <div className="bg-white border border-gray-100 mb-5">
+        <div className="flex border-b border-gray-100 overflow-x-auto scrollbar-hide">
+          {[
+            { key: 'roster', label: 'Team Roster' },
+            { key: 'upcoming', label: 'Upcoming Games' },
+            { key: 'past', label: 'Past Games' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`px-5 py-3.5 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${
+                activeTab === key ? 'text-[#c81434] border-[#c81434]' : 'text-gray-500 border-transparent hover:text-[#011B3B]'
+              }`}
+              style={{ fontFamily: B }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'roster' && (
-        <div className="bg-white rounded-lg shadow-sm p-3 md:p-6">
-          <div className="flex flex-col gap-2 mb-4">
-            <h3 className="text-lg font-bold text-[#011B3B]">Team Roster ({team.players.length}/12 Players)</h3>
+        <div className="bg-white border border-gray-100 p-3 md:p-5">
+          <div className="flex flex-col gap-2 mb-5">
+            <h3 className="text-[#011B3B] uppercase tracking-widest text-sm" style={{ fontFamily: B }}>
+              Team Roster ({players.length}/12 Players)
+            </h3>
             <button
               onClick={handleAddPlayer}
-              disabled={team.players.length >= 12}
-              className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-medium transition-all ${
-                team.players.length >= 12
+              disabled={players.length >= 12}
+              className={`flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                players.length >= 12
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-br from-[#FFC600] to-[#FF6B35] text-white hover:shadow-lg'
+                  : 'text-white'
               }`}
+              style={players.length >= 12 ? { fontFamily: B } : { fontFamily: B, backgroundColor: BRAND.primary }}
+              onMouseEnter={e => { if (players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
+              onMouseLeave={e => { if (players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primary; }}
             >
               <UserPlus className="w-4 h-4" />
               <span>Add Player</span>
             </button>
           </div>
-          
+
           {/* Starting Seven */}
           <div className="mb-6">
-            <h4 className="text-md font-semibold text-gray-700 mb-3">Starting Seven</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {team.players.filter(p => p.role !== 'Substitute').map((player) => (
-                <div key={player.id} className="bg-gradient-to-br from-gray-50 to-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${getRoleColor(player.role)} rounded-full flex items-center justify-center text-white font-bold`}>
-                        {player.number}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-[#011B3B]">{player.name}</p>
-                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                          {getRoleIcon(player.role)}
-                          <span>{player.role}</span>
-                          <span>•</span>
-                          <span>{player.age}y</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => handleEditPlayer(player)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4 text-[#011B3B]" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePlayerConfirm(player)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-[#D30336]" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>Starting Seven</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {players.filter(p => p.role !== 'Substitute').map((player) => (
+                <PlayerCard key={player.id} player={player} />
               ))}
             </div>
+            {players.filter(p => p.role !== 'Substitute').length === 0 && (
+              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No starters added yet.</p>
+            )}
           </div>
 
           {/* Substitutes */}
           <div>
-            <h4 className="text-md font-semibold text-gray-700 mb-3">Substitutes ({team.players.filter(p => p.role === 'Substitute').length}/5)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {team.players.filter(p => p.role === 'Substitute').map((player) => (
-                <div key={player.id} className="bg-gradient-to-br from-gray-50 to-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${getRoleColor(player.role)} rounded-full flex items-center justify-center text-white font-bold`}>
-                        {player.number}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-[#011B3B]">{player.name}</p>
-                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                          <Users className="w-3 h-3" />
-                          <span>{player.role}</span>
-                          <span>•</span>
-                          <span>{player.age}y</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => handleEditPlayer(player)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4 text-[#011B3B]" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePlayerConfirm(player)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-[#D30336]" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>
+              Substitutes ({players.filter(p => p.role === 'Substitute').length}/5)
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {players.filter(p => p.role === 'Substitute').map((player) => (
+                <PlayerCard key={player.id} player={player} />
               ))}
             </div>
+            {players.filter(p => p.role === 'Substitute').length === 0 && (
+              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No substitutes added yet.</p>
+            )}
           </div>
         </div>
       )}
 
       {activeTab === 'upcoming' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {team.upcomingGames.map((game) => (
-              <div
-                key={game.id}
-                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 overflow-hidden shadow-sm border border-gray-100"
-              >
-                {/* Teams Section */}
-                <div className="flex items-center justify-between mb-4 relative z-10">
-                  {/* Team 1 */}
-                  <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
-                      {/* Small ball image cutting into the team icon */}
-                      <div className="absolute -left-15 -top-18 w-30 h-30 opacity-40 pointer-events-none">
-                        <img
-                          src="/assets/design/wao-ball.png"
-                          alt="ball"
-                          className="w-full h-full object-contain brightness-0 invert opacity-80"
-                        />
-                      </div>
+          {upcomingGames.length === 0 && (
+            <p className="text-sm text-gray-400 col-span-full py-8 text-center" style={{ fontFamily: B }}>No upcoming games scheduled.</p>
+          )}
+          {upcomingGames.map((game) => (
+            <div key={game.id} className="bg-white border border-gray-100 p-4">
+              {/* Championship */}
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide text-center mb-4" style={{ fontFamily: B }}>
+                {game.championship}
+              </p>
 
-                      <span className="text-white font-bold text-sm relative z-10">
-                        {game.team1.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-[12px] font-semibold text-center line-clamp-1">
-                      {game.team1}
-                    </p>
+              {/* Teams */}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-md mb-1.5">
+                    <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{game.team1.substring(0, 2).toUpperCase()}</span>
                   </div>
-
-                  {/* VS Badge */}
-                  <div className="flex flex-col items-center mx-3">
-                    <div className="bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] px-4 py-2 rounded-lg shadow-md">
-                      <span className="text-white font-bold text-sm">VS</span>
-                    </div>
-                    <div className="mt-2 text-center">
-                      <p className="text-[#FFC600] text-xs font-semibold">{game.time}</p>
-                    </div>
-                  </div>
-
-                  {/* Team 2 */}
-                  <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
-                      {/* Small ball image cutting into the team icon */}
-                      <div className="absolute -right-15 -bottom-18 w-30 h-30 opacity-40 pointer-events-none">
-                        <img
-                          src="/assets/design/wao-ball.png"
-                          alt="ball"
-                          className="w-full h-full object-contain brightness-0 invert opacity-80"
-                        />
-                      </div>
-
-                      <span className="text-white font-bold text-sm relative z-10">
-                        {game.team2.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-[12px] font-semibold text-center line-clamp-1">
-                      {game.team2}
-                    </p>
-                  </div>
+                  <p className="text-xs font-semibold text-[#011B3B] text-center line-clamp-1" style={{ fontFamily: B }}>{game.team1}</p>
                 </div>
 
-                {/* Championship */}
-                <div className="text-center mb-3 relative z-10">
-                  <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
-                    {game.championship}
-                  </p>
-                </div>
+                <div className="bg-[#011B3B] text-white text-xs font-bold px-3 py-1.5" style={{ fontFamily: B }}>VS</div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200 my-3"></div>
-
-                {/* Info */}
-                <div className="flex items-center justify-between text-xs relative z-10">
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{game.venue}</span>
+                <div className="flex flex-col items-center flex-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#c81434] to-[#a8022b] rounded-full flex items-center justify-center shadow-md mb-1.5">
+                    <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{game.team2.substring(0, 2).toUpperCase()}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{game.date}</span>
-                  </div>
+                  <p className="text-xs font-semibold text-[#011B3B] text-center line-clamp-1" style={{ fontFamily: B }}>{game.team2}</p>
                 </div>
               </div>
-            ))}
+
+              {/* Meta */}
+              <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-100 pt-3" style={{ fontFamily: B }}>
+                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{game.venue}</span>
+                <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{game.date} · {game.time}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
       {activeTab === 'past' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {team.pastGames.map((game) => (
-              <div
-                key={game.id}
-                className="w-full bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 relative overflow-hidden shadow-sm border border-gray-100"
-              >
-                {/* Win/Loss/Draw Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-                    game.result === 'win' ? 'bg-green-500' :
-                    game.result === 'loss' ? 'bg-red-500' :
-                    'bg-yellow-500'
-                  }`}>
-                    {game.result === 'win' ? 'WIN' : game.result === 'loss' ? 'LOSS' : 'DRAW'}
-                  </div>
-                </div>
-
-                {/* Teams Section with Scores */}
-                <div className="flex items-center justify-between mb-4 mt-8 relative z-10">
-                  {/* Team 1 */}
-                  <div className="flex flex-col items-center flex-1">
-                    <div className="w-14 h-14 bg-yellow-400 rounded-full flex items-center justify-center mb-2 shadow-md">
-                      <span className="text-white font-bold text-sm">
-                        {game.team1.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-[12px] font-semibold text-center line-clamp-1 mb-1">
-                      {game.team1}
-                    </p>
-                    <p className="text-2xl font-bold text-[#011B3B]">{game.team1Score}</p>
-                  </div>
-
-                  {/* VS Badge */}
-                  <div className="flex flex-col items-center mx-3">
-                    <div className="bg-gradient-to-br from-[#3a3a3a] to-[#2a2a2a] px-4 py-2 rounded-lg shadow-md">
-                      <span className="text-white font-bold text-sm">FT</span>
-                    </div>
-                  </div>
-
-                  {/* Team 2 */}
-                  <div className="flex flex-col items-center flex-1">
-                   <div className="w-14 h-14 bg-[#A50229] rounded-full flex items-center justify-center mb-2 relative shadow-md overflow-visible">
-                      {/* Small ball image cutting into the team icon */}
-                      <div className="absolute -right-15 -bottom-18 w-30 h-30 opacity-40 pointer-events-none">
-                        <img
-                          src="/assets/design/wao-ball.png"
-                          alt="ball"
-                          className="w-full h-full object-contain brightness-0 invert opacity-80"
-                        />
-                      </div>
-
-                      <span className="text-white font-bold text-sm relative z-10">
-                        {game.team2.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-[12px] font-semibold text-center line-clamp-1 mb-1">
-                      {game.team2}
-                    </p>
-                    <p className="text-2xl font-bold text-[#011B3B]">{game.team2Score}</p>
-                  </div>
-                </div>
-
-                {/* Championship */}
-                <div className="text-center mb-3 relative z-10">
-                  <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
+          {pastGames.length === 0 && (
+            <p className="text-sm text-gray-400 col-span-full py-8 text-center" style={{ fontFamily: B }}>No past games yet.</p>
+          )}
+          {pastGames.map((game) => {
+            const { label: resultLabel, bg: resultBg } = RESULT_STYLES[game.result] ?? RESULT_STYLES.draw;
+            return (
+              <div key={game.id} className="bg-white border border-gray-100 p-4 relative">
+                {/* Result badge */}
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wide" style={{ fontFamily: B }}>
                     {game.championship}
                   </p>
+                  <span className={`${resultBg} text-white text-xs font-bold px-2.5 py-1`} style={{ fontFamily: B }}>{resultLabel}</span>
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-200 my-3"></div>
+                {/* Teams + Scores */}
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex flex-col items-center flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] rounded-full flex items-center justify-center shadow-md mb-1.5">
+                      <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{game.team1.substring(0, 2).toUpperCase()}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#011B3B] text-center line-clamp-1 mb-1" style={{ fontFamily: B }}>{game.team1}</p>
+                    <p className="text-2xl text-[#011B3B]" style={{ fontFamily: H }}>{game.team1Score}</p>
+                  </div>
 
-                {/* Info */}
-                <div className="flex items-center justify-between text-xs relative z-10">
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{game.venue}</span>
+                  <div className="bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1.5" style={{ fontFamily: B }}>FT</div>
+
+                  <div className="flex flex-col items-center flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#c81434] to-[#a8022b] rounded-full flex items-center justify-center shadow-md mb-1.5">
+                      <span className="text-white font-bold text-xs" style={{ fontFamily: H }}>{game.team2.substring(0, 2).toUpperCase()}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#011B3B] text-center line-clamp-1 mb-1" style={{ fontFamily: B }}>{game.team2}</p>
+                    <p className="text-2xl text-[#011B3B]" style={{ fontFamily: H }}>{game.team2Score}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{game.date}</span>
-                  </div>
+                </div>
+
+                {/* Meta */}
+                <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-100 pt-3" style={{ fontFamily: B }}>
+                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{game.venue}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{game.date}</span>
                 </div>
               </div>
-            ))}
+            );
+          })}
         </div>
       )}
 
       {/* Edit Team Modal */}
       {showEditTeamModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowEditTeamModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setShowEditTeamModal(false)} className="absolute top-4 right-4 text-gray-300 hover:text-gray-500 transition-colors">
+              <X className="w-4 h-4" />
             </button>
 
-            <h3 className="text-xl font-bold text-[#011B3B] mb-6">Edit Team Information</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wide" style={{ fontFamily: B }}>Edit Team Information</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Team Name</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Team Name</label>
                 <input
                   type="text"
                   value={teamForm.name}
                   onChange={(e) => setTeamForm({...teamForm, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={INPUT} style={{ fontFamily: B }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Team Icon (2 letters)</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Team Icon (2 letters)</label>
                 <input
                   type="text"
                   maxLength={2}
                   value={teamForm.icon}
                   onChange={(e) => setTeamForm({...teamForm, icon: e.target.value.toUpperCase()})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={INPUT} style={{ fontFamily: B }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Coach Name</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Coach Name</label>
                 <input
                   type="text"
                   value={teamForm.coach}
                   onChange={(e) => setTeamForm({...teamForm, coach: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={INPUT} style={{ fontFamily: B }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Category</label>
                 <select
                   value={teamForm.category}
                   onChange={(e) => setTeamForm({...teamForm, category: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={`${INPUT} appearance-none cursor-pointer`} style={{ fontFamily: B }}
                 >
                   <option value="Senior">Senior</option>
                   <option value="Junior">Junior</option>
@@ -682,19 +612,22 @@ const TeamDetails = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowEditTeamModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors rounded-sm"
+                style={{ fontFamily: B }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveTeam}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 text-sm font-semibold text-white transition-colors rounded-sm flex items-center justify-center gap-2"
+                style={{ fontFamily: B, backgroundColor: '#111' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#333'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#111'}
               >
-                <Save className="w-4 h-4" />
-                Save Changes
+                <Save className="w-4 h-4" /> Save Changes
               </button>
             </div>
           </div>
@@ -703,35 +636,32 @@ const TeamDetails = () => {
 
       {/* Add Player Modal */}
       {showAddPlayerModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={() => setShowAddPlayerModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6 relative">
+            <button onClick={() => setShowAddPlayerModal(false)} className="absolute top-4 right-4 text-gray-300 hover:text-gray-500 transition-colors">
+              <X className="w-4 h-4" />
             </button>
 
-            <h3 className="text-xl font-bold text-[#011B3B] mb-6">Add New Player</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wide" style={{ fontFamily: B }}>Add New Player</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Player Name *</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Player Name *</label>
                 <input
                   type="text"
                   value={playerForm.name}
                   onChange={(e) => setPlayerForm({...playerForm, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={INPUT} style={{ fontFamily: B }}
                   placeholder="Enter player name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Role</label>
                 <select
                   value={playerForm.role}
                   onChange={(e) => setPlayerForm({...playerForm, role: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={`${INPUT} appearance-none cursor-pointer`} style={{ fontFamily: B }}
                 >
                   {availableRoles.map(role => (
                     <option key={role} value={role}>{role}</option>
@@ -740,43 +670,44 @@ const TeamDetails = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jersey Number</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Jersey Number</label>
                 <input
                   type="number"
                   value={playerForm.number}
                   onChange={(e) => setPlayerForm({...playerForm, number: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                  min="1"
-                  max="14"
+                  className={INPUT} style={{ fontFamily: B }}
+                  min="1" max="14"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Age *</label>
                 <input
                   type="number"
                   value={playerForm.age}
                   onChange={(e) => setPlayerForm({...playerForm, age: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                  min="16"
-                  max="50"
+                  className={INPUT} style={{ fontFamily: B }}
+                  min="16" max="50"
                 />
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowAddPlayerModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors rounded-sm"
+                style={{ fontFamily: B }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveNewPlayer}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#FFC600] to-[#FF6B35] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 text-sm font-semibold text-white transition-colors rounded-sm flex items-center justify-center gap-2"
+                style={{ fontFamily: B, backgroundColor: BRAND.primary }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
               >
-                <Plus className="w-4 h-4" />
-                Add Player
+                <Plus className="w-4 h-4" /> Add Player
               </button>
             </div>
           </div>
@@ -785,34 +716,31 @@ const TeamDetails = () => {
 
       {/* Edit Player Modal */}
       {showEditPlayerModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={() => setShowEditPlayerModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6 relative">
+            <button onClick={() => setShowEditPlayerModal(false)} className="absolute top-4 right-4 text-gray-300 hover:text-gray-500 transition-colors">
+              <X className="w-4 h-4" />
             </button>
 
-            <h3 className="text-xl font-bold text-[#011B3B] mb-6">Edit Player</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wide" style={{ fontFamily: B }}>Edit Player</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Player Name</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Player Name</label>
                 <input
                   type="text"
                   value={playerForm.name}
                   onChange={(e) => setPlayerForm({...playerForm, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={INPUT} style={{ fontFamily: B }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Role</label>
                 <select
                   value={playerForm.role}
                   onChange={(e) => setPlayerForm({...playerForm, role: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
+                  className={`${INPUT} appearance-none cursor-pointer`} style={{ fontFamily: B }}
                 >
                   {availableRoles.map(role => (
                     <option key={role} value={role}>{role}</option>
@@ -821,43 +749,44 @@ const TeamDetails = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Jersey Number</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Jersey Number</label>
                 <input
                   type="number"
                   value={playerForm.number}
                   onChange={(e) => setPlayerForm({...playerForm, number: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                  min="1"
-                  max="99"
+                  className={INPUT} style={{ fontFamily: B }}
+                  min="1" max="99"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                <label className={LABEL} style={{ fontFamily: B }}>Age</label>
                 <input
                   type="number"
                   value={playerForm.age}
                   onChange={(e) => setPlayerForm({...playerForm, age: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D30336]"
-                  min="16"
-                  max="50"
+                  className={INPUT} style={{ fontFamily: B }}
+                  min="16" max="50"
                 />
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowEditPlayerModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors rounded-sm"
+                style={{ fontFamily: B }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSavePlayer}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#011B3B] to-[#022d5f] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 text-sm font-semibold text-white transition-colors rounded-sm flex items-center justify-center gap-2"
+                style={{ fontFamily: B, backgroundColor: '#111' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#333'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#111'}
               >
-                <Save className="w-4 h-4" />
-                Save Changes
+                <Save className="w-4 h-4" /> Save Changes
               </button>
             </div>
           </div>
@@ -866,37 +795,38 @@ const TeamDetails = () => {
 
       {/* Delete Player Modal */}
       {showDeletePlayerModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={() => setShowDeletePlayerModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6 relative">
+            <button onClick={() => setShowDeletePlayerModal(false)} className="absolute top-4 right-4 text-gray-300 hover:text-gray-500 transition-colors">
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-8 h-8 text-[#D30336]" />
+            <div className="w-12 h-12 rounded-sm flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${BRAND.primary}15` }}>
+              <Trash2 className="w-5 h-5" style={{ color: BRAND.primary }} />
             </div>
 
-            <h3 className="text-xl font-bold text-[#011B3B] text-center mb-2">
+            <h3 className="text-base font-semibold text-gray-900 text-center mb-1 uppercase tracking-wide" style={{ fontFamily: B }}>
               Remove Player
             </h3>
 
-            <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to remove <span className="font-semibold text-[#011B3B]">{selectedPlayer?.name}</span> from the team? This action cannot be undone.
+            <p className="text-sm text-gray-400 text-center mb-6" style={{ fontFamily: B }}>
+              Are you sure you want to remove <span className="font-semibold text-gray-700">{selectedPlayer?.name}</span> from the team? This cannot be undone.
             </p>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowDeletePlayerModal(false)}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors rounded-sm"
+                style={{ fontFamily: B }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeletePlayer}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
+                className="flex-1 py-2.5 text-sm font-semibold text-white transition-colors rounded-sm"
+                style={{ fontFamily: B, backgroundColor: BRAND.primary }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
               >
                 Remove
               </button>

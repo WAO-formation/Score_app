@@ -1107,6 +1107,12 @@ class _PastMatchDetailsState extends State<PastMatchDetails> with SingleTickerPr
       case PlayerRole.sacrificer:
         iconData = Icons.favorite;
         break;
+      case PlayerRole.servitor:
+        iconData = Icons.support_agent;
+        break;
+      case PlayerRole.substitute:
+        iconData = Icons.swap_horiz;
+        break;
     }
 
     return Icon(

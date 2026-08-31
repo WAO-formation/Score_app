@@ -30,6 +30,7 @@ class AuthService {
             username: username,
             email: email,
             createdAt: DateTime.now(),
+            accountRole: AccountRole.fan,
           );
 
           await _db
@@ -83,6 +84,7 @@ class AuthService {
           email: user.email ?? '',
           displayName: user.displayName,
           createdAt: DateTime.now(),
+          accountRole: AccountRole.fan,
         );
         await _db
             .collection('users')
@@ -126,9 +128,20 @@ class AuthService {
     }
   }
 
-  // Update user profile
+  // Update user profile.
+  // accountRole/createdAt are never editable through this path — only an
+  // admin can change a role, and only via a separate admin-only write.
+  // firestore.rules enforces this too; stripping here just fails fast.
+  static const _selfServiceOnly = {
+    'username', 'email', 'displayName', 'photoUrl', 'favoriteTeamIds',
+    'favoriteMatchIds', 'totalMatches', 'totalTeams', 'themePreference',
+    'notificationsEnabled', 'emailNotifications', 'language',
+  };
+
   Future<void> updateUserProfile(String uid, Map<String, dynamic> updates) async {
     try {
+      updates = Map.of(updates)
+        ..removeWhere((key, _) => !_selfServiceOnly.contains(key));
       updates['updatedAt'] = FieldValue.serverTimestamp();
       await _db.collection('users').doc(uid).update(updates);
     } catch (e) {

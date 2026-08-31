@@ -1,0 +1,13 @@
+{
+  "firestore": {
+    "rules": "wao_mobile/firestore.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8085
+    },
+    "ui": {
+      "enabled": false
+    }
+  }
+}

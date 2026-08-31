@@ -21,6 +21,7 @@ const CreateTeam = ({ isOpen, onClose, onCreateTeam }) => {
     number: 1,
     age: ''
   });
+  const [saving, setSaving] = useState(false);
 
   const availableRoles = [
     'King',
@@ -107,32 +108,36 @@ const CreateTeam = ({ isOpen, onClose, onCreateTeam }) => {
     setStep(2);
   };
 
-  const handleCreateTeam = () => {
+  // Builds a plain input object and hands it to the parent-supplied
+  // onCreateTeam (Teams.jsx), which is the one that actually talks to
+  // Firestore via teamsService — this component never imports the service
+  // directly, mirroring how CreateGame.jsx only builds a payload and awaits
+  // its onCreateGame prop. Category and icon are converted here since those
+  // are display-form conventions (capitalized "Senior", free-typed 2-letter
+  // icon) that don't belong in the service layer.
+  const handleCreateTeam = async () => {
     if (players.length === 0) {
       alert('Please add at least one player to the team');
       return;
     }
 
-    const newTeam = {
-      id: Date.now(),
-      ...teamForm,
-      icon: teamForm.icon.toUpperCase(),
-      gamesPlayed: 0,
-      players: players,
-      stats: {
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        penalties: 0,
-        goalsScored: 0,
-        goalsConceded: 0
-      },
-      upcomingGames: [],
-      pastGames: []
-    };
-
-    onCreateTeam(newTeam);
-    handleClose();
+    setSaving(true);
+    try {
+      await onCreateTeam({
+        name: teamForm.name,
+        coach: teamForm.coach,
+        category: teamForm.category.toLowerCase(),
+        description: teamForm.description,
+        founded: teamForm.founded,
+        icon: teamForm.icon.toUpperCase(),
+        players,
+      });
+      handleClose();
+    } catch (err) {
+      alert('Failed to create team. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleClose = () => {
@@ -438,7 +443,8 @@ const CreateTeam = ({ isOpen, onClose, onCreateTeam }) => {
             {step === 2 && (
               <button
                 onClick={() => setStep(1)}
-                className="px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200"
+                disabled={saving}
+                className="px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
               >
                 Back
               </button>
@@ -446,7 +452,8 @@ const CreateTeam = ({ isOpen, onClose, onCreateTeam }) => {
 
             <button
               onClick={handleClose}
-              className="px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200"
+              disabled={saving}
+              className="px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -461,10 +468,11 @@ const CreateTeam = ({ isOpen, onClose, onCreateTeam }) => {
             ) : (
               <button
                 onClick={handleCreateTeam}
-                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
+                disabled={saving}
+                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-br from-[#D30336] to-[#a8022b] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-60"
               >
                 <Save className="w-4 h-4" />
-                Create Team
+                {saving ? 'Creating…' : 'Create Team'}
               </button>
             )}
           </div>

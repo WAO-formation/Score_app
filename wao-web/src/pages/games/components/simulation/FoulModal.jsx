@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { BRAND } from '../../../../config/brand';
+
+const B = BRAND.font.body;
+const H = BRAND.font.heading;
 
 const FoulModal = ({ game, onFoul, onClose }) => {
   const [selectedTeam, setSelectedTeam] = useState('home');
-  const [playerName, setPlayerName] = useState('');
+  const [playerName, setPlayerName]     = useState('');
 
   const handleSubmit = () => {
     if (playerName.trim()) {
@@ -14,29 +18,32 @@ const FoulModal = ({ game, onFoul, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-        <div className="bg-gradient-to-br from-red-500 to-red-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <div className="bg-white w-full max-w-lg">
+
+        {/* Header */}
+        <div className="bg-[#c81434] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-6 h-6 text-white" />
-            <h3 className="text-xl font-bold text-white">Record Foul</h3>
+            <AlertCircle className="w-5 h-5 text-white" />
+            <h3 className="text-lg text-white uppercase tracking-widest" style={{ fontFamily: H }}>Record Foul</h3>
           </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white text-2xl">✕</button>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-xl">✕</button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Team</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" style={{ fontFamily: B }}>Team</label>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { key: 'home', label: game?.homeTeam, active: 'bg-yellow-100 border-yellow-400' },
-                { key: 'away', label: game?.awayTeam, active: 'bg-red-100 border-red-400' },
+                { key: 'home', label: game?.homeTeam, active: 'bg-amber-50 border-amber-400 text-[#011B3B]' },
+                { key: 'away', label: game?.awayTeam, active: 'bg-red-50 border-[#c81434] text-[#011B3B]' },
               ].map(({ key, label, active }) => (
                 <button
                   key={key}
                   onClick={() => setSelectedTeam(key)}
-                  className={`px-4 py-3 rounded-lg font-medium border-2 transition-all ${
-                    selectedTeam === key ? `${active} text-[#011B3B]` : 'bg-gray-100 border-gray-300 text-gray-600'
+                  className={`px-4 py-3 font-semibold border-2 transition-all text-sm ${
+                    selectedTeam === key ? active : 'bg-gray-50 border-gray-200 text-gray-500'
                   }`}
+                  style={{ fontFamily: B }}
                 >
                   {label}
                 </button>
@@ -45,14 +52,15 @@ const FoulModal = ({ game, onFoul, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Player Name</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2" style={{ fontFamily: B }}>Player Name</label>
             <input
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
               placeholder="Enter player name"
-              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full px-4 py-2.5 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c81434]/30 text-sm"
+              style={{ fontFamily: B }}
               autoFocus
             />
           </div>
@@ -60,7 +68,8 @@ const FoulModal = ({ game, onFoul, onClose }) => {
           <button
             onClick={handleSubmit}
             disabled={!playerName.trim()}
-            className="w-full bg-gradient-to-br from-red-500 to-red-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#c81434] hover:bg-[#e21e43] text-white font-bold py-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: B }}
           >
             Record Foul
           </button>

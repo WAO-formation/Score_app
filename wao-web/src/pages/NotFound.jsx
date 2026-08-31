@@ -1,157 +1,86 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
+import { BRAND } from '../config/brand';
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600&display=swap');`;
 
 const NotFound = () => {
   const navigate = useNavigate();
 
   return (
     <div
-      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-      className="min-h-screen bg-[#F5F4F0] flex items-center justify-center p-8 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-6 bg-cover bg-center relative overflow-hidden"
+      style={{ backgroundImage: "url('/assets/Hero.png')" }}
     >
-      {/* Faint ruled lines — editorial texture */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 39px, #00000008 39px, #00000008 40px)',
-        }}
-      />
+      <style>{FONTS}</style>
+      <div className="absolute inset-0 bg-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
 
-      {/* Large ghost numerals — background layer */}
-      <span
-        className="absolute select-none pointer-events-none"
-        style={{
-          fontSize: 'clamp(220px, 38vw, 480px)',
-          fontWeight: 900,
-          lineHeight: 1,
-          color: 'transparent',
-          WebkitTextStroke: '1.5px #00000012',
-          letterSpacing: '-0.04em',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontFamily: "'Georgia', serif",
-          userSelect: 'none',
-        }}
-      >
-        404
-      </span>
+      <div className="relative z-10 text-center max-w-lg w-full">
 
-      {/* Content */}
-      <div className="relative z-10 max-w-lg w-full">
+        {/* Logo */}
+        <Link to="/" className="inline-block mb-10">
+          <img src="/assets/logo.png" alt="WAO" className="h-10 w-auto mx-auto" />
+        </Link>
 
-        {/* Top rule + logo */}
-        <div className="flex items-center gap-4 mb-12">
-          <div className="h-px flex-1 bg-black/20" />
-          <div
-            className="w-8 h-8 rounded-md flex items-center justify-center"
-            style={{ background: '#1a1a1a' }}
+        {/* Ghost 404 */}
+        <div className="relative mb-6">
+          <span
+            className="block select-none pointer-events-none uppercase leading-none"
+            style={{
+              fontFamily: BRAND.font.heading,
+              fontSize: 'clamp(120px, 22vw, 220px)',
+              color: 'transparent',
+              WebkitTextStroke: `1px rgba(255,255,255,0.08)`,
+              letterSpacing: '-0.04em',
+            }}
           >
-            <span style={{ color: '#F5F4F0', fontWeight: 900, fontSize: 13, fontFamily: 'Georgia, serif' }}>W</span>
+            404
+          </span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.3em] mb-2"
+              style={{ fontFamily: BRAND.font.body, color: BRAND.primary }}
+            >
+              Error · Page Not Found
+            </p>
+            <h1
+              className="text-white uppercase text-3xl sm:text-4xl leading-tight"
+              style={{ fontFamily: BRAND.font.heading }}
+            >
+              Out of Bounds.
+            </h1>
           </div>
-          <div className="h-px flex-1 bg-black/20" />
         </div>
 
-        {/* Editorial label */}
         <p
-          className="text-xs tracking-[0.3em] uppercase mb-5"
-          style={{ color: '#00000050', fontFamily: 'system-ui, sans-serif', fontWeight: 500 }}
+          className="text-white/40 text-sm leading-relaxed max-w-sm mx-auto mb-10"
+          style={{ fontFamily: BRAND.font.body }}
         >
-          Error · Page not found
+          The page you're looking for doesn't exist or has been moved. Let's get you back in the game.
         </p>
 
-        {/* Headline */}
-        <h1
-          className="mb-5 leading-tight"
-          style={{
-            fontSize: 'clamp(36px, 6vw, 64px)',
-            fontWeight: 700,
-            color: '#1a1a1a',
-            letterSpacing: '-0.025em',
-            fontFamily: "'Georgia', serif",
-          }}
-        >
-          This page has
-          <br />
-          gone missing.
-        </h1>
-
-        {/* Body */}
-        <p
-          className="mb-10 leading-relaxed"
-          style={{
-            fontSize: 15,
-            color: '#00000055',
-            fontFamily: 'system-ui, sans-serif',
-            fontWeight: 400,
-            maxWidth: 360,
-          }}
-        >
-          The page you requested doesn't exist or may have been moved. Use the links below to find your way back.
-        </p>
-
-        {/* Bottom rule */}
-        <div className="h-px bg-black/15 mb-10" />
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-all text-sm"
-            style={{
-              fontFamily: 'system-ui, sans-serif',
-              fontWeight: 600,
-              color: '#1a1a1a',
-              background: 'transparent',
-              border: '1.5px solid #00000025',
-              letterSpacing: '0.01em',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#00000008';
-              e.currentTarget.style.borderColor = '#00000045';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = '#00000025';
-            }}
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white border border-white/20 hover:border-white/40 hover:bg-white/5 transition w-full sm:w-auto"
+            style={{ fontFamily: BRAND.font.body }}
           >
-            <ArrowLeft size={15} />
-            Go Back
+            <ArrowLeft className="w-4 h-4" /> Go Back
           </button>
-
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-all text-sm"
-            style={{
-              fontFamily: 'system-ui, sans-serif',
-              fontWeight: 600,
-              color: '#F5F4F0',
-              background: '#1a1a1a',
-              border: '1.5px solid #1a1a1a',
-              letterSpacing: '0.01em',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#333';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#1a1a1a';
-            }}
+          <Link
+            to="/"
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold uppercase tracking-widest text-white transition w-full sm:w-auto"
+            style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
           >
-            <Home size={15} />
-            Back to Dashboard
-          </button>
+            <Home className="w-4 h-4" /> Back to Home
+          </Link>
         </div>
 
-        {/* Footer caption */}
-        <p
-          className="mt-10 text-xs"
-          style={{
-            color: '#00000030',
-            fontFamily: 'system-ui, sans-serif',
-            letterSpacing: '0.05em',
-          }}
-        >
-          WAO · {new Date().getFullYear()}
+        <p className="mt-12 text-xs text-white/20" style={{ fontFamily: BRAND.font.body }}>
+          WAO © {new Date().getFullYear()}
         </p>
       </div>
     </div>
