@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 import 'package:wao_mobile/core/theme/app_typography.dart';
@@ -64,6 +65,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           isDarkMode: isDarkMode,
                           items: [
                             _MenuItem(
+                              icon: Icons.sports_handball_outlined,
+                              title: 'How to Play WAO',
+                              subtitle: 'Learn the rules and gameplay',
+                              onTap: () {
+                                _navigateToHowToPlay(context);
+                              },
+                            ),
+                            _MenuItem(
                               icon: Icons.person_outline,
                               title: 'Profile',
                               subtitle: 'Manage your profile information',
@@ -98,14 +107,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         _buildMenuCard(
                           isDarkMode: isDarkMode,
                           items: [
-                            _MenuItem(
-                              icon: Icons.sports_handball_outlined,
-                              title: 'How to Play WAO',
-                              subtitle: 'Learn the rules and gameplay',
-                              onTap: () {
-                                _navigateToHowToPlay(context);
-                              },
-                            ),
                             _MenuItem(
                               icon: Icons.info_outline,
                               title: 'About Us',
@@ -333,47 +334,24 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         child: Row(
           children: [
-            // Avatar - with photo or initials
-            user.photoUrl != null && user.photoUrl!.isNotEmpty
-                ? Container(
+            // Avatar — solid navy with initials
+            Container(
               width: 70,
               height: 70,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: AppColors.waoNavy,
                 border: Border.all(
-                  color: AppColors.waoYellow,
-                  width: 3,
-                ),
-                image: DecorationImage(
-                  image: NetworkImage(user.photoUrl!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            )
-                : Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF011B3B),
-                    Color(0xFFD30336),
-                  ],
-                ),
-                border: Border.all(
-                  color: AppColors.waoYellow,
-                  width: 3,
+                  color: AppColors.waoNavy.withOpacity(0.3),
+                  width: 2,
                 ),
               ),
               child: Center(
                 child: Text(
                   user.initials,
-                  style: const TextStyle(
+                  style: GoogleFonts.oswald(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                 ),

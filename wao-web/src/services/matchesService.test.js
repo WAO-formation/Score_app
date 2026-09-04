@@ -7,7 +7,7 @@ vi.mock('../lib/firebase', () => ({ db: {} }));
 
 const {
   emptyQuarters, emptyScoring, emptyFouls,
-  toFirestorePatch, canStartGame, isRecentOrActive, isPastDue, generateAccessCode,
+  toFirestorePatch, canStartGame, isRecentOrActive, isPastDue, isLiveOverdue, generateAccessCode,
 } = await import('./matchesService');
 
 // docToGame isn't exported, so it's exercised indirectly is not possible
@@ -64,6 +64,26 @@ describe('matchesService — Firestore <-> app-shape translation', () => {
     const newDate = new Date('2026-09-01T15:00:00Z');
     const patch = toFirestorePatch({ startTime: newDate });
     expect(patch.startTime.toDate().getTime()).toBe(newDate.getTime());
+  });
+
+  it('stamps liveStartedAt when a status change moves a game to live', () => {
+    const patch = toFirestorePatch({ status: 'live' });
+    expect(patch.status).toBe('live');
+    expect(patch).toHaveProperty('liveStartedAt');
+    expect(patch).not.toHaveProperty('completedAt');
+  });
+
+  it('keeps judgeUids in sync with the judges array', () => {
+    const judges = [{ uid: 'j1', name: 'Judge One' }, { uid: 'j2', name: 'Judge Two' }];
+    const patch = toFirestorePatch({ judges });
+    expect(patch.judges).toBe(judges);
+    expect(patch.judgeUids).toEqual(['j1', 'j2']);
+  });
+
+  it('maps a judgesScore grant to only teamAJudges/teamBJudges, nothing else', () => {
+    const patch = toFirestorePatch({ judgesScore: { home: 3, away: 1 } });
+    expect(patch).toMatchObject({ teamAJudges: 3, teamBJudges: 1 });
+    expect(Object.keys(patch).sort()).toEqual(['teamAJudges', 'teamBJudges', 'updatedAt'].sort());
   });
 
   it('produces zeroed, all-four-quarter/category default shapes', () => {
@@ -135,6 +155,24 @@ describe('isPastDue — moves a never-started game from Upcoming to Past', () =>
 
   it('is false when there is no date at all', () => {
     expect(isPastDue({ status: 'upcoming', date: '' })).toBe(false);
+  });
+});
+
+describe('isLiveOverdue — auto-suspend after 24h live', () => {
+  it('is false for a non-live game', () => {
+    expect(isLiveOverdue({ status: 'upcoming', liveStartedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) })).toBe(false);
+  });
+
+  it('is false for a live game with no liveStartedAt yet (pre-existing doc)', () => {
+    expect(isLiveOverdue({ status: 'live', liveStartedAt: null })).toBe(false);
+  });
+
+  it('is false for a live game under 24 hours old', () => {
+    expect(isLiveOverdue({ status: 'live', liveStartedAt: new Date(Date.now() - 60 * 60 * 1000) })).toBe(false);
+  });
+
+  it('is true for a live game over 24 hours old', () => {
+    expect(isLiveOverdue({ status: 'live', liveStartedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) })).toBe(true);
   });
 });
 

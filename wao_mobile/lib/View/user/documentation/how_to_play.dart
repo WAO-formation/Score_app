@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../shared/app_bar.dart';
 
 class HowToPlayWAO extends StatelessWidget {
-  const HowToPlayWAO({super.key});
+  // Pushed from Profile it needs a back button; as a bottom-nav tab there's
+  // no stack entry to pop back to, so the tab wiring passes false.
+  const HowToPlayWAO({super.key, this.showBackButton = true});
+
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -11,9 +15,9 @@ class HowToPlayWAO extends StatelessWidget {
 
     return Scaffold(
 
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'How To Play WAO!',
-        showBackButton: true,
+        showBackButton: showBackButton,
         showNotification: true,
         hasNotificationDot: true,
       ),

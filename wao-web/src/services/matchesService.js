@@ -68,6 +68,14 @@ function docToGame(id, data) {
     moderatorUid: data.moderatorUid || '',
     moderatorName: data.moderatorName || '',
     judges: data.judges || [],
+    // Kept in sync with `judges` (see PATCH_MAPPERS.judges) purely so
+    // firestore.rules can cheaply check "is this uid one of this match's
+    // judges" without reading into an array of maps — the app never needs
+    // to read this itself since `judges` already has the full {uid, name}.
+    judgeUids: data.judgeUids || [],
+    // Stamped when status first moves to 'live' (see PATCH_MAPPERS.status) —
+    // used to auto-suspend a game nobody ended after 24h (see isLiveOverdue).
+    liveStartedAt: tsToDate(data.liveStartedAt),
     currentQuarter: data.currentQuarter || 'Q1',
     timeRemaining: data.timeRemaining || '17:00',
     isPlaying: data.isPlaying ?? false,
@@ -114,6 +122,7 @@ export async function createMatch(input) {
     moderatorUid: input.moderatorUid,
     moderatorName: input.moderatorName || '',
     judges: input.judges || [],
+    judgeUids: (input.judges || []).map((j) => j.uid),
     teamAKingdom: 0, teamBKingdom: 0,
     teamAWorkout: 0, teamBWorkout: 0,
     teamAGoalSetting: 0, teamBGoalSetting: 0,
@@ -142,9 +151,9 @@ export async function createMatch(input) {
 const PATCH_MAPPERS = {
   status: (v) => {
     const fsStatus = toFirestoreStatus(v);
-    return fsStatus === 'finished'
-      ? { status: fsStatus, completedAt: serverTimestamp() }
-      : { status: fsStatus };
+    if (fsStatus === 'finished') return { status: fsStatus, completedAt: serverTimestamp() };
+    if (fsStatus === 'live') return { status: fsStatus, liveStartedAt: serverTimestamp() };
+    return { status: fsStatus };
   },
   statusReason: (v) => ({ statusReason: v }),
   previousStatus: (v) => ({ previousStatus: v }),
@@ -158,7 +167,11 @@ const PATCH_MAPPERS = {
   timeRemaining: (v) => ({ timeRemaining: v }),
   moderatorUid: (v) => ({ moderatorUid: v }),
   moderatorName: (v) => ({ moderatorName: v }),
-  judges: (v) => ({ judges: v }),
+  judges: (v) => ({ judges: v, judgeUids: v.map((j) => j.uid) }),
+  // Narrow write path for an assigned judge granting the Judges-category
+  // score from /officiating — deliberately touches nothing else so it fits
+  // firestore.rules' judge-tier allow-list (teamAJudges/teamBJudges only).
+  judgesScore: (v) => ({ teamAJudges: v.home, teamBJudges: v.away }),
   venue: (v) => ({ venue: v }),
   championship: (v) => ({ championshipName: v }),
   // Rescheduling a past-due game to a new day/time — v is a JS Date.
@@ -215,6 +228,15 @@ export const canStartGame = (game) => !!game.startTime && Date.now() >= game.sta
 // string docToGame already exposes, so today's cutoff uses the same basis.
 export const isPastDue = (game) =>
   game.status === 'upcoming' && !!game.date && game.date < new Date().toISOString().slice(0, 10);
+
+// True once a live game has run for over 24 hours straight with nobody
+// ending it — GamesContext auto-suspends these (see its `liveStartedAt`
+// check) so a forgotten/stuck game doesn't sit "live" indefinitely. Games
+// stamped 'live' before this field existed have no liveStartedAt yet and
+// are left alone rather than force-suspended on a guess.
+const LIVE_TIMEOUT_MS = 24 * 60 * 60 * 1000;
+export const isLiveOverdue = (game) =>
+  game.status === 'live' && !!game.liveStartedAt && (Date.now() - game.liveStartedAt.getTime()) > LIVE_TIMEOUT_MS;
 
 // Main Games list keeps a completed game visible for 7 days after it was
 // marked finished; after that it's still fully queryable, just no longer

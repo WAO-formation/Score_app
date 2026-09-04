@@ -11,6 +11,7 @@ import GameDetails from '../pages/games/GameDetails';
 import GameSimulation from '../pages/games/components/LiveGame';
 import Management from '../pages/management/management';
 import MyGamesPage from '../pages/moderator/MyGamesPage';
+import MyOfficiatingPage from '../pages/officiating/MyOfficiatingPage';
 import Profile from '../pages/profile/Profile';
 import NotFound from '../pages/NotFound';
 import Login from '../pages/auth/Login';
@@ -42,6 +43,7 @@ const AppRoutes = () => {
           <Route path="games/:gameId/simulate" element={<GameSimulation />} />
           <Route path="management" element={<Management />} />
           <Route path="my-games" element={<MyGamesPage />} />
+          <Route path="officiating" element={<MyOfficiatingPage />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

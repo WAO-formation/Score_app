@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
 import 'package:wao_mobile/ViewModel/teams_games/team_viewmodel.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 import 'package:wao_mobile/View/dashboard/widgets/folow_button.dart';
-
-import '../../../core/theme/app_typography.dart';
-import '../../../shared/app_bar.dart';
-import '../../games_details/team_details.dart'; // Import your FollowButton
+import 'package:wao_mobile/core/widgets/wao_toast.dart';
+import '../../games_details/team_details.dart';
 
 class AllTeamsPage extends StatefulWidget {
   const AllTeamsPage({super.key});
@@ -17,254 +16,297 @@ class AllTeamsPage extends StatefulWidget {
 }
 
 class _AllTeamsPageState extends State<AllTeamsPage> {
-  String selectedCategory = 'All';
-  final List<String> categories = ['All', 'Senior', 'Junior', 'Youth'];
-  String searchQuery = '';
+  String _selectedCategory = 'All';
+  String _searchQuery = '';
+
+  static const _categories = ['All', 'Senior', 'Junior', 'Youth'];
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final top = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      extendBody: true,
-      appBar: CustomAppBar(
-        title: 'All Teams',
-        showBackButton: true,
-        showNotification: true,
-        hasNotificationDot: false,
-        onNotificationPressed: () {
-          // Navigate to notifications
-        },
-      ),
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-
-          // Search Bar
+          // ── Inline header ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: _buildSearchBar(isDarkMode),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Category Filter
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: _buildCategoryFilter(isDarkMode),
+            padding: EdgeInsets.fromLTRB(20, top + 20, 20, 0),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : AppColors.waoNavy.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.08)
+                            : AppColors.waoNavy.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 16,
+                      color: isDark ? Colors.white : AppColors.waoNavy,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'All Teams',
+                  style: GoogleFonts.oswald(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          // Teams Grid
+          // ── Search ──────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _SearchBar(
+              isDark: isDark,
+              onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Category chips ──────────────────────────────────────────────
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final cat = _categories[i];
+                final selected = _selectedCategory == cat;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedCategory = cat),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.waoRed
+                          : isDark
+                              ? Colors.white.withOpacity(0.06)
+                              : AppColors.waoNavy.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.waoRed
+                            : isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : AppColors.waoNavy.withOpacity(0.12),
+                        width: 1,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      cat,
+                      style: GoogleFonts.oswald(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: selected
+                            ? Colors.white
+                            : isDark
+                                ? Colors.white60
+                                : AppColors.waoNavy.withOpacity(0.7),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Grid ────────────────────────────────────────────────────────
           Expanded(
-            child: _buildTeamsGrid(isDarkMode),
+            child: _TeamsGrid(
+              isDark: isDark,
+              selectedCategory: _selectedCategory,
+              searchQuery: _searchQuery,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSearchBar(bool isDarkMode) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+// ── Search Bar ────────────────────────────────────────────────────────────────
+
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({required this.isDark, required this.onChanged});
+  final bool isDark;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: onChanged,
+      style: GoogleFonts.oswald(
+        fontSize: 15,
+        color: isDark ? Colors.white : AppColors.waoNavy,
       ),
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            searchQuery = value.toLowerCase();
-          });
-        },
-        style: TextStyle(
-          color: AppColors.textPrimary(isDarkMode),
-          fontSize: AppTypography.bodyLg,
-          fontWeight: FontWeight.w400,
+      decoration: InputDecoration(
+        hintText: 'Search teams...',
+        hintStyle: GoogleFonts.oswald(
+          fontSize: 15,
+          color: isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.35),
         ),
-        decoration: InputDecoration(
-          hintText: 'Search teams...',
-          hintStyle: TextStyle(
-            color: AppColors.textSecondary(isDarkMode),
-            fontSize: AppTypography.bodyLg,
-            fontWeight: FontWeight.w400,
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          size: 20,
+          color: isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.4),
+        ),
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withOpacity(0.05)
+            : AppColors.waoNavy.withOpacity(0.04),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withOpacity(0.08)
+                : AppColors.waoNavy.withOpacity(0.1),
+            width: 1,
           ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: AppColors.textSecondary(isDarkMode),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white.withOpacity(0.08)
+                : AppColors.waoNavy.withOpacity(0.1),
+            width: 1,
           ),
-          filled: true,
-          fillColor: Colors.transparent,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.white54 : AppColors.waoNavy,
+            width: 1.5,
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: BorderSide(
-              color: isDarkMode ? Colors.white : AppColors.waoNavy,
-              width: 1.5,
-            ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
         ),
       ),
     );
   }
+}
 
-  Widget _buildCategoryFilter(bool isDarkMode) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = selectedCategory == category;
+// ── Teams Grid ────────────────────────────────────────────────────────────────
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategory = category;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                  colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-                    : null,
-                color: isSelected ? null : isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+class _TeamsGrid extends StatelessWidget {
+  const _TeamsGrid({
+    required this.isDark,
+    required this.selectedCategory,
+    required this.searchQuery,
+  });
 
-              ),
-              child: Text(
-                category,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : isDarkMode
-                      ? Colors.white70
-                      : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  final bool isDark;
+  final String selectedCategory;
+  final String searchQuery;
 
-  Widget _buildTeamsGrid(bool isDarkMode) {
+  @override
+  Widget build(BuildContext context) {
     return Consumer<TeamViewModel>(
-      builder: (context, teamViewModel, child) {
+      builder: (context, vm, _) {
         return StreamBuilder<List<WaoTeam>>(
-          stream: teamViewModel.getAllTeams(),
+          stream: vm.getAllTeams(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.waoYellow,
-                ),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: isDarkMode ? Colors.white30 : Colors.black26,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading teams',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+              return _EmptyState(
+                icon: Icons.error_outline_rounded,
+                label: 'Error loading teams',
+                isDark: isDark,
               );
             }
 
             var teams = snapshot.data ?? [];
 
-            // Apply category filter
             if (selectedCategory != 'All') {
-              teams = teams.where((team) {
-                switch (selectedCategory) {
-                  case 'Senior':
-                    return team.category == TeamCategory.senior;
-                  case 'Junior':
-                    return team.category == TeamCategory.junior;
-                  case 'Youth':
-                    return team.category == TeamCategory.youth;
-                  default:
-                    return true;
-                }
-              }).toList();
+              final cat = TeamCategory.values.firstWhere(
+                (e) => e.name == selectedCategory.toLowerCase(),
+                orElse: () => TeamCategory.senior,
+              );
+              teams = teams.where((t) => t.category == cat).toList();
             }
 
-            // Apply search filter
             if (searchQuery.isNotEmpty) {
-              teams = teams.where((team) {
-                return team.name.toLowerCase().contains(searchQuery);
-              }).toList();
+              teams = teams.where((t) => t.name.toLowerCase().contains(searchQuery)).toList();
             }
 
             if (teams.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      searchQuery.isNotEmpty ? Icons.search_off : Icons.groups_outlined,
-                      size: 64,
-                      color: isDarkMode ? Colors.white30 : Colors.black26,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      searchQuery.isNotEmpty ? 'No teams found' : 'No teams available',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+              return _EmptyState(
+                icon: searchQuery.isNotEmpty
+                    ? Icons.search_off_rounded
+                    : Icons.groups_outlined,
+                label: searchQuery.isNotEmpty ? 'No teams found' : 'No teams available',
+                isDark: isDark,
               );
             }
 
             return GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+              physics: const BouncingScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.82,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
               itemCount: teams.length,
               itemBuilder: (context, index) {
                 final team = teams[index];
-                final isFollowing = teamViewModel.isFollowingTeam(team.id);
-
-                return _buildTeamGridCard(team, isFollowing, teamViewModel, isDarkMode);
+                return _TeamGridCard(
+                  team: team,
+                  isFollowing: vm.isFollowingTeam(team.id),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => TeamDetails(team: team)),
+                  ),
+                  onFollowToggle: () async {
+                    final wasFollowing = vm.isFollowingTeam(team.id);
+                    try {
+                      await vm.toggleFollowTeam(team.id);
+                      if (context.mounted) {
+                        wasFollowing
+                            ? WaoToast.info(context, 'Unfollowed ${team.name}')
+                            : WaoToast.success(context, 'Following ${team.name}');
+                      }
+                    } catch (_) {
+                      if (context.mounted) {
+                        WaoToast.error(context, 'Failed to update follow status');
+                      }
+                    }
+                  },
+                );
               },
             );
           },
@@ -272,13 +314,27 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
       },
     );
   }
+}
 
-  Widget _buildTeamGridCard(WaoTeam team, bool isFollowing, TeamViewModel teamViewModel, bool isDarkMode) {
+// ── Team Grid Card ────────────────────────────────────────────────────────────
+
+class _TeamGridCard extends StatelessWidget {
+  const _TeamGridCard({
+    required this.team,
+    required this.isFollowing,
+    required this.onTap,
+    required this.onFollowToggle,
+  });
+
+  final WaoTeam team;
+  final bool isFollowing;
+  final VoidCallback onTap;
+  final VoidCallback onFollowToggle;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-       Navigator.push(context,
-       MaterialPageRoute(builder: (context) => TeamDetails(team: team)));
-      },
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -288,7 +344,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFFD30336).withOpacity(0.15),
+            color: AppColors.waoRed.withOpacity(0.15),
             width: 1,
           ),
         ),
@@ -296,27 +352,23 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
           borderRadius: BorderRadius.circular(16),
           child: Stack(
             children: [
-              // Background pattern
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Transform.translate(
-                    offset: const Offset(30, 30),
-                    child: Opacity(
-                      opacity: 0.06,
-                      child: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFFC600),
-                          BlendMode.srcIn,
-                        ),
-                        child: Image.asset(
-                          "assets/images/wao-ball.png",
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => const SizedBox(),
-                        ),
-                      ),
+              // Watermark ball
+              Positioned(
+                right: -20,
+                bottom: -20,
+                child: Opacity(
+                  opacity: 0.06,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.waoYellow,
+                      BlendMode.srcIn,
+                    ),
+                    child: Image.asset(
+                      'assets/images/wao-ball.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox(),
                     ),
                   ),
                 ),
@@ -324,86 +376,57 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
 
               // Category badge
               Positioned(
-                top: 8,
-                right: 8,
+                top: 10,
+                right: 10,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.waoYellow.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1,
+                    ),
                   ),
                   child: Text(
                     team.category.name.toUpperCase(),
-                    style: const TextStyle(
-                      color: Color(0xFF011B3B),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.oswald(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ),
               ),
 
-              // Main content - Centralized
-              Center(
+              // Content — fully centred
+              Positioned.fill(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(12, 28, 12, 14),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Team logo
-                      _buildTeamLogo(team),
-
+                      _TeamLogo(logoUrl: team.logoUrl),
                       const SizedBox(height: 12),
-
-                      // Team name
                       Text(
                         team.name,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: GoogleFonts.oswald(
                           fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                           height: 1.3,
+                          letterSpacing: 0.2,
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
-                      // Follow button - Using your FollowButton widget
                       FollowButton(
                         isFollowing: isFollowing,
-                        onToggle: () async {
-                          try {
-                            await teamViewModel.toggleFollowTeam(team.id);
-
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    isFollowing ? 'Unfollowed ${team.name}' : 'Following ${team.name}',
-                                  ),
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: isFollowing ? Colors.grey[700] : AppColors.waoYellow,
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Failed to update follow status'),
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          }
-                        },
+                        onToggle: onFollowToggle,
                       ),
                     ],
                   ),
@@ -415,31 +438,81 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
       ),
     );
   }
+}
 
-  Widget _buildTeamLogo(WaoTeam team) {
-    final hasValidLogo = team.logoUrl.isNotEmpty && team.logoUrl.startsWith('http');
+// ── Team Logo ─────────────────────────────────────────────────────────────────
 
+class _TeamLogo extends StatelessWidget {
+  const _TeamLogo({required this.logoUrl});
+  final String logoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLogo = logoUrl.isNotEmpty && logoUrl.startsWith('http');
     return Container(
-      width: 70,
-      height: 70,
+      width: 64,
+      height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.08),
         border: Border.all(
-          color: AppColors.waoYellow.withOpacity(0.3),
-          width: 2,
+          color: Colors.white.withOpacity(0.15),
+          width: 1.5,
         ),
       ),
       child: ClipOval(
-        child: hasValidLogo
+        child: hasLogo
             ? Image.network(
-          team.logoUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.shield, color: Colors.white, size: 35);
-          },
-        )
-            : const Icon(Icons.shield, color: Colors.white, size: 35),
+                logoUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (_, child, progress) => progress == null
+                    ? child
+                    : const Center(
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ),
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.shield_outlined,
+                  color: Colors.white54,
+                  size: 28,
+                ),
+              )
+            : const Icon(Icons.shield_outlined, color: Colors.white54, size: 28),
+      ),
+    );
+  }
+}
+
+// ── Empty State ───────────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.icon, required this.label, required this.isDark});
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 56, color: isDark ? Colors.white24 : AppColors.waoNavy.withOpacity(0.2)),
+          const SizedBox(height: 14),
+          Text(
+            label,
+            style: GoogleFonts.oswald(
+              fontSize: 15,
+              color: isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.4),
+            ),
+          ),
+        ],
       ),
     );
   }

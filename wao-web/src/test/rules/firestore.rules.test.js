@@ -17,8 +17,10 @@ const [emuHost, emuPort] = (process.env.FIRESTORE_EMULATOR_HOST || 'localhost:80
 let testEnv;
 
 const ADMIN = 'admin-uid';
-const MOD_A = 'mod-a-uid';   // assigned to match1
-const MOD_B = 'mod-b-uid';   // NOT assigned to match1
+const MOD_A = 'mod-a-uid';     // assigned to match1
+const MOD_B = 'mod-b-uid';     // NOT assigned to match1
+const JUDGE_A = 'judge-a-uid'; // assigned to match1's judges/judgeUids
+const JUDGE_B = 'judge-b-uid'; // NOT assigned to match1
 const FAN = 'fan-uid';
 
 beforeAll(async () => {
@@ -41,6 +43,8 @@ beforeEach(async () => {
     await setDoc(doc(db, 'users', ADMIN), { role: 'admin' });
     await setDoc(doc(db, 'users', MOD_A), { role: 'moderator' });
     await setDoc(doc(db, 'users', MOD_B), { role: 'moderator' });
+    await setDoc(doc(db, 'users', JUDGE_A), { role: 'official' });
+    await setDoc(doc(db, 'users', JUDGE_B), { role: 'official' });
     await setDoc(doc(db, 'users', FAN), { role: 'fan' });
   });
 });
@@ -48,17 +52,22 @@ beforeEach(async () => {
 const asAdmin = () => testEnv.authenticatedContext(ADMIN).firestore();
 const asModA = () => testEnv.authenticatedContext(MOD_A).firestore();
 const asModB = () => testEnv.authenticatedContext(MOD_B).firestore();
+const asJudgeA = () => testEnv.authenticatedContext(JUDGE_A).firestore();
+const asJudgeB = () => testEnv.authenticatedContext(JUDGE_B).firestore();
 const asFan = () => testEnv.authenticatedContext(FAN).firestore();
 const unauth = () => testEnv.unauthenticatedContext().firestore();
 
-// Seeds match1 with moderatorUid = MOD_A, updatedAt `secondsAgo` seconds in
-// the past (bypassing rules) so cooldown-dependent tests can control it.
+// Seeds match1 with moderatorUid = MOD_A and JUDGE_A as its sole judge,
+// updatedAt `secondsAgo` seconds in the past (bypassing rules) so
+// cooldown-dependent tests can control it.
 async function seedMatch(secondsAgo = 10, overrides = {}) {
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), 'matches', 'match1'), {
       teamAId: 't1', teamBId: 't2', teamAName: 'Home', teamBName: 'Away',
       scoreA: 0, scoreB: 0, status: 'live',
       moderatorUid: MOD_A, moderatorName: 'Mod A',
+      judges: [{ uid: JUDGE_A, name: 'Judge A' }], judgeUids: [JUDGE_A],
+      teamAJudges: 0, teamBJudges: 0,
       quarters: {}, fouls: { home: [], away: [] }, events: [],
       currentQuarter: 'Q1', timeRemaining: '17:00', isPlaying: false,
       updatedAt: Timestamp.fromMillis(Date.now() - secondsAgo * 1000),
@@ -74,20 +83,32 @@ describe('matches — create', () => {
     }));
   });
 
-  it('allows a moderator to create a valid match doc', async () => {
-    await assertSucceeds(addDoc(collection(asModA(), 'matches'), {
+  it('rejects a moderator creating a match — only admins assign moderators/judges to new games', async () => {
+    await assertFails(addDoc(collection(asModA(), 'matches'), {
+      scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('rejects a judge creating a match', async () => {
+    await assertFails(addDoc(collection(asJudgeA(), 'matches'), {
+      scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('allows an admin to create a valid match doc', async () => {
+    await assertSucceeds(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
     }));
   });
 
   it('rejects a create with a non-zero starting score', async () => {
-    await assertFails(addDoc(collection(asModA(), 'matches'), {
+    await assertFails(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 1, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
     }));
   });
 
   it('rejects a create missing moderatorUid', async () => {
-    await assertFails(addDoc(collection(asModA(), 'matches'), {
+    await assertFails(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 0, scoreB: 0, updatedAt: serverTimestamp(),
     }));
   });
@@ -208,6 +229,50 @@ describe('matches — update: per-document cooldown', () => {
     await seedMatch(3); // updatedAt = 3s ago, past the 2s cooldown
     await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
       scoreA: 5, updatedAt: serverTimestamp(),
+    }));
+  });
+});
+
+describe('matches — update: judge-tier Judges-score grant', () => {
+  it('the assigned judge can grant teamAJudges/teamBJudges while the match is live', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, teamBJudges: 1, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('an official NOT assigned as a judge on this match cannot grant a score', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeB(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot grant a score while the match is not live', async () => {
+    await seedMatch(10, { status: 'upcoming' });
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot piggyback a different field onto a score grant', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, scoreA: 99, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot touch scoreA/scoreB directly', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      scoreA: 5, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the 2s per-document cooldown applies to judge writes too', async () => {
+    await seedMatch(0); // updatedAt = now
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
     }));
   });
 });

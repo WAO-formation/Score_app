@@ -183,11 +183,20 @@ const Footer = () => {
                   +233 24 278 6261
                 </a>
               </li>
+              <li>
+                <a
+                  href="mailto:waosport@gmail.com"
+                  className="text-sm transition-colors duration-200 hover:text-white"
+                  style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.6)' }}
+                >
+                  waosport@gmail.com
+                </a>
+              </li>
               <li
                 className="text-sm leading-relaxed"
                 style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.6)' }}
               >
-                Cornerstone Baptist Church Court,<br />Dome, Accra
+                GA-157-8721 Dzorwulu Junction,<br />Accra, Ghana
               </li>
             </ul>
           </div>

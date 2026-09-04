@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/services/auth_service/auth_serivce.dart';
+import '../../core/widgets/wao_toast.dart';
 
 class RegistrationController extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -18,6 +19,40 @@ class RegistrationController extends ChangeNotifier {
   bool passwordLengthValid = false;
   bool passwordsMatch = false;
   bool isLoading = false;
+
+  // Server-side errors attributed to the specific field they're about
+  // (e.g. "this email is already registered"), cleared as soon as that
+  // field is edited again — see LoginController for the same pattern.
+  String? usernameError;
+  String? emailError;
+  String? passwordError;
+
+  RegistrationController() {
+    usernameController.addListener(_clearUsernameError);
+    emailController.addListener(_clearEmailError);
+    passwordController.addListener(_clearPasswordError);
+  }
+
+  void _clearUsernameError() {
+    if (usernameError != null) {
+      usernameError = null;
+      notifyListeners();
+    }
+  }
+
+  void _clearEmailError() {
+    if (emailError != null) {
+      emailError = null;
+      notifyListeners();
+    }
+  }
+
+  void _clearPasswordError() {
+    if (passwordError != null) {
+      passwordError = null;
+      notifyListeners();
+    }
+  }
 
   void togglePasswordVisibility() {
     passwordVisible = !passwordVisible;
@@ -40,6 +75,7 @@ class RegistrationController extends ChangeNotifier {
   }
 
   String? validateEmail(String? value) {
+    if (emailError != null) return emailError;
     if (value == null || value.isEmpty) return 'Email is required';
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) return 'Enter a valid email address';
@@ -47,12 +83,14 @@ class RegistrationController extends ChangeNotifier {
   }
 
   String? validateUsername(String? value) {
+    if (usernameError != null) return usernameError;
     if (value == null || value.isEmpty) return 'Username is required';
     if (value.length < 3) return 'Username must be at least 3 characters';
     return null;
   }
 
   String? validatePassword(String? value) {
+    if (passwordError != null) return passwordError;
     if (value == null || value.isEmpty) return 'Password is required';
     if (value.length < 6) return 'Password must be at least 6 characters';
     if (!RegExp(r'\d').hasMatch(value)) return 'Password must contain at least one number';
@@ -85,13 +123,7 @@ class RegistrationController extends ChangeNotifier {
 
       if (user != null) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Registration successful!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          WaoToast.success(context, 'Account created successfully!');
           clearFields();
         }
         return true;
@@ -101,37 +133,29 @@ class RegistrationController extends ChangeNotifier {
 
     } on FirebaseAuthException catch (e) {
       isLoading = false;
-      notifyListeners();
-
-      String errorMessage = 'Registration failed';
 
       switch (e.code) {
         case 'email-already-in-use':
-          errorMessage = 'This email is already registered';
+          emailError = 'This email is already registered';
           break;
         case 'invalid-email':
-          errorMessage = 'Invalid email address';
-          break;
-        case 'operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled';
+          emailError = 'Invalid email address';
           break;
         case 'weak-password':
-          errorMessage = 'Password is too weak';
+          passwordError = 'Password is too weak';
+          break;
+        case 'operation-not-allowed':
+          if (context.mounted) WaoToast.error(context, 'Email/password accounts are not enabled');
+          break;
+        case 'too-many-requests':
+          if (context.mounted) WaoToast.error(context, 'Too many attempts. Try again later');
           break;
         default:
-          errorMessage = 'Registration failed: ${e.message}';
+          if (context.mounted) WaoToast.error(context, 'Registration failed: ${e.message}');
       }
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-
+      notifyListeners();
+      formKey.currentState?.validate();
       return false;
 
     } catch (e) {
@@ -139,13 +163,7 @@ class RegistrationController extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('An error occurred: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        WaoToast.error(context, 'An error occurred: ${e.toString()}');
       }
 
       return false;

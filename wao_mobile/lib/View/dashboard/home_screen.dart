@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/View/dashboard/widgets/LiveMatchesCarousel.dart';
 import 'package:wao_mobile/View/dashboard/widgets/all_teams.dart';
@@ -8,12 +9,9 @@ import 'package:wao_mobile/View/dashboard/widgets/news.dart';
 import 'package:wao_mobile/View/dashboard/widgets/team_card.dart';
 import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
 import 'package:wao_mobile/View/games_details/team_details.dart';
-import 'package:wao_mobile/core/theme/app_typography.dart';
+import 'package:wao_mobile/core/widgets/wao_toast.dart';
 import '../../Model/teams_games/wao_team.dart';
-import '../../ViewModel/teams_games/match_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
-import '../../core/services/Seeding_service.dart';
-import '../../core/services/news/news_service.dart';
 import '../../core/theme/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,264 +25,127 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeViewModel();
-  }
-
-  void _initializeViewModel() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
-          teamViewModel.initialize(user.uid);
-          print('TeamViewModel initialized with user ID: ${user.uid}');
-        }
-      });
-    } else {
-      print('Warning: No user logged in');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && mounted) {
+        Provider.of<TeamViewModel>(context, listen: false).initialize(user.uid);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 20, 20, 32),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // ── Header ────────────────────────────────────────────────
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: StreamBuilder<User?>(
-                        stream: FirebaseAuth.instance.authStateChanges(),
-                        builder: (context, authSnapshot) {
-                          final uid = authSnapshot.data?.uid;
-                          if (uid == null) {
-                            return _buildUserAvatar('User', null);
-                          }
-                          return StreamBuilder<DocumentSnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(uid)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              String name = 'User';
-                              String? profilePic;
-
-                              if (snapshot.hasData && snapshot.data!.exists) {
-                                final data = snapshot.data!.data() as Map<String, dynamic>;
-                                name = data['displayName'] ?? data['username'] ?? 'User';
-                                profilePic = data['profilePicture'] ?? data['photoUrl'];
-                              }
-
-                              return Row(
-                                children: [
-                                  _buildUserAvatar(name, profilePic),
-                                  const SizedBox(width: 12.0),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Welcome Back!',
-                                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                                        ),
-                                        const SizedBox(height: 2.0),
-                                        Text(
-                                          name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    _buildNotificationBell(isDarkMode),
+                    Expanded(child: _UserGreeting(isDark: isDark)),
+                    const SizedBox(width: 12),
+                    _NotificationButton(isDark: isDark),
                   ],
                 ),
+                const SizedBox(height: 28),
 
-                const SizedBox(height: 25.0),
-
+                // ── Live Matches ──────────────────────────────────────────
+                _SectionHeader(title: 'Live Now', isDark: isDark),
+                const SizedBox(height: 12),
                 const LiveMatchesCarousel(),
 
-                const SizedBox(height: 25.0),
+                const SizedBox(height: 28),
 
-                _buildTopTeamsSection(context, isDarkMode),
+                // ── Top Teams ─────────────────────────────────────────────
+                _buildTopTeamsSection(context, isDark),
 
-                const SizedBox(height: 25.0),
+                const SizedBox(height: 28),
 
-                Text(
-                  'Upcoming Matches',
-                  style: TextStyle(
-                    fontSize: AppTypography.h2,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                  ),
-                ),
-
-                const SizedBox(height: 10.0),
-
+                // ── Upcoming Matches ──────────────────────────────────────
+                _SectionHeader(title: 'Upcoming Matches', isDark: isDark),
+                const SizedBox(height: 12),
                 const UpcomingMatchesCarousel(),
 
-                const SizedBox(height: 25.0),
+                const SizedBox(height: 28),
 
-                Text(
-                  'WAO News',
-                  style: TextStyle(
-                    fontSize: AppTypography.h2,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                  ),
-                ),
-
-                const SizedBox(height: 10.0,),
-
-                NewsSection(isDarkMode: isDarkMode),
-
-                const SizedBox(height: 25.0,),
-
-              ],
+                // ── WAO News ──────────────────────────────────────────────
+                _SectionHeader(title: 'WAO News', isDark: isDark),
+                const SizedBox(height: 12),
+                NewsSection(isDarkMode: isDark),
+              ]),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTopTeamsSection(BuildContext context, bool isDarkMode) {
+  Widget _buildTopTeamsSection(BuildContext context, bool isDark) {
     return Consumer<TeamViewModel>(
-      builder: (context, teamViewModel, child) {
+      builder: (context, teamViewModel, _) {
         return StreamBuilder<List<WaoTeam>>(
           stream: teamViewModel.getTopTeams(limit: 5),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: Padding(
-                  padding: EdgeInsets.all(20.0),
+                  padding: EdgeInsets.symmetric(vertical: 20),
                   child: CircularProgressIndicator(),
                 ),
               );
             }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(
-                    'Error loading teams',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
-                    ),
-                  ),
-                ),
-              );
-            }
-
             final teams = snapshot.data ?? [];
-
-            if (teams.isEmpty) {
-              return const SizedBox.shrink();
-            }
+            if (teams.isEmpty) return const SizedBox.shrink();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Top Teams',
-                      style: TextStyle(
-                        fontSize: AppTypography.h2,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AllTeamsPage(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'See All',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 20,
-                          color: AppColors.waoYellow,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
+                _SectionHeader(
+                  title: 'Top Teams',
+                  isDark: isDark,
+                  action: 'See All',
+                  onAction: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AllTeamsPage()),
+                  ),
                 ),
-                const SizedBox(height: 10.0),
+                const SizedBox(height: 12),
                 SizedBox(
                   height: 168,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     itemCount: teams.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
                     itemBuilder: (context, index) {
                       final team = teams[index];
                       final isFollowing = teamViewModel.isFollowingTeam(team.id);
-
                       return TeamCard(
                         team: team,
                         isFollowing: isFollowing,
-                        onTap: () => _handleTeamTap(context, team),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => TeamDetails(team: team)),
+                        ),
                         onFollowToggle: () async {
                           try {
                             await teamViewModel.toggleFollowTeam(team.id);
-
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    isFollowing
-                                        ? 'Unfollowed ${team.name}'
-                                        : 'Following ${team.name}',
-                                  ),
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: isFollowing
-                                      ? Colors.grey[700]
-                                      : const Color(0xFFFFC600),
-                                ),
-                              );
+                              isFollowing
+                                  ? WaoToast.info(context, 'Unfollowed ${team.name}')
+                                  : WaoToast.success(context, 'Following ${team.name}');
                             }
                           } catch (e) {
-                            print('Error toggling follow: $e');
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed to update follow status: $e'),
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
+                              WaoToast.error(context, 'Failed to update follow status');
                             }
                           }
                         },
@@ -299,39 +160,148 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+}
 
-  void _handleTeamTap(BuildContext context, WaoTeam team) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TeamDetails(team: team),
-      ),
+// ── User Greeting ─────────────────────────────────────────────────────────────
+
+class _UserGreeting extends StatelessWidget {
+  const _UserGreeting({required this.isDark});
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, authSnap) {
+        final uid = authSnap.data?.uid;
+        if (uid == null) return _greeting('User', null, isDark);
+
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+          builder: (context, snap) {
+            String name = 'User';
+            String? pic;
+            if (snap.hasData && snap.data!.exists) {
+              final d = snap.data!.data() as Map<String, dynamic>;
+              name = d['displayName'] ?? d['username'] ?? 'User';
+              pic = d['profilePicture'] ?? d['photoUrl'];
+            }
+            return _greeting(name, pic, isDark);
+          },
+        );
+      },
     );
   }
 
+  Widget _greeting(String name, String? pic, bool isDark) {
+    return Row(
+      children: [
+        _Avatar(name: name, imageUrl: pic),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Welcome back',
+                style: GoogleFonts.oswald(
+                  fontSize: 12,
+                  color: isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.45),
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.oswald(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : AppColors.waoNavy,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-  Widget _buildNotificationBell(bool isDarkMode) {
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.name, this.imageUrl});
+  final String name;
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.waoNavy,
+        border: Border.all(color: AppColors.waoNavy.withOpacity(0.3), width: 2),
+      ),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : 'U',
+          style: GoogleFonts.oswald(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Notification Button ───────────────────────────────────────────────────────
+
+class _NotificationButton extends StatelessWidget {
+  const _NotificationButton({required this.isDark});
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-            color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.white.withOpacity(0.06)
+                : AppColors.waoNavy.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.08)
+                  : AppColors.waoNavy.withOpacity(0.1),
+              width: 1,
+            ),
           ),
           child: Icon(
             Icons.notifications_none_rounded,
-            color: isDarkMode ? const Color(0xFFFFC600) : const Color(0xFF011B3B),
+            size: 22,
+            color: isDark ? Colors.white70 : AppColors.waoNavy,
           ),
         ),
         Positioned(
           right: 10,
           top: 10,
           child: Container(
-            height: 8,
             width: 8,
+            height: 8,
             decoration: const BoxDecoration(
-              color: Color(0xFFFE0000),
+              color: AppColors.waoRed,
               shape: BoxShape.circle,
             ),
           ),
@@ -339,27 +309,62 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+}
 
-  Widget _buildUserAvatar(String name, String? imageUrl) {
-    String initial = name.isNotEmpty ? name[0].toUpperCase() : "U";
+// ── Section Header ────────────────────────────────────────────────────────────
 
-    return CircleAvatar(
-      radius: 22.0,
-      backgroundColor: const Color(0xFFFFC600).withOpacity(0.15),
-      backgroundImage: imageUrl != null && imageUrl.isNotEmpty
-          ? NetworkImage(imageUrl)
-          : null,
-      child: imageUrl == null || imageUrl.isEmpty
-          ? Text(
-        initial,
-        style: const TextStyle(
-          color: Color(0xFFFFC600),
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.isDark,
+    this.action,
+    this.onAction,
+  });
+
+  final String title;
+  final bool isDark;
+  final String? action;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Left accent bar
+        Container(
+          width: 3,
+          height: 20,
+          decoration: BoxDecoration(
+            color: AppColors.waoRed,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
-      )
-          : null,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: GoogleFonts.oswald(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+        if (action != null && onAction != null)
+          GestureDetector(
+            onTap: onAction,
+            child: Text(
+              action!,
+              style: GoogleFonts.oswald(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.waoRed,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+      ],
     );
   }
-
 }

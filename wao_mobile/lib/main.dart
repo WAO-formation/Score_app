@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wao_mobile/core/services/Seeding_service.dart';
 import 'package:wao_mobile/core/theme/app_theme.dart';
 import 'package:wao_mobile/core/theme/theme_provider.dart';
@@ -24,7 +25,11 @@ Future<void> _runSeedOnce() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // Web can't read google-services config natively, so it needs explicit
+  // options. Native platforms keep using their bundled config files.
+  await Firebase.initializeApp(
+    options: kIsWeb ? DefaultFirebaseOptions.web : null,
+  );
 
   // Seed demo data once on first launch (creates auth account + Firestore data)
   await _runSeedOnce();
@@ -51,12 +56,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
     return  MaterialApp(
-      themeMode: themeProvider.themeMode,
+      // Locked to light regardless of the device's system setting or any
+      // stored preference — the in-app theme picker (Profile > Settings)
+      // still writes a preference, it just no longer changes what renders.
+      themeMode: ThemeMode.light,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      darkTheme: AppTheme.lightTheme,
       title: 'WAO Score App',
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),

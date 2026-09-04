@@ -1,84 +1,62 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wao_mobile/View/onboarding/onboarding_screen.dart';
 import 'package:wao_mobile/View/onboarding/splash_screen.dart';
+import 'package:wao_mobile/core/services/auth_service/session_service.dart';
+import 'package:wao_mobile/core/widgets/wao_loading_screen.dart';
 import 'package:wao_mobile/shared/bottom_nav_bar.dart';
 
 import '../../Model/user_provider.dart';
 
-class AuthGate extends StatefulWidget {
+/// Decides the first screen after the native launch splash: a brief branded
+/// loader while Firebase settles, then either the app shell (signed in) or the
+/// "Get Started" screen. There is no separate in-app splash — the OS launch
+/// screen is the only splash.
+class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  bool _showOnboarding = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkFirstTime();
-  }
-
-  Future<void> _checkFirstTime() async {
-    // Check if user has seen onboarding before
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-
-    if (hasSeenOnboarding) {
-      // Skip onboarding if already seen
-      if (mounted) {
-        setState(() {
-          _showOnboarding = false;
-        });
-      }
-    } else {
-      // Show onboarding for 3 seconds, then mark as seen
-      Future.delayed(const Duration(seconds: 3), () async {
-        await prefs.setBool('hasSeenOnboarding', true);
-        if (mounted) {
-          setState(() {
-            _showOnboarding = false;
-          });
-        }
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_showOnboarding) {
-      return const OnboardingScreen();
-    }
-
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Show loading while checking auth state
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+          return const WaoLoadingScreen(message: 'Signing you in');
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          final user = snapshot.data!;
+          // Firebase itself would keep this device signed in forever —
+          // SessionService bounds that to the window recorded at login
+          // (see LoginController), so a session that's aged out here still
+          // gets treated as signed out even though Firebase's own cache
+          // hasn't expired.
+          return FutureBuilder<bool>(
+            future: SessionService.isSessionValid(),
+            builder: (context, sessionSnap) {
+              if (!sessionSnap.hasData) {
+                return const WaoLoadingScreen(message: 'Signing you in');
+              }
+
+              if (sessionSnap.data == false) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await SessionService.clearSession();
+                  await FirebaseAuth.instance.signOut();
+                });
+                return const WaoLoadingScreen(message: 'Session expired');
+              }
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+                userProvider.loadUserProfile(user.uid);
+              });
+
+              return const BottomNavBar();
+            },
           );
         }
 
-        // User is logged in
-        if (snapshot.hasData && snapshot.data != null) {
-          // Initialize user profile when logged in
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final userProvider = Provider.of<UserProvider>(context, listen: false);
-            userProvider.loadUserProfile(snapshot.data!.uid);
-          });
-
-          return const BottomNavBar();
-        }
-
-        // User is not logged in
         return const SplashScreen();
       },
     );

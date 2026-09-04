@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../Model/user_model.dart';
+import 'session_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -99,6 +100,7 @@ class AuthService {
 
   Future<void> signOut() async {
     try {
+      await SessionService.clearSession();
       await _auth.signOut();
     } catch (e) {
       throw Exception("Logout failed: $e");

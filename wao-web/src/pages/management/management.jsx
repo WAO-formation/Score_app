@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Officials from './components/Officials';
 import Players from './components/Players';
 import VenuesAndTournaments from './components/VenuesAndTournaments';
@@ -15,10 +16,25 @@ const ADMIN_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', '
 const MODERATOR_TABS = ['Players', 'Reports', 'Games'];
 
 export default function Management() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const TABS = isAdmin ? ADMIN_TABS : MODERATOR_TABS;
   const [tab, setTab] = useState(TABS[0]);
+
+  // This is admin/moderator back-office tooling — a judge has their own
+  // scoped surface at /officiating and no business here, even if they guess
+  // the URL (the nav link is already hidden for them — see constants.js).
+  if (user?.role !== 'admin' && user?.role !== 'moderator') {
+    return (
+      <section className="flex flex-col items-center justify-center gap-3 py-24">
+        <p className="text-gray-500 text-sm" style={{ fontFamily: BRAND.font.body }}>This page is for admin/moderator accounts.</p>
+        <button onClick={() => navigate('/dashboard')} className="text-sm text-[#011B3B] underline" style={{ fontFamily: BRAND.font.body }}>
+          Back to Dashboard
+        </button>
+      </section>
+    );
+  }
 
   return (
     <div className="px-2 py-2 md:p-4">

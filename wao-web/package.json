@@ -12,6 +12,8 @@
     "seed:venues": "node scripts/seedVenues.js",
     "seed:officials": "node scripts/seedOfficials.js",
     "seed:moderator": "node scripts/seedModerator.js",
+    "seed:judge": "node scripts/seedJudge.js",
+    "seed:fan": "node scripts/seedFan.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --project demo-wao-rules --config ../firebase.json \"vitest run --config vitest.rules.config.js\""

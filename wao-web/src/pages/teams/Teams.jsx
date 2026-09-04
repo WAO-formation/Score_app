@@ -3,6 +3,7 @@ import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, 
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
 import * as teamsService from '../../services/teamsService';
+import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
 const CATEGORY_COLORS = {
@@ -13,6 +14,8 @@ const CATEGORY_COLORS = {
 
 function Teams() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [teamsData, setTeamsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,15 +114,17 @@ function Teams() {
           >
             <Users className="w-4 h-4" /> Create Team
           </button>
-          <button
-            onClick={() => navigate('/games/create')}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition"
-            style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
-          >
-            <Trophy className="w-4 h-4" /> Create Game
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/games/create')}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition"
+              style={{ fontFamily: BRAND.font.body, backgroundColor: BRAND.primary }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND.primaryHover}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND.primary}
+            >
+              <Trophy className="w-4 h-4" /> Create Game
+            </button>
+          )}
         </div>
       </div>
 

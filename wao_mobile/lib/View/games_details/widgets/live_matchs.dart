@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/Model/teams_games/wao_match.dart';
 import 'package:wao_mobile/ViewModel/teams_games/match_viewmodel.dart';
@@ -11,64 +12,57 @@ class LiveMatchesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer2<MatchViewModel, TeamViewModel>(
-      builder: (context, matchViewModel, teamViewModel, child) {
+      builder: (context, matchViewModel, teamViewModel, _) {
         return StreamBuilder<List<WaoMatch>>(
           stream: matchViewModel.getLiveMatches(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox.shrink();
-            }
-
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const SizedBox.shrink();
-            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
 
             final liveMatches = snapshot.data!;
+            final followedIds = teamViewModel.followedTeamIds;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Section header with pulsing red accent
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        width: 3,
+                        height: 20,
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.circle,
-                          color: Colors.red,
-                          size: 12,
+                          color: AppColors.waoRed,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Text(
                         'Live Now',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
+                        style: GoogleFonts.oswald(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : AppColors.waoNavy,
+                          letterSpacing: 0.3,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
+                          color: AppColors.waoRed,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '${liveMatches.length}',
-                          style: const TextStyle(
+                          style: GoogleFonts.oswald(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -81,23 +75,19 @@ class LiveMatchesSection extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: liveMatches.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final match = liveMatches[index];
-                    final followedTeamIds = teamViewModel.followedTeamIds;
-                    final isTeamAFollowed = followedTeamIds.contains(match.teamAId);
-                    final isTeamBFollowed = followedTeamIds.contains(match.teamBId);
-
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) {
+                    final m = liveMatches[i];
                     return MatchCard(
-                      match: match,
-                      isTeamAFollowed: isTeamAFollowed,
-                      isTeamBFollowed: isTeamBFollowed,
-                      onFavoriteTap: () {
-                        matchViewModel.toggleMatchFavorite(match.id, match.isFavorite);
-                      },
+                      match: m,
+                      isTeamAFollowed: followedIds.contains(m.teamAId),
+                      isTeamBFollowed: followedIds.contains(m.teamBId),
+                      onFavoriteTap: () =>
+                          matchViewModel.toggleMatchFavorite(m.id, m.isFavorite),
                     );
                   },
                 ),
+                const SizedBox(height: 24),
               ],
             );
           },

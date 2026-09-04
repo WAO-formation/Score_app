@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/View/games_details/widgets/live_matchs.dart';
 import 'package:wao_mobile/View/games_details/widgets/match_card.dart';
@@ -19,101 +20,137 @@ class MatchesScreen extends StatefulWidget {
 }
 
 class _MatchesScreenState extends State<MatchesScreen> {
-  DateTime selectedDate = DateTime.now();
-  String selectedFilter = 'All';
-  final List<String> filters = ['All', 'Friendly', 'Championship', 'Campus'];
+  DateTime _selectedDate = DateTime.now();
+  String _selectedFilter = 'All';
+  static const _filters = ['All', 'Friendly', 'Championship', 'Campus'];
 
   @override
   void initState() {
     super.initState();
-    _initializeViewModel();
-  }
-
-  void _initializeViewModel() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final matchViewModel = Provider.of<MatchViewModel>(context, listen: false);
-          final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
-          matchViewModel.initialize();
-          teamViewModel.initialize(user.uid);
-        }
-      });
-    }
-  }
-
-  void _onDateSelected(DateTime date) {
-    setState(() {
-      selectedDate = date;
-    });
-  }
-
-  void _onFilterSelected(String filter) {
-    setState(() {
-      selectedFilter = filter;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && mounted) {
+        Provider.of<MatchViewModel>(context, listen: false).initialize();
+        Provider.of<TeamViewModel>(context, listen: false).initialize(user.uid);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final top = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      extendBody: true,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Add top safe area padding
-          SizedBox(height: MediaQuery.of(context).padding.top),
+          SizedBox(height: top),
 
-          // Fixed header and date filter
+          // ── Page title ──────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Text(
+              'Matches',
+              style: GoogleFonts.oswald(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : AppColors.waoNavy,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Followed teams strip ────────────────────────────────────────
           const MatchesHeader(),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 16),
 
+          // ── Date picker ─────────────────────────────────────────────────
           DateFilter(
-            selectedDate: selectedDate,
-            onDateSelected: _onDateSelected,
+            selectedDate: _selectedDate,
+            onDateSelected: (d) => setState(() => _selectedDate = d),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Category chips ──────────────────────────────────────────────
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _filters.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final f = _filters[i];
+                final selected = _selectedFilter == f;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedFilter = f),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.waoRed
+                          : isDark
+                              ? Colors.white.withOpacity(0.06)
+                              : AppColors.waoNavy.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.waoRed
+                            : isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : AppColors.waoNavy.withOpacity(0.12),
+                        width: 1,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      f,
+                      style: GoogleFonts.oswald(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: selected
+                            ? Colors.white
+                            : isDark
+                                ? Colors.white60
+                                : AppColors.waoNavy.withOpacity(0.7),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          // Scrollable content
+          // ── Scrollable match sections ───────────────────────────────────
           Expanded(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 100.0), // Space for bottom nav
-                child: Column(
-                  children: [
-                    CategoryFilter(
-                      filters: filters,
-                      selectedFilter: selectedFilter,
-                      onFilterSelected: _onFilterSelected,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // My Favorites Section
-                    FavoritesMatchesSection(
-                      selectedDate: selectedDate,
-                      selectedFilter: selectedFilter,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const LiveMatchesSection(),
-
-                    const SizedBox(height: 16),
-
-                    // All Matches Section
-                    AllMatchesSection(
-                      selectedDate: selectedDate,
-                      selectedFilter: selectedFilter,
-                    ),
-
-                    const SizedBox(height: 32),
-                  ],
-                ),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FavoritesMatchesSection(
+                    selectedDate: _selectedDate,
+                    selectedFilter: _selectedFilter,
+                  ),
+                  const SizedBox(height: 8),
+                  const LiveMatchesSection(),
+                  const SizedBox(height: 8),
+                  AllMatchesSection(
+                    selectedDate: _selectedDate,
+                    selectedFilter: _selectedFilter,
+                  ),
+                ],
               ),
             ),
           ),
@@ -123,7 +160,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
   }
 }
 
-/// favourites section
+// ── Favourites section ────────────────────────────────────────────────────────
+
 class FavoritesMatchesSection extends StatelessWidget {
   final DateTime selectedDate;
   final String selectedFilter;
@@ -136,145 +174,137 @@ class FavoritesMatchesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer2<TeamViewModel, MatchViewModel>(
-      builder: (context, teamViewModel, matchViewModel, child) {
+      builder: (context, teamViewModel, matchViewModel, _) {
         final followedTeamIds = teamViewModel.followedTeamIds;
 
         return StreamBuilder<List<WaoMatch>>(
           stream: matchViewModel.getMatchesByDate(selectedDate),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
 
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
-            // Filter matches that are marked as favorite OR have a followed team
-            // BUT exclude live matches that are ONLY in favorites because of followed teams
-            // (allow explicitly favorited live matches)
-            var favoriteMatches = snapshot.data!.where((match) {
-              // Check if match is explicitly favorited
-              final isFavorite = match.isFavorite;
-
-              // Check if either team is followed
-              final hasFollowedTeam = followedTeamIds.contains(match.teamAId) ||
-                  followedTeamIds.contains(match.teamBId);
-
-              final isLive = match.status == MatchStatus.live;
-
-              // Show if:
-              // 1. Explicitly favorited (regardless of status), OR
-              // 2. Has followed team AND is not live (followed team matches shown when not live)
-              return isFavorite || (hasFollowedTeam && !isLive);
+            var matches = snapshot.data!.where((m) {
+              final isFav = m.isFavorite;
+              final hasFollowed = followedTeamIds.contains(m.teamAId) ||
+                  followedTeamIds.contains(m.teamBId);
+              final isLive = m.status == MatchStatus.live;
+              return isFav || (hasFollowed && !isLive);
             }).toList();
 
-            // Apply category filter
             if (selectedFilter != 'All') {
-              favoriteMatches = favoriteMatches.where((match) {
-                switch (selectedFilter) {
-                  case 'Friendly':
-                    return match.type == MatchType.friendly;
-                  case 'Championship':
-                    return match.type == MatchType.championship;
-                  case 'Campus':
-                    return match.type == MatchType.campusInternal;
-                  default:
-                    return true;
-                }
-              }).toList();
+              matches = matches.where((m) => _matchesFilter(m, selectedFilter)).toList();
             }
 
-            if (favoriteMatches.isEmpty) {
-              return const SizedBox.shrink();
-            }
+            if (matches.isEmpty) return const SizedBox.shrink();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.waoYellow.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.star,
-                          color: AppColors.waoYellow,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'My Favourites',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.waoYellow,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${favoriteMatches.length}',
-                          style: const TextStyle(
-                            color: Color(0xFF011B3B),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                _SectionHeader(
+                  title: 'My Favourites',
+                  count: matches.length,
+                  isDark: isDark,
+                  accentColor: AppColors.waoYellow,
                 ),
                 const SizedBox(height: 12),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: favoriteMatches.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final match = favoriteMatches[index];
-                    final isTeamAFollowed = followedTeamIds.contains(match.teamAId);
-                    final isTeamBFollowed = followedTeamIds.contains(match.teamBId);
-
+                  itemCount: matches.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) {
+                    final m = matches[i];
                     return MatchCard(
-                      match: match,
-                      isTeamAFollowed: isTeamAFollowed,
-                      isTeamBFollowed: isTeamBFollowed,
-                      onFavoriteTap: () {
-                        // Toggle favorite status
-                        matchViewModel.toggleMatchFavorite(
-                          match.id,
-                          match.isFavorite,
-                        );
-                      },
+                      match: m,
+                      isTeamAFollowed: followedTeamIds.contains(m.teamAId),
+                      isTeamBFollowed: followedTeamIds.contains(m.teamBId),
+                      onFavoriteTap: () =>
+                          matchViewModel.toggleMatchFavorite(m.id, m.isFavorite),
                     );
                   },
                 ),
+                const SizedBox(height: 24),
               ],
             );
           },
         );
       },
+    );
+  }
+}
+
+bool _matchesFilter(WaoMatch m, String filter) {
+  switch (filter) {
+    case 'Friendly':      return m.type == MatchType.friendly;
+    case 'Championship':  return m.type == MatchType.championship;
+    case 'Campus':        return m.type == MatchType.campusInternal;
+    default:              return true;
+  }
+}
+
+// ── Shared section header ─────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.isDark,
+    this.count,
+    this.accentColor,
+  });
+
+  final String title;
+  final bool isDark;
+  final int? count;
+  final Color? accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final bar = accentColor ?? AppColors.waoRed;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 20,
+            decoration: BoxDecoration(
+              color: bar,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: GoogleFonts.oswald(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+              letterSpacing: 0.3,
+            ),
+          ),
+          if (count != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: bar.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$count',
+                style: GoogleFonts.oswald(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: bar,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

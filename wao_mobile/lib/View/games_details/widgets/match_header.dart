@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
 import 'package:wao_mobile/View/games_details/team_details.dart';
@@ -11,161 +12,110 @@ class MatchesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Text(
-            'Matches',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-            ),
-          ),
-        ),
+    return Consumer<TeamViewModel>(
+      builder: (context, vm, _) {
+        final followedIds = vm.followedTeamIds;
 
-        // Followed Teams Horizontal Scroll
-        Consumer<TeamViewModel>(
-          builder: (context, teamViewModel, child) {
-            final followedTeamIds = teamViewModel.followedTeamIds;
+        return SizedBox(
+          height: 82,
+          child: StreamBuilder<List<WaoTeam>>(
+            stream: vm.getAllTeams(),
+            builder: (context, snapshot) {
+              final allTeams = snapshot.data ?? [];
+              final followed = allTeams.where((t) => followedIds.contains(t.id)).toList();
 
-            return SizedBox(
-              height: 90,
-              child: StreamBuilder<List<WaoTeam>>(
-                stream: teamViewModel.getAllTeams(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: followed.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == followed.length) {
+                    return _AddTeamButton(
+                      isDark: isDark,
+                      onTap: () => showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => TeamSelectorDialog(
+                          allTeams: allTeams,
+                          followedTeamIds: followedIds,
+                        ),
                       ),
                     );
                   }
-
-                  final allTeams = snapshot.data ?? [];
-                  final followedTeams = allTeams
-                      .where((team) => followedTeamIds.contains(team.id))
-                      .toList();
-
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: followedTeams.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == followedTeams.length) {
-                        return _AddTeamButton(
-                          isDarkMode: isDarkMode,
-                          onTap: () => _showTeamSelector(context, allTeams, followedTeamIds),
-                        );
-                      }
-
-                      final team = followedTeams[index];
-                      return _TeamAvatarItem(
-                        team: team,
-                        isDarkMode: isDarkMode,
-                        onTap: () => _handleTeamTap(context, team),
-                      );
-                    },
+                  final team = followed[index];
+                  return _TeamAvatarItem(
+                    team: team,
+                    isDark: isDark,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => TeamDetails(team: team)),
+                    ),
                   );
                 },
-              ),
-            );
-          },
-        ),
-      ],
+              );
+            },
+          ),
+        );
+      },
     );
-  }
-
-  void _showTeamSelector(BuildContext context, List<WaoTeam> allTeams, Set<String> followedTeamIds) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => TeamSelectorDialog(
-        allTeams: allTeams,
-        followedTeamIds: followedTeamIds,
-      ),
-    );
-  }
-
-  void _handleTeamTap(BuildContext context, WaoTeam team) {
-   Navigator.push(context,
-   MaterialPageRoute(builder: (context) => TeamDetails(team: team)));
   }
 }
 
-class _TeamAvatarItem extends StatelessWidget {
-  final WaoTeam team;
-  final bool isDarkMode;
-  final VoidCallback onTap;
+// ── Team avatar item ──────────────────────────────────────────────────────────
 
-  const _TeamAvatarItem({
-    required this.team,
-    required this.isDarkMode,
-    required this.onTap,
-  });
+class _TeamAvatarItem extends StatelessWidget {
+  const _TeamAvatarItem({required this.team, required this.isDark, required this.onTap});
+  final WaoTeam team;
+  final bool isDark;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final initial = team.name.isNotEmpty ? team.name[0].toUpperCase() : 'T';
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 70,
+        width: 64,
         margin: const EdgeInsets.only(right: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Team Logo
             Container(
-              width: 50,
-              height: 50,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
+                color: AppColors.waoNavy,
                 border: Border.all(
-                  color: AppColors.waoYellow.withOpacity(0.3),
+                  color: AppColors.waoNavy.withOpacity(0.3),
                   width: 2,
                 ),
-                image: team.logoUrl.isNotEmpty
-                    ? DecorationImage(
-                  image: NetworkImage(team.logoUrl),
-                  fit: BoxFit.cover,
-                )
-                    : null,
               ),
-              child: team.logoUrl.isEmpty
-                  ? Center(
+              child: Center(
                 child: Text(
-                  team.name.isNotEmpty ? team.name[0].toUpperCase() : 'T',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                  initial,
+                  style: GoogleFonts.oswald(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
-              )
-                  : null,
+              ),
             ),
             const SizedBox(height: 6),
-            // Team Name
             Text(
               team.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: GoogleFonts.oswald(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.white70 : Colors.black87,
+                color: isDark ? Colors.white60 : AppColors.waoNavy.withOpacity(0.7),
               ),
             ),
           ],
@@ -175,55 +125,52 @@ class _TeamAvatarItem extends StatelessWidget {
   }
 }
 
-class _AddTeamButton extends StatelessWidget {
-  final bool isDarkMode;
-  final VoidCallback onTap;
+// ── Add team button ───────────────────────────────────────────────────────────
 
-  const _AddTeamButton({
-    required this.isDarkMode,
-    required this.onTap,
-  });
+class _AddTeamButton extends StatelessWidget {
+  const _AddTeamButton({required this.isDark, required this.onTap});
+  final bool isDark;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 70,
+        width: 64,
         margin: const EdgeInsets.only(right: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Add Button
             Container(
-              width: 50,
-              height: 50,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: AppColors.waoYellow.withOpacity(0.2),
                 shape: BoxShape.circle,
+                color: isDark
+                    ? Colors.white.withOpacity(0.06)
+                    : AppColors.waoNavy.withOpacity(0.06),
                 border: Border.all(
-                  color: AppColors.waoYellow,
-                  width: 2,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.15)
+                      : AppColors.waoNavy.withOpacity(0.2),
+                  width: 1.5,
                   style: BorderStyle.solid,
                 ),
               ),
-              child: const Icon(
-                Icons.add,
-                color: AppColors.waoYellow,
-                size: 28,
+              child: Icon(
+                Icons.add_rounded,
+                size: 22,
+                color: isDark ? Colors.white54 : AppColors.waoNavy.withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 6),
-            // Label
             Text(
-              'Add Team',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
+              'Follow',
+              style: GoogleFonts.oswald(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.white70 : Colors.black87,
+                color: isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.5),
               ),
             ),
           ],

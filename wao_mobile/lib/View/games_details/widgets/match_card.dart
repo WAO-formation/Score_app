@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:wao_mobile/Model/teams_games/wao_match.dart';
 import 'package:wao_mobile/View/games_details/upcoming_game_details.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
-
 import '../live_game_details.dart';
 
 class MatchCard extends StatelessWidget {
@@ -24,245 +24,245 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final isLive = match.status == MatchStatus.live;
     final isFinished = match.status == MatchStatus.finished;
     final isCancelled = match.status == MatchStatus.cancelled;
-    final isPostponedOrSuspended = match.status == MatchStatus.postponed ||
-        match.status == MatchStatus.suspended;
+    final isPostponed = match.status == MatchStatus.postponed;
+    final isSuspended = match.status == MatchStatus.suspended;
 
     return GestureDetector(
       onTap: onTap ?? () {
-       if(isLive){
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (context) => LiveGamesDetails(match: match),
-           ),
-         );
-       }else{
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (context) => UpcomingGameDetails(match: match),
-           ),
-         );
-       }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => isLive
+                ? LiveGamesDetails(match: match)
+                : UpcomingGameDetails(match: match),
+          ),
+        );
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.05)
-              : Colors.grey.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
+          color: isDark
+              ? Colors.white.withOpacity(0.04)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isLive
-                ? Colors.red.withOpacity(0.3)
-                : Colors.transparent,
-            width: 1.5,
+                ? AppColors.waoRed.withOpacity(0.4)
+                : isDark
+                    ? Colors.white.withOpacity(0.07)
+                    : AppColors.waoNavy.withOpacity(0.08),
+            width: 1,
           ),
         ),
         child: Row(
           children: [
-            // Time or Status
-            _buildTimeColumn(isDarkMode, isLive, isFinished, isCancelled, isPostponedOrSuspended),
-            const SizedBox(width: 12),
-            // Teams and Scores
+            // Status column
+            SizedBox(
+              width: 52,
+              child: _StatusBadge(
+                isLive: isLive,
+                isFinished: isFinished,
+                isCancelled: isCancelled,
+                isPostponed: isPostponed,
+                isSuspended: isSuspended,
+                startTime: match.startTime,
+                isDark: isDark,
+              ),
+            ),
+
+            // Divider
+            Container(
+              width: 1,
+              height: 48,
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              color: isDark
+                  ? Colors.white.withOpacity(0.08)
+                  : AppColors.waoNavy.withOpacity(0.08),
+            ),
+
+            // Teams
             Expanded(
               child: Column(
                 children: [
                   _TeamRow(
-                    teamName: match.teamAName,
+                    name: match.teamAName,
                     score: match.scoreA,
-                    isDarkMode: isDarkMode,
+                    isDark: isDark,
                     isFollowed: isTeamAFollowed,
                     showScore: isLive || isFinished,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _TeamRow(
-                    teamName: match.teamBName,
+                    name: match.teamBName,
                     score: match.scoreB,
-                    isDarkMode: isDarkMode,
+                    isDark: isDark,
                     isFollowed: isTeamBFollowed,
                     showScore: isLive || isFinished,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Notifications and Favorite
-            _buildActionColumn(isDarkMode, isTeamAFollowed, isTeamBFollowed),
+
+            const SizedBox(width: 10),
+
+            // Favourite
+            GestureDetector(
+              onTap: onFavoriteTap,
+              child: Icon(
+                match.isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
+                size: 22,
+                color: match.isFavorite
+                    ? AppColors.waoYellow
+                    : isDark
+                        ? Colors.white24
+                        : AppColors.waoNavy.withOpacity(0.2),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTimeColumn(bool isDarkMode, bool isLive, bool isFinished, bool isCancelled, bool isPostponedOrSuspended) {
-    return SizedBox(
-      width: 60,
-      child: Column(
-        children: [
-          if (isLive)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'LIVE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else if (isFinished)
-            Text(
-              'FT',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white70 : Colors.black54,
-              ),
-            )
-          else if (isCancelled)
-            Text(
-              'CANC',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.red.shade400,
-              ),
-            )
-          else if (isPostponedOrSuspended)
-            Text(
-              match.status == MatchStatus.postponed ? 'PPD' : 'SUSP',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white70 : Colors.black54,
-              ),
-            )
-          else
-            Text(
-              DateFormat('HH:mm').format(match.startTime),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+// ── Status badge ──────────────────────────────────────────────────────────────
 
-  Widget _buildActionColumn(bool isDarkMode, bool isTeamAFollowed, bool isTeamBFollowed) {
-    return Column(
-      children: [
-        Icon(
-          Icons.notifications_outlined,
-          size: 20,
-          color: isDarkMode ? Colors.white30 : Colors.black26,
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.isLive,
+    required this.isFinished,
+    required this.isCancelled,
+    required this.isPostponed,
+    required this.isSuspended,
+    required this.startTime,
+    required this.isDark,
+  });
+
+  final bool isLive, isFinished, isCancelled, isPostponed, isSuspended;
+  final DateTime startTime;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLive) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.waoRed,
+          borderRadius: BorderRadius.circular(6),
         ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: onFavoriteTap, // UPDATED
-          child: Icon(
-            match.isFavorite ? Icons.star : Icons.star_border, // UPDATED
-            size: 20,
-            color: match.isFavorite // UPDATED
-                ? AppColors.waoYellow
-                : isDarkMode
-                ? Colors.white30
-                : Colors.black26,
+        child: Text(
+          'LIVE',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.oswald(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
-      ],
+      );
+    }
+
+    String label;
+    Color color;
+
+    if (isFinished) {
+      label = 'FT';
+      color = isDark ? Colors.white54 : AppColors.waoNavy.withOpacity(0.5);
+    } else if (isCancelled) {
+      label = 'CANC';
+      color = AppColors.waoRed;
+    } else if (isPostponed) {
+      label = 'PPD';
+      color = isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.4);
+    } else if (isSuspended) {
+      label = 'SUSP';
+      color = isDark ? Colors.white38 : AppColors.waoNavy.withOpacity(0.4);
+    } else {
+      label = DateFormat('HH:mm').format(startTime);
+      color = isDark ? Colors.white : AppColors.waoNavy;
+    }
+
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      style: GoogleFonts.oswald(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: color,
+      ),
     );
   }
 }
 
-class _TeamRow extends StatelessWidget {
-  final String teamName;
-  final int score;
-  final bool isDarkMode;
-  final bool isFollowed;
-  final bool showScore;
+// ── Team row ──────────────────────────────────────────────────────────────────
 
+class _TeamRow extends StatelessWidget {
   const _TeamRow({
-    required this.teamName,
+    required this.name,
     required this.score,
-    required this.isDarkMode,
-    this.isFollowed = false,
-    this.showScore = false,
+    required this.isDark,
+    required this.isFollowed,
+    required this.showScore,
   });
+
+  final String name;
+  final int score;
+  final bool isDark, isFollowed, showScore;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Team Logo (placeholder)
+        // Solid initial avatar
         Container(
-          width: 24,
-          height: 24,
+          width: 26,
+          height: 26,
           decoration: BoxDecoration(
-            color: isDarkMode
-                ? Colors.white.withOpacity(0.1)
-                : Colors.black.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
+            shape: BoxShape.circle,
+            color: AppColors.waoNavy,
           ),
           child: Center(
             child: Text(
-              teamName.isNotEmpty ? teamName[0].toUpperCase() : 'T',
-              style: TextStyle(
+              name.isNotEmpty ? name[0].toUpperCase() : 'T',
+              style: GoogleFonts.oswald(
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white70 : Colors.black54,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        // Team Name
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
-            teamName,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
+            name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.oswald(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+            ),
           ),
         ),
-        // Star if followed
         if (isFollowed) ...[
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.star,
-            size: 16,
-            color: AppColors.waoYellow,
-          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.star_rounded, size: 14, color: AppColors.waoYellow),
         ],
-        // Score
         if (showScore) ...[
           const SizedBox(width: 8),
-          SizedBox(
-            width: 30,
-            child: Text(
-              score.toString(),
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
+          Text(
+            '$score',
+            style: GoogleFonts.oswald(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : AppColors.waoNavy,
             ),
           ),
         ],

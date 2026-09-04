@@ -132,7 +132,11 @@ service cloud.firestore {
     match /matches/{matchId} {
       allow read: if isSignedIn();
 
-      allow create: if isOfficial()
+      // Admin-only: creating a match assigns a moderator to run it and
+      // judges to officiate it, which is an admin decision — a moderator
+      // only ever operates a match already assigned to them (wao-web's
+      // CreateGamePage is hidden from non-admins for the same reason).
+      allow create: if isAdmin()
                     && request.resource.data.scoreA == 0
                     && request.resource.data.scoreB == 0
                     && 'moderatorUid' in request.resource.data
@@ -140,14 +144,18 @@ service cloud.firestore {
                     && request.resource.data.moderatorUid.size() > 0
                     && stampsServerTime();
 
-      // Split into two update shapes rather than one blanket "official can
+      // Split into three update shapes rather than one blanket "official can
       // write anything": scoring/status changes are restricted to an admin
       // or the specific moderator assigned to *this* match (moderatorUid,
       // set at creation) — not just any official-tier account, since the
       // web simulate screen has no other gate keeping a moderator out of a
-      // match they weren't assigned. Favoriting is a self-service action
-      // open to any signed-in user but can only ever touch the isFavorite
-      // field.
+      // match they weren't assigned. A plain official assigned as a *judge*
+      // (judgeUids, kept in sync with the judges array — see matchesService)
+      // gets a narrower third branch: only the Judges-category score, and
+      // only while the match is live, so their wao-web "My Officiating" page
+      // can grant that one score without needing moderator-tier access.
+      // Favoriting is a self-service action open to any signed-in user but
+      // can only ever touch the isFavorite field.
       allow update: if
         (isOfficial()
           && (isAdmin() || resource.data.moderatorUid == request.auth.uid)
@@ -161,12 +169,22 @@ service cloud.firestore {
                  'teamAGoalSetting', 'teamBGoalSetting',
                  'teamAJudges', 'teamBJudges',
                  'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining', 'isPlaying',
-                 'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
-                 'startTime', 'venue',
+                 'moderatorUid', 'moderatorName', 'judges', 'judgeUids', 'completedAt', 'championshipName',
+                 'startTime', 'venue', 'liveStartedAt',
                  'updatedAt',
                ])
           && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0 && request.resource.data.scoreA <= 999
           && request.resource.data.scoreB is int && request.resource.data.scoreB >= 0 && request.resource.data.scoreB <= 999)
+        ||
+        (isSignedIn()
+          && callerRole() == 'official'
+          && ('judgeUids' in resource.data) && resource.data.judgeUids.hasAny([request.auth.uid])
+          && resource.data.status == 'live'
+          && stampsServerTime()
+          && pastCooldown(resource.data, 2)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamAJudges', 'teamBJudges', 'updatedAt'])
+          && request.resource.data.teamAJudges is int && request.resource.data.teamAJudges >= 0 && request.resource.data.teamAJudges <= 999
+          && request.resource.data.teamBJudges is int && request.resource.data.teamBJudges >= 0 && request.resource.data.teamBJudges <= 999)
         ||
         (isSignedIn()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isFavorite']));
