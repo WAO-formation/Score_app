@@ -17,6 +17,7 @@
     "seed:player": "node scripts/seedPlayer.js",
     "seed:coach": "node scripts/seedCoach.js",
     "link:player-team": "node scripts/linkPlayerToTeam.js",
+    "test:integration": "node scripts/integrationSecurityTest.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --project demo-wao-rules --config ../firebase.json \"vitest run --config vitest.rules.config.js\""
