@@ -32,6 +32,18 @@ service cloud.firestore {
       return isSignedIn() && (callerRole() == 'official' || callerRole() == 'moderator' || callerRole() == 'admin');
     }
 
+    function callerTeamId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId;
+    }
+
+    // A coach may manage the roster of *their own* team only (users/{uid}.
+    // teamId, the same admin-assigned link TeamActivitiesPage reads on
+    // mobile) — not any other team, and not match/score data, which stays
+    // isOfficial()-only.
+    function isCoachOfTeam(teamId) {
+      return isSignedIn() && callerRole() == 'coach' && callerTeamId() == teamId;
+    }
+
     // True once at least `seconds` have passed since the document's last
     // recorded write. Acts as a per-document cooldown — the closest thing
     // to rate limiting Firestore rules can do without a Cloud Function
@@ -81,7 +93,7 @@ service cloud.firestore {
                                'favoriteTeamIds', 'favoriteMatchIds',
                                'totalMatches', 'totalTeams', 'themePreference',
                                'notificationsEnabled', 'emailNotifications',
-                               'language', 'updatedAt',
+                               'language', 'fcmToken', 'updatedAt',
                              ]));
 
       allow delete: if isAdmin();
@@ -95,22 +107,33 @@ service cloud.firestore {
 
     match /teams/{teamId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isOfficial();
+      allow create, delete: if isOfficial();
+
+      // A coach may only ever touch their own team's roster field — name,
+      // category, coach/secretary/director etc. stay isOfficial()-only.
+      allow update: if isOfficial()
+                    || (isCoachOfTeam(teamId)
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['roster', 'updatedAt']));
     }
 
     match /teamStatistics/{teamId} {
       allow read: if isSignedIn();
 
-      // Derived data — officials write the match-driven fields today via
-      // TeamService; the real fix is a Cloud Function recomputing them
-      // after each finished match, so no client can hand-edit win/loss
-      // counts. totalFollowers is carved out separately because following
-      // a team is an ordinary-fan action (TeamService.updateFollowerCount),
-      // not an officiating one.
+      // Win/loss/goals now come from the onMatchFinished Cloud Function
+      // (Admin SDK, bypasses these rules) so no client can hand-edit them.
+      // totalFollowers is carved out separately because following a team is
+      // an ordinary-fan action (TeamService.updateFollowerCount), not an
+      // officiating one. activePlayers/inactivePlayers is carved out for a
+      // coach too — TeamService recomputes those right after a roster edit
+      // (add/removePlayerFromTeam), which a coach is now allowed to do.
       allow update: if isOfficial()
                     || (isSignedIn()
                         && request.resource.data.diff(resource.data).affectedKeys()
-                             .hasOnly(['totalFollowers', 'updatedAt']));
+                             .hasOnly(['totalFollowers', 'updatedAt']))
+                    || (isCoachOfTeam(teamId)
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['activePlayers', 'inactivePlayers', 'updatedAt']));
       allow create: if isOfficial();
       allow delete: if isOfficial();
     }
@@ -124,7 +147,26 @@ service cloud.firestore {
 
     match /players/{playerId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isOfficial();
+      allow delete: if isOfficial();
+
+      // A coach may create a player doc only for their own team, and edit
+      // an existing player only via the same fields TeamService's
+      // add/removePlayerFromTeam and updatePlayerRole/Status actually
+      // write. Stats fields (gamesPlayed etc.) stay Cloud-Function/
+      // admin-only. Joining is only allowed from unassigned
+      // (resource.currentTeamId == null) — a coach can't poach a player
+      // who's already on a *different* team; that stays isOfficial().
+      allow create: if isOfficial()
+                    || (isSignedIn() && callerRole() == 'coach'
+                        && request.resource.data.currentTeamId == callerTeamId());
+      allow update: if isOfficial()
+                    || (isSignedIn() && callerRole() == 'coach'
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['currentTeamId', 'currentTeamName', 'joinedTeamAt',
+                                       'role', 'status', 'jerseyNumber', 'age', 'updatedAt'])
+                        && (resource.data.currentTeamId == callerTeamId()
+                            || (resource.data.currentTeamId == null
+                                && request.resource.data.currentTeamId == callerTeamId())));
     }
 
     // ==================== MATCHES ====================
@@ -220,7 +262,9 @@ service cloud.firestore {
     // ==================== REPORTS ====================
 
     match /reports/{reportId} {
-      allow read: if isSignedIn();
+      // Internal officiating/incident reports — not fan-facing, unlike the
+      // other collections above that intentionally use isSignedIn().
+      allow read: if isOfficial();
       allow create, update: if isOfficial();
       allow delete: if isAdmin();
     }

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BRAND } from '../../config/brand';
+import { useAuth } from '../../context/AuthContext';
 import { useGames } from '../../context/GamesContext';
 import {
   subscribeToTeam,
@@ -59,6 +60,8 @@ const LABEL = "block text-xs font-semibold text-gray-500 uppercase tracking-wide
 const TeamDetails = () => {
   const { teamId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const { games } = useGames();
   const [activeTab, setActiveTab] = useState('roster');
 
@@ -361,14 +364,16 @@ const TeamDetails = () => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={handleEditTeam}
-              className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white text-[#011B3B] font-semibold uppercase tracking-wide hover:bg-gray-100 transition-colors text-xs md:text-sm flex-shrink-0"
-              style={{ fontFamily: B }}
-            >
-              <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              <span>Edit</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleEditTeam}
+                className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white text-[#011B3B] font-semibold uppercase tracking-wide hover:bg-gray-100 transition-colors text-xs md:text-sm flex-shrink-0"
+                style={{ fontFamily: B }}
+              >
+                <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <span>Edit</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -415,17 +420,16 @@ const TeamDetails = () => {
       {/* Tab Content */}
       {activeTab === 'roster' && (
         <div className="bg-white border border-gray-100 p-3 md:p-5">
-          <div className="flex flex-col gap-2 mb-5">
-            <h3 className="text-[#011B3B] uppercase tracking-widest text-sm" style={{ fontFamily: B }}>
-              Team Roster ({players.length}/12 Players)
-            </h3>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-[#011B3B] uppercase tracking-widest text-sm" style={{ fontFamily: B }}>Manage Roster</h3>
+              <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: B }}>{players.length}/12 players · {players.filter(p => p.role !== 'Substitute').length} starters · {players.filter(p => p.role === 'Substitute').length} subs</p>
+            </div>
             <button
               onClick={handleAddPlayer}
               disabled={players.length >= 12}
-              className={`flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold uppercase tracking-wide transition-colors ${
-                players.length >= 12
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'text-white'
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                players.length >= 12 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white'
               }`}
               style={players.length >= 12 ? { fontFamily: B } : { fontFamily: B, backgroundColor: BRAND.primary }}
               onMouseEnter={e => { if (players.length < 12) e.currentTarget.style.backgroundColor = BRAND.primaryHover; }}
@@ -438,29 +442,39 @@ const TeamDetails = () => {
 
           {/* Starting Seven */}
           <div className="mb-6">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>Starting Seven</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {players.filter(p => p.role !== 'Substitute').map((player) => (
-                <PlayerCard key={player.id} player={player} />
-              ))}
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide" style={{ fontFamily: B }}>Starting Seven</p>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-sm" style={{ fontFamily: B }}>{players.filter(p => p.role !== 'Substitute').length}/7</span>
             </div>
-            {players.filter(p => p.role !== 'Substitute').length === 0 && (
-              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No starters added yet.</p>
+            {players.filter(p => p.role !== 'Substitute').length === 0 ? (
+              <div className="border border-dashed border-gray-200 py-6 text-center">
+                <p className="text-sm text-gray-400" style={{ fontFamily: B }}>No starters added yet.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {players.filter(p => p.role !== 'Substitute').map((player) => (
+                  <PlayerCard key={player.id} player={player} />
+                ))}
+              </div>
             )}
           </div>
 
           {/* Substitutes */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3" style={{ fontFamily: B }}>
-              Substitutes ({players.filter(p => p.role === 'Substitute').length}/5)
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {players.filter(p => p.role === 'Substitute').map((player) => (
-                <PlayerCard key={player.id} player={player} />
-              ))}
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide" style={{ fontFamily: B }}>Substitutes</p>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-sm" style={{ fontFamily: B }}>{players.filter(p => p.role === 'Substitute').length}/5</span>
             </div>
-            {players.filter(p => p.role === 'Substitute').length === 0 && (
-              <p className="text-sm text-gray-400 py-2" style={{ fontFamily: B }}>No substitutes added yet.</p>
+            {players.filter(p => p.role === 'Substitute').length === 0 ? (
+              <div className="border border-dashed border-gray-200 py-6 text-center">
+                <p className="text-sm text-gray-400" style={{ fontFamily: B }}>No substitutes added yet.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {players.filter(p => p.role === 'Substitute').map((player) => (
+                  <PlayerCard key={player.id} player={player} />
+                ))}
+              </div>
             )}
           </div>
         </div>

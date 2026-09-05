@@ -42,6 +42,23 @@ class PlayerService {
     );
   }
 
+  // Get a player by their account email (players aren't linked to a Firebase
+  // Auth uid directly — email is the join key between users/ and players/).
+  Future<WaoPlayer?> getPlayerByEmail(String email) async {
+    try {
+      final snap = await _firestore
+          .collection('players')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+      if (snap.docs.isEmpty) return null;
+      return WaoPlayer.fromFirestore(snap.docs.first.data(), snap.docs.first.id);
+    } catch (e) {
+      print('Error fetching player by email: $e');
+      return null;
+    }
+  }
+
   // Get players by team
   Stream<List<WaoPlayer>> getPlayersByTeam(String teamId) {
     return _firestore

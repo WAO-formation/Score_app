@@ -96,8 +96,8 @@ function Games() {
 
       {/* ── Tabs + Search + Grid ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 pt-4 gap-3 border-b border-gray-100">
-          <div className="flex">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 gap-3 border-b border-gray-100">
+          <div className="flex overflow-x-auto scrollbar-hide w-full sm:w-auto px-4">
             {TABS.map((tab) => {
               const Icon = TAB_CONFIG[tab].icon;
               return (
@@ -117,7 +117,7 @@ function Games() {
               );
             })}
           </div>
-          <div className="relative w-full sm:w-56 pb-3 sm:pb-0">
+          <div className="relative w-full sm:w-56 pb-3 px-4 sm:px-0 sm:pb-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"

@@ -9,6 +9,8 @@ import 'package:wao_mobile/View/dashboard/widgets/news.dart';
 import 'package:wao_mobile/View/dashboard/widgets/team_card.dart';
 import 'package:wao_mobile/View/dashboard/widgets/upcoming_games.dart';
 import 'package:wao_mobile/View/games_details/team_details.dart';
+import 'package:wao_mobile/View/user/notifications_page.dart';
+import 'package:wao_mobile/core/services/notification_service.dart';
 import 'package:wao_mobile/core/widgets/wao_toast.dart';
 import '../../Model/teams_games/wao_team.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
@@ -39,11 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      body: CustomScrollView(
+      // Outer SafeArea (bottom_nav_bar.dart) already consumes the top inset
+      // for this tab; this one's bottom half protects the News section from
+      // the floating pill nav bar / home indicator.
+      body: SafeArea(
+        child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 20, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // ── Header ────────────────────────────────────────────────
@@ -83,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -264,49 +271,82 @@ class _Avatar extends StatelessWidget {
 
 // ── Notification Button ───────────────────────────────────────────────────────
 
-class _NotificationButton extends StatelessWidget {
+class _NotificationButton extends StatefulWidget {
   const _NotificationButton({required this.isDark});
   final bool isDark;
 
   @override
+  State<_NotificationButton> createState() => _NotificationButtonState();
+}
+
+class _NotificationButtonState extends State<_NotificationButton> {
+  final _service = NotificationService.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _service.addListener(_onUpdate);
+  }
+
+  @override
+  void dispose() {
+    _service.removeListener(_onUpdate);
+    super.dispose();
+  }
+
+  void _onUpdate() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : AppColors.waoNavy.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
+    final bool isDark = widget.isDark;
+    final hasUnread = _service.unreadCount > 0;
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const NotificationsPage()),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : AppColors.waoNavy.withOpacity(0.1),
-              width: 1,
+                  ? Colors.white.withOpacity(0.06)
+                  : AppColors.waoNavy.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.08)
+                    : AppColors.waoNavy.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.notifications_none_rounded,
+              size: 22,
+              color: isDark ? Colors.white70 : AppColors.waoNavy,
             ),
           ),
-          child: Icon(
-            Icons.notifications_none_rounded,
-            size: 22,
-            color: isDark ? Colors.white70 : AppColors.waoNavy,
-          ),
-        ),
-        Positioned(
-          right: 10,
-          top: 10,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: AppColors.waoRed,
-              shape: BoxShape.circle,
+          if (hasUnread)
+            Positioned(
+              right: 10,
+              top: 10,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.waoRed,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

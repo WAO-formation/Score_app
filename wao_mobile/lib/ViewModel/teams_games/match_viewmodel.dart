@@ -140,17 +140,8 @@ class MatchViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> seedMatches() async {
-    await _matchService.seedMatches();
-    notifyListeners();
-  }
-
   Future<Map<String, dynamic>> getTeamStats(String teamId) async {
     return await _matchService.getTeamStats(teamId);
-  }
-
-  Future<bool> isMatchesEmpty() async {
-    return await _matchService.isMatchesEmpty();
   }
 
   /// Toggle favorite status for a match

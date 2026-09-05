@@ -39,15 +39,16 @@ class _MatchesScreenState extends State<MatchesScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final top = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      body: Column(
+      // Outer SafeArea (bottom_nav_bar.dart) already consumes the top inset
+      // for this tab; kept here too so this screen is still correct if ever
+      // reached outside the tab shell.
+      body: SafeArea(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: top),
-
           // ── Page title ──────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -155,6 +156,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

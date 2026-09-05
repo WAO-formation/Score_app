@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:wao_mobile/Model/teams_games/team/wao_player.dart';
 import 'package:wao_mobile/Model/teams_games/wao_match.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
+import 'package:wao_mobile/View/games_details/player_profile_page.dart';
 import 'package:wao_mobile/ViewModel/teams_games/player_viewmodel.dart';
 import 'package:wao_mobile/ViewModel/teams_games/team_viewmodel.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
@@ -527,6 +528,10 @@ class _PlayerCard extends StatelessWidget {
       isDark: isDark,
       trailing: Icon(_roleIcon(player.role), size: 16,
         color: isDark ? Colors.white24 : AppColors.waoNavy.withOpacity(0.25)),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => PlayerProfilePage(player: player)),
+      ),
     );
   }
 
@@ -551,15 +556,19 @@ class _PersonCard extends StatelessWidget {
     this.subtitle,
     required this.isDark,
     required this.trailing,
+    this.onTap,
   });
   final String initial, title;
   final String? subtitle;
   final bool isDark;
   final Widget trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
         color: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
@@ -596,6 +605,7 @@ class _PersonCard extends StatelessWidget {
           ),
           trailing,
         ],
+      ),
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:wao_mobile/core/widgets/wao_auth_scaffold.dart';
 import '../../../shared/bottom_nav_bar.dart';
@@ -78,28 +77,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _RememberMeCheckbox(
-                      value: _controller.rememberMe,
-                      onChanged: _controller.isLoading
-                          ? null
-                          : _controller.toggleRememberMe,
-                    ),
-                    WaoAuthLink(
-                      'Forgot Password?',
-                      onTap: _controller.isLoading
-                          ? null
-                          : () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ForgotPasswordEmailScreen(),
-                                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: WaoAuthLink(
+                    'Forgot Password?',
+                    onTap: _controller.isLoading
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordEmailScreen(),
                               ),
-                    ),
-                  ],
+                            ),
+                  ),
                 ),
                 const SizedBox(height: 28),
 
@@ -127,43 +118,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-// Unchecked (default): session lasts a day. Checked: 30 days — see
-// SessionService, which is what actually enforces this on top of Firebase
-// Auth's own indefinite local persistence.
-class _RememberMeCheckbox extends StatelessWidget {
-  const _RememberMeCheckbox({required this.value, required this.onChanged});
-
-  final bool value;
-  final ValueChanged<bool?>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onChanged == null ? null : () => onChanged!(!value),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 20,
-            height: 20,
-            child: Checkbox(
-              value: value,
-              onChanged: onChanged,
-              activeColor: kAuthBrand,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              side: const BorderSide(color: kAuthLine, width: 1.5),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text('Remember me', style: GoogleFonts.oswald(fontSize: 13, color: kAuthSub)),
-        ],
-      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
+import 'package:wao_mobile/core/utils/drive_image.dart';
 import '../../../Model/news/news_model.dart';
 import '../../../core/services/news/news_service.dart';
 import 'news_details.dart';
@@ -158,43 +159,48 @@ class _NewsImage extends StatelessWidget {
   const _NewsImage({required this.news});
   final NewsModel news;
 
+  static Widget _placeholder() => Container(
+        color: AppColors.waoNavy.withOpacity(0.06),
+        child: Icon(
+          Icons.image_outlined,
+          color: AppColors.waoNavy.withOpacity(0.3),
+          size: 32,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
+    final resolvedUrl = DriveImage.resolve(news.imageUrl);
+
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(
-            news.imageUrl,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                color: AppColors.waoNavy.withOpacity(0.06),
-                child: const Center(
-                  child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(AppColors.waoYellow),
+          if (DriveImage.isSafeToLoad(resolvedUrl))
+            Image.network(
+              resolvedUrl,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: AppColors.waoNavy.withOpacity(0.06),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(AppColors.waoYellow),
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: AppColors.waoNavy.withOpacity(0.06),
-                child: Icon(
-                  Icons.image_outlined,
-                  color: AppColors.waoNavy.withOpacity(0.3),
-                  size: 32,
-                ),
-              );
-            },
-          ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => _placeholder(),
+            )
+          else
+            _placeholder(),
           if (news.category != null && news.category!.isNotEmpty)
             Positioned(
               top: 12,

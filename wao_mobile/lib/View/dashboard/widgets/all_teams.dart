@@ -24,16 +24,16 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final top = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      body: Column(
+      body: SafeArea(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Inline header ───────────────────────────────────────────────
           Padding(
-            padding: EdgeInsets.fromLTRB(20, top + 20, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Row(
               children: [
                 GestureDetector(
@@ -150,6 +150,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

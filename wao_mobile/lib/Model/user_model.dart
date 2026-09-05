@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Permission role, distinct from WaoPlayer's PlayerRole (in-game position).
-// Stored on the user doc as 'role' (matching the field SeedingService.
-// seedAdminProfile already writes). Controls what a signed-in user is
+// Stored on the user doc as 'role'. Controls what a signed-in user is
 // allowed to write in Firestore — see firestore.rules. Only an existing
 // admin can grant/change this; a user can never elevate their own role
 // (enforced server-side in the rules, not just here).
@@ -33,6 +32,11 @@ class UserProfile {
   final bool emailNotifications;
   final String language;
   final AccountRole accountRole;
+  // Which roster a player-role account belongs to. Admin-assigned only
+  // (not in AuthService's self-service update allow-list, and not settable
+  // by a plain owner-write under firestore.rules) — a player can't declare
+  // their own team the way a fan favorites one.
+  final String? teamId;
 
   UserProfile({
     required this.uid,
@@ -51,6 +55,7 @@ class UserProfile {
     this.emailNotifications = false,
     this.language = 'English',
     this.accountRole = AccountRole.fan,
+    this.teamId,
   });
 
   bool get isOfficial =>
@@ -92,6 +97,7 @@ class UserProfile {
             (e) => e.name == data['role'],
         orElse: () => AccountRole.fan,
       ),
+      teamId: data['teamId'],
     );
   }
 
@@ -112,6 +118,7 @@ class UserProfile {
       'emailNotifications': emailNotifications,
       'language': language,
       'role': accountRole.name,
+      'teamId': teamId,
     };
   }
 
@@ -130,6 +137,7 @@ class UserProfile {
     bool? emailNotifications,
     String? language,
     AccountRole? accountRole,
+    String? teamId,
   }) {
     return UserProfile(
       uid: uid,
@@ -146,6 +154,7 @@ class UserProfile {
       themePreference: themePreference ?? this.themePreference,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       accountRole: accountRole ?? this.accountRole,
+      teamId: teamId ?? this.teamId,
       emailNotifications: emailNotifications ?? this.emailNotifications,
       language: language ?? this.language,
     );

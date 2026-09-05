@@ -1,8 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wao_mobile/Model/user_model.dart';
+import 'package:wao_mobile/Model/user_provider.dart';
 import 'package:wao_mobile/View/games_details/games.dart';
 import 'package:wao_mobile/View/user/documentation/how_to_play.dart';
+import 'package:wao_mobile/View/user/team_activities/team_activities_page.dart';
 import 'package:wao_mobile/View/user/user_profile.dart';
 
 import '../View/dashboard/home_screen.dart';
@@ -17,15 +21,21 @@ class BottomNavBar extends StatefulWidget {
 class BottomNavBarState extends State<BottomNavBar> {
   int currentIndex = 0;
 
-  final List<Widget> pages = [
-    const HomeScreen(),
-    const MatchesScreen(),
-    const HowToPlayWAO(showBackButton: false),
-    const ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Players and coaches get a "Team" tab (lineup/fixtures/roster) in
+    // place of the fan-facing "Rules" (How to Play WAO) tab. A coach sees
+    // extra management controls on the same page (see TeamActivitiesPage).
+    final role = context.watch<UserProvider>().userProfile?.accountRole;
+    final isPlayerOrCoach = role == AccountRole.player || role == AccountRole.coach;
+
+    final pages = <Widget>[
+      const HomeScreen(),
+      const MatchesScreen(),
+      isPlayerOrCoach ? const TeamActivitiesPage() : const HowToPlayWAO(showBackButton: false),
+      const ProfilePage(),
+    ];
+
     return Scaffold(
       // Lets page content scroll behind the floating bar instead of the
       // bar squeezing the body's height — the point of a floating nav.
@@ -92,8 +102,8 @@ class BottomNavBarState extends State<BottomNavBar> {
                       currentIndex = index;
                     });
                   },
-                  items: const [
-                    BottomNavigationBarItem(
+                  items: [
+                    const BottomNavigationBarItem(
                       icon: Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.grid_view_rounded, size: 26),
@@ -104,7 +114,7 @@ class BottomNavBarState extends State<BottomNavBar> {
                       ),
                       label: 'Home',
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.stadium_outlined, size: 26),
@@ -115,18 +125,30 @@ class BottomNavBarState extends State<BottomNavBar> {
                       ),
                       label: 'Games',
                     ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.sports_handball_outlined, size: 26),
-                      ),
-                      activeIcon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.sports_handball, size: 28),
-                      ),
-                      label: 'Rules',
-                    ),
-                    BottomNavigationBarItem(
+                    isPlayerOrCoach
+                        ? const BottomNavigationBarItem(
+                            icon: Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: Icon(Icons.groups_outlined, size: 26),
+                            ),
+                            activeIcon: Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: Icon(Icons.groups, size: 28),
+                            ),
+                            label: 'Team',
+                          )
+                        : const BottomNavigationBarItem(
+                            icon: Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: Icon(Icons.sports_handball_outlined, size: 26),
+                            ),
+                            activeIcon: Padding(
+                              padding: EdgeInsets.only(bottom: 4),
+                              child: Icon(Icons.sports_handball, size: 28),
+                            ),
+                            label: 'Rules',
+                          ),
+                    const BottomNavigationBarItem(
                       icon: Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.account_circle_outlined, size: 26),

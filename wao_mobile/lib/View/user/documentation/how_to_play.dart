@@ -1,528 +1,211 @@
 import 'package:flutter/material.dart';
-
-import '../../../shared/app_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:wao_mobile/core/theme/app_colors.dart';
 
 class HowToPlayWAO extends StatelessWidget {
-  // Pushed from Profile it needs a back button; as a bottom-nav tab there's
-  // no stack entry to pop back to, so the tab wiring passes false.
   const HowToPlayWAO({super.key, this.showBackButton = true});
-
   final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final top = MediaQuery.of(context).padding.top;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-
-      appBar: CustomAppBar(
-        title: 'How To Play WAO!',
-        showBackButton: showBackButton,
-        showNotification: true,
-        hasNotificationDot: true,
-      ),
-
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    // Introduction
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFFD30336).withOpacity(0.1),
-                            Colors.transparent,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFD30336).withOpacity(0.3),
-                        ),
-                      ),
-                      child: Text(
-                        "WAO is a multiple scoring hand-controlled sport played on a spherical pitch, and thrives on technology.",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          height: 1.6,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Let's Play banner
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        "Let's play WAO!",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Basic Rules
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.sports_handball,
-                      title: "Basic Rules",
-                      content: "Handle and control ball by bouncing, dribbling, passing, and displaying skills or movement in any direction.\n\n"
-                          "Every part of the pitch is playable by all players, and any Player can score points anywhere.\n\n"
-                          "The objective is to score points in four scoring areas, and end with a high percentage sum.",
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Scoring Areas Header
-                    Text(
-                      "THE SCORING AREAS",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Kingdom, Workout, Oval-Crown and Judges",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontStyle: FontStyle.italic,
-                        color: isDarkMode ? Colors.white60 : Colors.black54,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Scoring sections
-                    _buildScoringCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.castle,
-                      title: "KINGDOM",
-                      percentage: "30%",
-                      content: "Score by invading opponent's KINGDOM with the ball and bounce.\n\n"
-                          "At least one foot must be in the Kingdom area. Each bounce per second is 1 point.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildScoringCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.fitness_center,
-                      title: "WORKOUT",
-                      percentage: "30%",
-                      content: "Score in your own Workout area by entering with ball.\n\n"
-                          "Time you stay in with the ball is counted and converted to points. At least one foot must be in the area.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildScoringCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.sports_basketball,
-                      title: "OVAL-CROWN",
-                      percentage: "30%",
-                      content: "Each Team has 2 Oval Crowns to score and 2 to defend.\n\n"
-                          "For fowls and penalty throws at game start, can be opened for other scoring too.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildScoringCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.gavel,
-                      title: "JUDGES",
-                      percentage: "10%",
-                      content: "Judges use predictable golden characters and humane behaviors to determine score.",
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Players
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.people_alt,
-                      title: "Players Identification",
-                      content: "A Team has 7 Players plus 5 subs; 14 Players total on the WaoSphere.\n\n"
-                          "Players are identified by characters for storytelling.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Characters Table
-                    _buildCharactersTable(isDarkMode),
-
-                    const SizedBox(height: 16),
-
-                    // Foul Rules
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.rule_folder,
-                      title: "Basic Foul Rules",
-                      content: "Wao! is discipline - the better you play, the more disciplined you're expected to be in life!\n\n"
-                          "Greatness is measured by displaying skillset within game jurisprudence.\n\n"
-                          "Playing within rules makes it attractive and competitive.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Laws of Territory
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.map,
-                      title: "Laws of Territory",
-                      content: "Special rules for player positions:\n\n"
-                          "KING: Minor aggressions defending Kingdom may not be foul.\n\n"
-                          "WORKER: Any aggression towards Worker in Workout is foul.\n\n"
-                          "SACRIFICE: Strict rules - attempting to abort or hurt is Penalty.\n\n"
-                          "SACRIFICER: Any aggression in Sacrifice area is foul.",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Inspection
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.checklist,
-                      title: "Inspection",
-                      content: "• Safety & Security\n"
-                          "• 7 Players per Team (plus 5 Subs)\n"
-                          "• WaoSphere quality / Pitch condition\n"
-                          "• Minimum 2 balls of 2 colors\n"
-                          "• 2 field Refs, sideline Refs\n"
-                          "• Panel of Judges (max 3 per Hi-Court)\n"
-                          "• Smart kit: Balls, Floor, Jerseys, etc.\n"
-                          "• Digital Narrators\n"
-                          "• Storytellers / Storyline\n"
-                          "• Facilities for human dwelling",
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Officiating
-                    _buildSection(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.sports,
-                      title: "Officiating",
-                      content: "1 field Referee assisted by 2 sideline referees and technology assistants.\n\n"
-                          "Technology assists scoring, officiating and adds to the fun.",
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // WAO Motto
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFD30336).withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Text(
-                        "WAO - World As One!",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection({
-    required bool isDarkMode,
-    required IconData icon,
-    required String title,
-    required String content,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: const Color(0xFFD30336), size: 24),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            content,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: isDarkMode ? Colors.white70 : Colors.black54,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScoringCard({
-    required bool isDarkMode,
-    required IconData icon,
-    required String title,
-    required String percentage,
-    required String content,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: Colors.white, size: 24),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD30336),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  percentage,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : const Color(0xFF011B3B),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  content,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCharactersTable(bool isDarkMode) {
-    final characters = [
-      ['King', 'Kingdom'],
-      ['Warrior', 'Dominion'],
-      ['Worker', 'Workout'],
-      ['Protaque', 'Hi Court (Left)'],
-      ['Sacrificer', 'Sacrifice'],
-      ['Antaque', 'Goal Setting (Right)'],
-      ['Servitor', 'Discretionary'],
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.sports_score, color: Color(0xFFD30336), size: 24),
-              const SizedBox(width: 12),
-              Text(
-                'PLAYERS CHARACTERS & POSITIONS',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Table Header
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-              ),
-            ),
-            child: const Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      'CHARACTER',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      'POSITION',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Table Rows
-          ...characters.map((row) => Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.2),
-                ),
-              ),
-            ),
+          // ── Inline header ─────────────────────────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, top + 20, 20, 0),
             child: Row(
               children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      row[0],
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkMode ? Colors.white : Colors.black87,
+                if (showBackButton) ...[
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.06)
+                            : AppColors.waoNavy.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.08)
+                              : AppColors.waoNavy.withOpacity(0.1),
+                          width: 1,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: isDark ? Colors.white : AppColors.waoNavy,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      row[1],
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                  const SizedBox(width: 14),
+                ],
+                Text(
+                  'How To Play WAO',
+                  style: GoogleFonts.oswald(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
             ),
-          )),
+          ),
 
-          const SizedBox(height: 12),
-          Text(
-            'Positions are interchangeable. Characters and descriptions are changeable to suit stories. Characters come with learning beyond sport.',
-            style: TextStyle(
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-              color: isDarkMode ? Colors.white60 : Colors.black54,
+          const SizedBox(height: 20),
+
+          // ── Scrollable content ────────────────────────────────────────
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              // Clears the floating pill nav bar (~84px) when shown as a
+              // tab, not just the OS home-indicator inset SafeArea covers.
+              padding: EdgeInsets.only(bottom: bottomInset + 84),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Intro card
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _IntroCard(isDark: isDark),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Basic Rules
+                  _SectionHeader(title: 'Basic Rules', isDark: isDark),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _InfoCard(
+                      isDark: isDark,
+                      icon: Icons.sports_handball,
+                      text:
+                          'Handle and control the ball by bouncing, dribbling, passing, and displaying skills in any direction.\n\n'
+                          'Every part of the pitch is playable by all players. Any player can score points anywhere.\n\n'
+                          'The objective is to score in four scoring areas and end with the highest percentage sum.',
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Scoring Areas
+                  _SectionHeader(
+                    title: 'The Scoring Areas',
+                    isDark: isDark,
+                    subtitle: 'Kingdom · Workout · Oval-Crown · Judges',
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _ScoringTile(isDark: isDark, icon: Icons.castle,          title: 'KINGDOM',    pct: '30%', text: 'Invade the opponent\'s Kingdom with the ball and bounce. At least one foot must be inside. Each bounce per second = 1 point.'),
+                        const SizedBox(height: 10),
+                        _ScoringTile(isDark: isDark, icon: Icons.fitness_center,   title: 'WORKOUT',    pct: '30%', text: 'Score in your own Workout area. Time spent inside with the ball is converted to points. At least one foot must be in the area.'),
+                        const SizedBox(height: 10),
+                        _ScoringTile(isDark: isDark, icon: Icons.sports_basketball, title: 'OVAL-CROWN', pct: '30%', text: 'Each team has 2 Oval Crowns to score and 2 to defend. Also used for fouls, penalty throws, and game-start scoring.'),
+                        const SizedBox(height: 10),
+                        _ScoringTile(isDark: isDark, icon: Icons.gavel,            title: 'JUDGES',     pct: '10%', text: 'Judges use predictable golden characters and humane behaviours to determine the score.'),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Players
+                  _SectionHeader(title: 'Players & Characters', isDark: isDark),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _InfoCard(
+                          isDark: isDark,
+                          icon: Icons.people_alt,
+                          text:
+                              'A team has 7 players plus 5 substitutes — 14 players total on the WaoSphere.\n\n'
+                              'Players are identified by characters for storytelling. Positions are interchangeable and characters can be adapted to suit any story.',
+                        ),
+                        const SizedBox(height: 10),
+                        _CharactersTable(isDark: isDark),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Foul Rules
+                  _SectionHeader(title: 'Foul Rules', isDark: isDark),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _InfoCard(
+                          isDark: isDark,
+                          icon: Icons.rule_folder,
+                          text:
+                              'WAO! is discipline — the better you play, the more disciplined you are expected to be.\n\n'
+                              'Greatness is measured by displaying your skillset within game jurisprudence. Playing within the rules makes it attractive and competitive.',
+                        ),
+                        const SizedBox(height: 10),
+                        _InfoCard(
+                          isDark: isDark,
+                          icon: Icons.map,
+                          label: 'Laws of Territory',
+                          text:
+                              'KING — Minor aggressions defending the Kingdom may not be a foul.\n\n'
+                              'WORKER — Any aggression towards the Worker in Workout is a foul.\n\n'
+                              'SACRIFICE — Strict rules; attempting to abort or hurt is a Penalty.\n\n'
+                              'SACRIFICER — Any aggression in the Sacrifice area is a foul.',
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Inspection & Officiating
+                  _SectionHeader(title: 'Inspection & Officiating', isDark: isDark),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _ChecklistCard(isDark: isDark),
+                        const SizedBox(height: 10),
+                        _InfoCard(
+                          isDark: isDark,
+                          icon: Icons.sports,
+                          label: 'Officiating',
+                          text:
+                              '1 field Referee assisted by 2 sideline referees and technology assistants.\n\n'
+                              'Technology assists scoring, officiating, and adds to the fun.',
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Motto
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _MottoBar(),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -530,3 +213,497 @@ class HowToPlayWAO extends StatelessWidget {
     );
   }
 }
+
+// ── Intro card ────────────────────────────────────────────────────────────────
+
+class _IntroCard extends StatelessWidget {
+  const _IntroCard({required this.isDark});
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.waoNavy,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '"WAO is a multiple scoring hand-controlled sport played on a spherical pitch, and thrives on technology."',
+            style: GoogleFonts.oswald(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              height: 1.65,
+              color: Colors.white,
+              letterSpacing: 0.2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: 36,
+            height: 3,
+            decoration: BoxDecoration(
+              color: AppColors.waoRed,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Let's play WAO!",
+            style: GoogleFonts.oswald(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.waoRed,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Section header — exact match to games.dart _SectionHeader ─────────────────
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.isDark,
+    this.subtitle,
+  });
+  final String title;
+  final bool isDark;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 3,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: AppColors.waoRed,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: GoogleFonts.oswald(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : AppColors.waoNavy,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 13),
+              child: Text(
+                subtitle!,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? Colors.white54 : Colors.black45,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Generic info card ─────────────────────────────────────────────────────────
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.isDark,
+    required this.icon,
+    required this.text,
+    this.label,
+  });
+  final bool isDark;
+  final IconData icon;
+  final String text;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecor(isDark),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.waoRed, size: 20),
+              if (label != null) ...[
+                const SizedBox(width: 10),
+                Text(
+                  label!,
+                  style: GoogleFonts.oswald(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.65,
+              color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Scoring tile ──────────────────────────────────────────────────────────────
+
+class _ScoringTile extends StatelessWidget {
+  const _ScoringTile({
+    required this.isDark,
+    required this.icon,
+    required this.title,
+    required this.pct,
+    required this.text,
+  });
+  final bool isDark;
+  final IconData icon;
+  final String title, pct, text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecor(isDark),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.waoNavy,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: Colors.white, size: 22),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.waoRed,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  pct,
+                  style: GoogleFonts.oswald(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.oswald(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.55,
+                    color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Characters table ──────────────────────────────────────────────────────────
+
+class _CharactersTable extends StatelessWidget {
+  const _CharactersTable({required this.isDark});
+  final bool isDark;
+
+  static const _rows = [
+    ['King',       'Kingdom'],
+    ['Warrior',    'Dominion'],
+    ['Worker',     'Workout'],
+    ['Protaque',   'Hi Court (Left)'],
+    ['Sacrificer', 'Sacrifice'],
+    ['Antaque',    'Goal Setting (Right)'],
+    ['Servitor',   'Discretionary'],
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: _cardDecor(isDark),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Header
+          Container(
+            color: AppColors.waoNavy,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                _Cell('CHARACTER', header: true),
+                _Cell('POSITION', header: true),
+              ],
+            ),
+          ),
+          // Rows
+          ..._rows.asMap().entries.map((e) {
+            final even = e.key.isEven;
+            return Container(
+              color: even
+                  ? (isDark
+                      ? Colors.white.withOpacity(0.03)
+                      : AppColors.waoNavy.withOpacity(0.03))
+                  : Colors.transparent,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  _Cell(e.value[0], isDark: isDark, bold: true),
+                  _Cell(e.value[1], isDark: isDark),
+                ],
+              ),
+            );
+          }),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+            child: Text(
+              'Positions are interchangeable. Characters come with learning beyond sport.',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Cell extends StatelessWidget {
+  const _Cell(this.text, {this.header = false, this.isDark, this.bold = false});
+  final String text;
+  final bool header;
+  final bool? isDark;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: header
+            ? GoogleFonts.oswald(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.6,
+                color: Colors.white,
+              )
+            : bold
+                ? GoogleFonts.oswald(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isDark! ? Colors.white : AppColors.waoNavy,
+                  )
+                : TextStyle(
+                    fontSize: 13,
+                    color: isDark! ? Colors.white60 : Colors.black54,
+                  ),
+      ),
+    );
+  }
+}
+
+// ── Checklist card ────────────────────────────────────────────────────────────
+
+class _ChecklistCard extends StatelessWidget {
+  const _ChecklistCard({required this.isDark});
+  final bool isDark;
+
+  static const _items = [
+    'Safety & Security',
+    '7 Players per Team (plus 5 Subs)',
+    'WaoSphere quality / Pitch condition',
+    'Minimum 2 balls of 2 colours',
+    '2 field Refs, sideline Refs',
+    'Panel of Judges (max 3 per Hi-Court)',
+    'Smart kit: Balls, Floor, Jerseys, etc.',
+    'Digital Narrators',
+    'Storytellers / Storyline',
+    'Facilities for human dwelling',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecor(isDark),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.checklist_rounded, color: AppColors.waoRed, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                'Inspection Checklist',
+                style: GoogleFonts.oswald(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                  color: isDark ? Colors.white : AppColors.waoNavy,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ..._items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      color: AppColors.waoRed,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.5,
+                        color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Motto bar ─────────────────────────────────────────────────────────────────
+
+class _MottoBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: AppColors.waoNavy,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'WAO',
+            style: GoogleFonts.oswald(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 6,
+              color: AppColors.waoRed,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'WORLD AS ONE',
+            style: GoogleFonts.oswald(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 4,
+              color: Colors.white54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shared card decoration ────────────────────────────────────────────────────
+
+BoxDecoration _cardDecor(bool isDark) => BoxDecoration(
+      color: isDark ? AppColors.darkSurface : Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(
+        color: isDark
+            ? Colors.white.withOpacity(0.08)
+            : AppColors.waoNavy.withOpacity(0.08),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );

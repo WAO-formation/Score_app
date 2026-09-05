@@ -29,7 +29,12 @@ class _UpcomingGameDetailsState extends State<UpcomingGameDetails>
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      body: SingleChildScrollView(
+      // top:false leaves the hero card's gradient full-bleed against the
+      // status bar (it hand-rolls its own top inset for the back button);
+      // bottom protects the roster panel from the home indicator.
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,6 +58,7 @@ class _UpcomingGameDetailsState extends State<UpcomingGameDetails>
 
             const SizedBox(height: 32),
           ],
+        ),
         ),
       ),
     );

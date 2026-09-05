@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/services/auth_service/auth_serivce.dart';
-import '../../core/services/auth_service/session_service.dart';
 import '../../core/widgets/wao_toast.dart';
 
 
@@ -15,7 +14,6 @@ class LoginController extends ChangeNotifier {
   final AuthService _auth = AuthService();
 
   bool passwordVisible = false;
-  bool rememberMe = false;
   bool isLoading = false;
 
   // Server-side errors (e.g. "no account with this email", "wrong password")
@@ -45,11 +43,6 @@ class LoginController extends ChangeNotifier {
 
   void togglePasswordVisibility() {
     passwordVisible = !passwordVisible;
-    notifyListeners();
-  }
-
-  void toggleRememberMe(bool? value) {
-    rememberMe = value ?? false;
     notifyListeners();
   }
 
@@ -88,7 +81,6 @@ class LoginController extends ChangeNotifier {
       notifyListeners();
 
       if (userCredential?.user != null) {
-        await SessionService.recordLogin(rememberMe: rememberMe);
         if (context.mounted) {
           WaoToast.success(context, 'Login successful!');
         }

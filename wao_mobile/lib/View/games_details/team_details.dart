@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
-import 'package:wao_mobile/core/theme/app_typography.dart';
-
+import 'package:wao_mobile/core/widgets/wao_toast.dart';
 import '../../Model/teams_games/team/wao_player.dart';
 import '../../Model/teams_games/team/team_stat.dart';
-import '../../Model/news/news_model.dart';
-import '../../ViewModel/news_viewmodel/news_viewmodel.dart';
 import '../../ViewModel/teams_games/player_viewmodel.dart';
 import '../../ViewModel/teams_games/team_viewmodel.dart';
 import '../dashboard/widgets/folow_button.dart';
 
 class TeamDetails extends StatefulWidget {
+  const TeamDetails({super.key, required this.team});
   final WaoTeam team;
-
-  const TeamDetails({
-    super.key,
-    required this.team,
-  });
 
   @override
   State<TeamDetails> createState() => _TeamDetailsState();
@@ -26,1022 +20,898 @@ class TeamDetails extends StatefulWidget {
 
 class _TeamDetailsState extends State<TeamDetails>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  late TabController _tab;
   bool _isFollowing = false;
-  bool _isLoadingFollow = false;
-  TeamStatistics? _teamStats;
-  List<NewsModel> _teamNews = [];
+  bool _loadingFollow = false;
+  TeamStatistics? _stats;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
+    _tab = TabController(length: 2, vsync: this)
+      ..addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final vm = Provider.of<TeamViewModel>(context, listen: false);
+      setState(() => _isFollowing = vm.isFollowingTeam(widget.team.id));
+      vm.getTeamStatistics(widget.team.id).listen((s) {
+        if (mounted) setState(() => _stats = s);
+      });
     });
-    _loadFollowStatus();
-    _loadTeamStatistics();
-    _loadTeamNews();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tab.dispose();
     super.dispose();
   }
 
-  void _loadFollowStatus() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
-        setState(() {
-          _isFollowing = teamViewModel.isFollowingTeam(widget.team.id);
-        });
-      }
-    });
-  }
-
-  void _loadTeamStatistics() {
-    final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
-    teamViewModel.getTeamStatistics(widget.team.id).listen((stats) {
-      if (mounted) {
-        setState(() {
-          _teamStats = stats;
-        });
-      }
-    });
-  }
-
-  void _loadTeamNews() {
-    final newsViewModel = Provider.of<NewsViewModel>(context, listen: false);
-    // Filter news by team name or team-related content
-    newsViewModel.listenToNews().listen((allNews) {
-      if (mounted) {
-        setState(() {
-          // Filter news that contains team name in title or content
-          _teamNews = allNews.where((news) {
-            final teamName = widget.team.name.toLowerCase();
-            final newsTitle = news.title.toLowerCase();
-            return newsTitle.contains(teamName) ;
-          }).take(5).toList();
-        });
-      }
-    });
-  }
-
   Future<void> _toggleFollow() async {
-    if (_isLoadingFollow) return;
-
-    setState(() {
-      _isLoadingFollow = true;
-    });
-
+    if (_loadingFollow) return;
+    setState(() => _loadingFollow = true);
     try {
-      final teamViewModel = Provider.of<TeamViewModel>(context, listen: false);
-      await teamViewModel.toggleFollowTeam(widget.team.id);
-
-      setState(() {
-        _isFollowing = !_isFollowing;
-      });
-
+      final vm = Provider.of<TeamViewModel>(context, listen: false);
+      await vm.toggleFollowTeam(widget.team.id);
+      setState(() => _isFollowing = !_isFollowing);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isFollowing
-                  ? 'Following ${widget.team.name}'
-                  : 'Unfollowed ${widget.team.name}',
-            ),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: _isFollowing
-                ? const Color(0xFFFFC600)
-                : Colors.grey[700],
-          ),
-        );
+        _isFollowing
+            ? WaoToast.success(context, 'Following ${widget.team.name}')
+            : WaoToast.info(context, 'Unfollowed ${widget.team.name}');
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-      print('Error toggling follow: $e');
+    } catch (_) {
+      if (mounted) WaoToast.error(context, 'Failed to update follow status');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingFollow = false;
-        });
-      }
+      if (mounted) setState(() => _loadingFollow = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final top = MediaQuery.of(context).padding.top;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildHeader(isDarkMode),
-              const SizedBox(height: 25),
-              _buildStatsCards(isDarkMode),
-              const SizedBox(height: 25),
-              _buildTabBar(isDarkMode),
-              const SizedBox(height: 25),
-              _buildTabContent(isDarkMode),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(bool isDarkMode) {
-    return Stack(
-      children: [
-        const SizedBox(width: double.infinity, height: 280),
-        const Positioned(
-          child: Image(
-            image: AssetImage("assets/images/officiate.jpg"),
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 210,
-          ),
-        ),
-        Positioned(
-          child: Container(
-            width: double.infinity,
-            height: 210,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 15,
-          left: 15,
-          right: 15,
-          child: _buildHeaderActions(isDarkMode),
-        ),
-        Positioned(
-          top: 100,
-          left: 15,
-          right: 15,
-          child: _buildTeamCard(isDarkMode),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeaderActions(bool isDarkMode) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withOpacity(0.3)
-                  : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
-        ),
-        Text(
-          widget.team.name.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-        _buildNotificationBell(isDarkMode),
-      ],
-    );
-  }
-
-  Widget _buildTeamCard(bool isDarkMode) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: -80,
-              right: -80,
-              child: Opacity(
-                opacity: 0.1,
-                child: Image.asset(
-                  "assets/images/wao-ball.png",
-                  width: 230,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _buildTeamLogo(),
-                      const SizedBox(width: 10.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.team.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Team Group: ${widget.team.category.name}',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _isLoadingFollow
-                          ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : FollowButton(
-                        isFollowing: _isFollowing,
-                        onToggle: _toggleFollow,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTeamLogo() {
-    final hasValidLogo =
-        widget.team.logoUrl.isNotEmpty && widget.team.logoUrl.startsWith('http');
-
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        shape: BoxShape.circle,
-      ),
-      child: ClipOval(
-        child: hasValidLogo
-            ? Image.network(
-          widget.team.logoUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.shield, color: Colors.white, size: 40),
-        )
-            : const Icon(Icons.shield, color: Colors.white, size: 40),
-      ),
-    );
-  }
-
-  Widget _buildStatsCards(bool isDarkMode) {
-    // Use real statistics if available, otherwise show defaults
-    final wins = _teamStats?.wins ?? 0;
-    final losses = _teamStats?.losses ?? 0;
-    final draws = _teamStats?.draws ?? 0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Row(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      body: Column(
         children: [
-          Expanded(
-            child: _buildStatCard(
-              title: 'Games Won',
-              value: wins.toString(),
-              isDarkMode: isDarkMode,
-            ),
+          // ── Hero header ────────────────────────────────────────────────
+          _HeroHeader(
+            team: widget.team,
+            top: top,
+            isDark: isDark,
+            isFollowing: _isFollowing,
+            loadingFollow: _loadingFollow,
+            onBack: () => Navigator.pop(context),
+            onFollow: _toggleFollow,
           ),
-          const SizedBox(width: 10),
+
+          // ── Tab bar ────────────────────────────────────────────────────
+          _TabBar(tab: _tab, isDark: isDark),
+
+          // ── Tab content ────────────────────────────────────────────────
           Expanded(
-            child: _buildStatCard(
-              title: 'Games Lost',
-              value: losses.toString(),
-              isDarkMode: isDarkMode,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _buildStatCard(
-              title: 'Games Drawn',
-              value: draws.toString(),
-              isDarkMode: isDarkMode,
-            ),
+            child: _tab.index == 0
+                ? _RosterTab(
+                    team: widget.team,
+                    stats: _stats,
+                    isDark: isDark,
+                    bottomInset: bottomInset,
+                  )
+                : _StatsTab(
+                    stats: _stats,
+                    isDark: isDark,
+                    bottomInset: bottomInset,
+                  ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required bool isDarkMode,
-  }) {
+// ── Hero header ───────────────────────────────────────────────────────────────
+
+class _HeroHeader extends StatelessWidget {
+  const _HeroHeader({
+    required this.team,
+    required this.top,
+    required this.isDark,
+    required this.isFollowing,
+    required this.loadingFollow,
+    required this.onBack,
+    required this.onFollow,
+  });
+  final WaoTeam team;
+  final double top;
+  final bool isDark, isFollowing, loadingFollow;
+  final VoidCallback onBack, onFollow;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? Colors.white.withOpacity(0.05)
-            : Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: isDarkMode ? Colors.white : AppColors.darkBackground,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isDarkMode ? Colors.white : AppColors.darkBackground,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBar(bool isDarkMode) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.05)
-              : Colors.grey.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: TabBar(
-          controller: _tabController,
-          indicator: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          indicatorSize: TabBarIndicatorSize.tab,
-          dividerColor: Colors.transparent,
-          labelColor: Colors.white,
-          unselectedLabelColor: isDarkMode ? Colors.white60 : Colors.black54,
-          labelStyle: const TextStyle(
-            fontSize: AppTypography.bodyLg,
-            fontWeight: FontWeight.w600,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: AppTypography.bodyLg,
-            fontWeight: FontWeight.w500,
-          ),
-          tabs: const [
-            Tab(text: 'Team Members'),
-            Tab(text: 'Team News'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabContent(bool isDarkMode) {
-    return _tabController.index == 0
-        ? _buildTeamMembers(isDarkMode)
-        : _buildTeamNews(isDarkMode);
-  }
-
-  Widget _buildTeamMembers(bool isDarkMode) {
-    return FutureBuilder<List<WaoPlayer>>(
-      future: _getTeamPlayers(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: CircularProgressIndicator(
-                color: isDarkMode
-                    ? const Color(0xFFFFC600)
-                    : const Color(0xFF011B3B),
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 40),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Error loading players',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final players = snapshot.data ?? [];
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 20),
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    'Team Roster',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : AppColors.darkBackground,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildRosterSections(players, isDarkMode),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<List<WaoPlayer>> _getTeamPlayers() async {
-    final playerService = PlayerService();
-    final allPlayerIds = widget.team.roster.getAllPlayerIds();
-    final List<WaoPlayer> players = [];
-
-    for (final playerId in allPlayerIds) {
-      final player = await playerService.getPlayerById(playerId);
-      if (player != null) {
-        players.add(player);
-      }
-    }
-
-    return players;
-  }
-
-  Widget _buildRosterSections(List<WaoPlayer> players, bool isDarkMode) {
-    return Column(
-      children: [
-        _buildRosterSection('Coach', [widget.team.coach], isDarkMode, isCoach: true),
-        const SizedBox(height: 15),
-        _buildPlayerRoleSection(
-            'Kings', widget.team.roster.kingIds, players, isDarkMode),
-        _buildPlayerRoleSection(
-            'Workers', widget.team.roster.workerIds, players, isDarkMode),
-        _buildPlayerRoleSection(
-            'Protagues', widget.team.roster.protagueIds, players, isDarkMode),
-        _buildPlayerRoleSection(
-            'Antagues', widget.team.roster.antagueIds, players, isDarkMode),
-        _buildPlayerRoleSection(
-            'Warriors', widget.team.roster.warriorIds, players, isDarkMode),
-        _buildPlayerRoleSection(
-            'Sacrificers', widget.team.roster.sacrificerIds, players, isDarkMode),
-      ],
-    );
-  }
-
-  Widget _buildPlayerRoleSection(
-      String role, List<String> roleIds, List<WaoPlayer> allPlayers, bool isDarkMode) {
-    final rolePlayers = allPlayers.where((p) => roleIds.contains(p.id)).toList();
-
-    if (rolePlayers.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      children: [
-        _buildRosterSection(role, rolePlayers, isDarkMode),
-        const SizedBox(height: 15),
-      ],
-    );
-  }
-
-  Widget _buildRosterSection(
-      String role, List<dynamic> items, bool isDarkMode,
-      {bool isCoach = false}) {
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                role,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${items.length}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        if (isCoach)
-          _buildCoachCard(items[0] as String, isDarkMode)
-        else
-          ...items.map((player) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: _buildPlayerCard(player as WaoPlayer, isDarkMode),
-          )),
-      ],
-    );
-  }
-
-  Widget _buildCoachCard(String coachName, bool isDarkMode) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.08) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.sports, color: Colors.white, size: 20),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  coachName,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  ),
-                ),
-                Text(
-                  'Head Coach',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDarkMode ? Colors.white54 : Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.verified, size: 20, color: Color(0xFFFFC600)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlayerCard(WaoPlayer player, bool isDarkMode) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.08) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          _buildPlayerAvatar(player, isDarkMode),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.name,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                _buildStatusBadge(player.status, isDarkMode),
-              ],
-            ),
-          ),
-          _getRoleIcon(player.role, isDarkMode),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlayerAvatar(WaoPlayer player, bool isDarkMode) {
-    if (player.profileImageUrl != null && player.profileImageUrl!.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          player.profileImageUrl!,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              _buildDefaultAvatar(player.name, isDarkMode),
-        ),
-      );
-    }
-    return _buildDefaultAvatar(player.name, isDarkMode);
-  }
-
-  Widget _buildDefaultAvatar(String name, bool isDarkMode) {
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'P';
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? Colors.white.withOpacity(0.1)
-            : Colors.grey.withOpacity(0.2),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white70 : Colors.black87,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(PlayerStatus status, bool isDarkMode) {
-    final statusConfig = _getStatusConfig(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: statusConfig['color'].withOpacity(0.2),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: statusConfig['color'], width: 0.5),
-      ),
-      child: Text(
-        statusConfig['label'],
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-          color: statusConfig['color'],
-        ),
-      ),
-    );
-  }
-
-  Map<String, dynamic> _getStatusConfig(PlayerStatus status) {
-    switch (status) {
-      case PlayerStatus.active:
-        return {'label': 'Active', 'color': Colors.green};
-      case PlayerStatus.inactive:
-        return {'label': 'Injured', 'color': Colors.orange};
-      case PlayerStatus.suspended:
-        return {'label': 'Suspended', 'color': Colors.red};
-    }
-  }
-
-  Widget _getRoleIcon(PlayerRole role, bool isDarkMode) {
-    IconData iconData;
-
-    switch (role) {
-      case PlayerRole.king:
-        iconData = Icons.emoji_events;
-        break;
-      case PlayerRole.worker:
-        iconData = Icons.work;
-        break;
-      case PlayerRole.protague:
-        iconData = Icons.shield;
-        break;
-      case PlayerRole.antague:
-        iconData = Icons.security;
-        break;
-      case PlayerRole.warrior:
-        iconData = Icons.sports_martial_arts;
-        break;
-      case PlayerRole.sacrificer:
-        iconData = Icons.favorite;
-        break;
-      case PlayerRole.servitor:
-        iconData = Icons.support_agent;
-        break;
-      case PlayerRole.substitute:
-        iconData = Icons.swap_horiz;
-        break;
-    }
-
-    return Icon(
-      iconData,
-      size: 20,
-      color: isDarkMode ? Colors.white38 : Colors.black38,
-    );
-  }
-
-  Widget _buildTeamNews(bool isDarkMode) {
-    if (_teamNews.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 40.0),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                Icons.article_outlined,
-                size: 60,
-                color: isDarkMode ? Colors.white24 : Colors.black26,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No news available for this team',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.white54 : Colors.black54,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Column(
-        children: _teamNews
-            .map((news) => Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: _buildNewsCard(news, isDarkMode),
-        ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildNewsCard(NewsModel news, bool isDarkMode) {
-    // Calculate time ago
-    final now = DateTime.now();
-    final difference = now.difference(news.publishedDate);
-    String timeAgo;
-
-    if (difference.inDays > 0) {
-      timeAgo = '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
-    } else if (difference.inHours > 0) {
-      timeAgo = '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
-    } else if (difference.inMinutes > 0) {
-      timeAgo = '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
-    } else {
-      timeAgo = 'Just now';
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? Colors.white.withOpacity(0.05)
-            : Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
+      color: AppColors.waoNavy,
+      padding: EdgeInsets.fromLTRB(20, top + 16, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Back + team name row
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD30336), Color(0xFFFF6B35)],
+              GestureDetector(
+                onTap: onBack,
+                child: Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded,
+                      size: 16, color: Colors.white),
                 ),
-                child: const Icon(Icons.article, color: Colors.white, size: 20),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  team.name,
+                  style: GoogleFonts.oswald(
+                    fontSize: 20, fontWeight: FontWeight.w700,
+                    color: Colors.white, letterSpacing: 0.3,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.waoRed,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  team.category.name.toUpperCase(),
+                  style: GoogleFonts.oswald(
+                    fontSize: 11, fontWeight: FontWeight.w700,
+                    color: Colors.white, letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Avatar + info + follow
+          Row(
+            children: [
+              // Team avatar
+              Container(
+                width: 72, height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.1),
+                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
+                ),
+                child: Center(
+                  child: Text(
+                    team.name.isNotEmpty ? team.name[0].toUpperCase() : 'T',
+                    style: GoogleFonts.oswald(
+                      fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      news.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      timeAgo,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDarkMode ? Colors.white60 : Colors.black54,
-                      ),
-                    ),
+                    _InfoRow(icon: Icons.sports_rounded,
+                        label: 'Coach: ${team.coach}'),
+                    const SizedBox(height: 5),
+                    _InfoRow(icon: Icons.manage_accounts_rounded,
+                        label: 'Director: ${team.director}'),
+                    const SizedBox(height: 5),
+                    _InfoRow(icon: Icons.people_rounded,
+                        label: '${team.roster.totalPlayers} players'),
                   ],
                 ),
               ),
+              const SizedBox(width: 12),
+              loadingFollow
+                  ? const SizedBox(
+                      width: 24, height: 24,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : FollowButton(isFollowing: isFollowing, onToggle: onFollow),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            news.title,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDarkMode ? Colors.white70 : Colors.black87,
-              height: 1.4,
-            ),
-          ),
-          if (news.category != null && news.category!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFC600).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: const Color(0xFFFFC600),
-                  width: 0.5,
-                ),
-              ),
-              child: Text(
-                news.category!,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFFFC600),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
+}
 
-  Widget _buildNotificationBell(bool isDarkMode) {
-    return Stack(
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: Colors.white,
-          ),
-        ),
-        Positioned(
-          right: 10,
-          top: 10,
-          child: Container(
-            height: 8,
-            width: 8,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFE0000),
-              shape: BoxShape.circle,
-            ),
+        Icon(icon, size: 13, color: Colors.white54),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 12, color: Colors.white70),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
     );
   }
 }
+
+// ── Tab bar ───────────────────────────────────────────────────────────────────
+
+class _TabBar extends StatelessWidget {
+  const _TabBar({required this.tab, required this.isDark});
+  final TabController tab;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: isDark ? AppColors.darkSurface : Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: TabBar(
+        controller: tab,
+        indicator: BoxDecoration(
+          color: AppColors.waoRed,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        labelColor: Colors.white,
+        unselectedLabelColor:
+            isDark ? Colors.white54 : AppColors.waoNavy.withOpacity(0.5),
+        labelStyle: GoogleFonts.oswald(
+            fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+        unselectedLabelStyle: GoogleFonts.oswald(
+            fontSize: 14, fontWeight: FontWeight.w500),
+        tabs: const [Tab(text: 'Roster'), Tab(text: 'Statistics')],
+      ),
+    );
+  }
+}
+
+// ── Roster tab ────────────────────────────────────────────────────────────────
+
+class _RosterTab extends StatelessWidget {
+  const _RosterTab({
+    required this.team,
+    required this.stats,
+    required this.isDark,
+    required this.bottomInset,
+  });
+  final WaoTeam team;
+  final TeamStatistics? stats;
+  final bool isDark;
+  final double bottomInset;
+
+  static const _roles = [
+    ('Kings',      'kingIds'),
+    ('Warriors',   'warriorIds'),
+    ('Workers',    'workerIds'),
+    ('Protagues',  'protagueIds'),
+    ('Antagues',   'antagueIds'),
+    ('Sacrificers','sacrificerIds'),
+    ('Servitors',  'servitorIds'),
+    ('Substitutes','substituteIds'),
+  ];
+
+  List<String> _ids(String key) {
+    switch (key) {
+      case 'kingIds':       return team.roster.kingIds;
+      case 'warriorIds':    return team.roster.warriorIds;
+      case 'workerIds':     return team.roster.workerIds;
+      case 'protagueIds':   return team.roster.protagueIds;
+      case 'antagueIds':    return team.roster.antagueIds;
+      case 'sacrificerIds': return team.roster.sacrificerIds;
+      case 'servitorIds':   return team.roster.servitorIds;
+      case 'substituteIds': return team.roster.substituteIds;
+      default:              return [];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<WaoPlayer>>(
+      future: _fetchPlayers(),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final players = snap.data ?? [];
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset + 84),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Coach card
+              _SectionLabel(label: 'Head Coach', isDark: isDark),
+              const SizedBox(height: 8),
+              _CoachCard(name: team.coach, isDark: isDark),
+              const SizedBox(height: 20),
+
+              // Role sections
+              for (final (label, key) in _roles) ...[
+                Builder(builder: (_) {
+                  final ids = _ids(key);
+                  final rolePlayers =
+                      players.where((p) => ids.contains(p.id)).toList();
+                  if (rolePlayers.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionLabel(
+                          label: label,
+                          count: rolePlayers.length,
+                          isDark: isDark),
+                      const SizedBox(height: 8),
+                      ...rolePlayers.map((p) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _PlayerCard(player: p, isDark: isDark),
+                          )),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<WaoPlayer>> _fetchPlayers() async {
+    final svc = PlayerService();
+    final ids = team.roster.getAllPlayerIds();
+    final List<WaoPlayer> out = [];
+    for (final id in ids) {
+      final p = await svc.getPlayerById(id);
+      if (p != null) out.add(p);
+    }
+    return out;
+  }
+}
+
+// ── Stats tab ─────────────────────────────────────────────────────────────────
+
+class _StatsTab extends StatelessWidget {
+  const _StatsTab({
+    required this.stats,
+    required this.isDark,
+    required this.bottomInset,
+  });
+  final TeamStatistics? stats;
+  final bool isDark;
+  final double bottomInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = stats;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset + 84),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // W / D / L row
+          Row(
+            children: [
+              _BigStat(label: 'Won',   value: '${s?.wins ?? 0}',
+                  color: const Color(0xFF1A7A4A), isDark: isDark),
+              const SizedBox(width: 10),
+              _BigStat(label: 'Drawn', value: '${s?.draws ?? 0}',
+                  color: AppColors.waoNavy, isDark: isDark),
+              const SizedBox(width: 10),
+              _BigStat(label: 'Lost',  value: '${s?.losses ?? 0}',
+                  color: AppColors.waoRed, isDark: isDark),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Detail grid
+          _SectionLabel(label: 'Performance', isDark: isDark),
+          const SizedBox(height: 10),
+          _StatGrid(isDark: isDark, items: [
+            ('Games Played',  '${s?.totalGamesPlayed ?? 0}', Icons.sports_rounded),
+            ('Points',        '${s?.points ?? 0}',           Icons.emoji_events_rounded),
+            ('Goals Scored',  '${s?.goalsScored ?? 0}',      Icons.sports_score_rounded),
+            ('Goals Conceded','${s?.goalsConceded ?? 0}',     Icons.shield_rounded),
+            ('Goal Diff',     '${s?.goalDifference ?? 0}',   Icons.swap_vert_rounded),
+            ('Win %',         '${(s?.winPercentage ?? 0).toStringAsFixed(0)}%',
+                              Icons.percent_rounded),
+          ]),
+
+          const SizedBox(height: 20),
+
+          _SectionLabel(label: 'Squad', isDark: isDark),
+          const SizedBox(height: 10),
+          _StatGrid(isDark: isDark, items: [
+            ('Active Players',   '${s?.activePlayers ?? 0}',   Icons.person_rounded),
+            ('Inactive Players', '${s?.inactivePlayers ?? 0}', Icons.person_off_rounded),
+            ('Total Followers',  '${s?.totalFollowers ?? 0}',  Icons.favorite_rounded),
+          ]),
+
+          // Recent games
+          if (s != null && s.recentGames.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _SectionLabel(label: 'Recent Games', isDark: isDark),
+            const SizedBox(height: 10),
+            ...s.recentGames.take(5).map((g) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _ResultRow(game: g, isDark: isDark),
+                )),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shared section label ──────────────────────────────────────────────────────
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label, required this.isDark, this.count});
+  final String label;
+  final bool isDark;
+  final int? count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 3, height: 18,
+          decoration: BoxDecoration(
+            color: AppColors.waoRed,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(label,
+            style: GoogleFonts.oswald(
+              fontSize: 15, fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+              letterSpacing: 0.3,
+            )),
+        if (count != null) ...[
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.waoRed.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text('$count',
+                style: GoogleFonts.oswald(
+                  fontSize: 11, fontWeight: FontWeight.w700,
+                  color: AppColors.waoRed,
+                )),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// ── Coach card ────────────────────────────────────────────────────────────────
+
+class _CoachCard extends StatelessWidget {
+  const _CoachCard({required this.name, required this.isDark});
+  final String name;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: _cardDecor(isDark),
+      child: Row(
+        children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.waoNavy,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.sports_rounded, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: GoogleFonts.oswald(
+                      fontSize: 15, fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : AppColors.waoNavy,
+                    )),
+                Text('Head Coach',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white54 : Colors.black45,
+                    )),
+              ],
+            ),
+          ),
+          const Icon(Icons.verified_rounded,
+              size: 20, color: AppColors.waoYellow),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Player card ───────────────────────────────────────────────────────────────
+
+class _PlayerCard extends StatelessWidget {
+  const _PlayerCard({required this.player, required this.isDark});
+  final WaoPlayer player;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _statusColor(player.status);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: _cardDecor(isDark),
+      child: Row(
+        children: [
+          // Avatar with jersey number
+          Stack(
+            children: [
+              Container(
+                width: 46, height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.waoNavy,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    player.name.isNotEmpty ? player.name[0].toUpperCase() : 'P',
+                    style: GoogleFonts.oswald(
+                      fontSize: 18, fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              if (player.jerseyNumber != null)
+                Positioned(
+                  bottom: 0, right: 0,
+                  child: Container(
+                    width: 18, height: 18,
+                    decoration: BoxDecoration(
+                      color: AppColors.waoRed,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: isDark ? AppColors.darkSurface : Colors.white,
+                          width: 1.5),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${player.jerseyNumber}',
+                        style: const TextStyle(
+                          fontSize: 9, fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 12),
+
+          // Name + status
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(player.name,
+                    style: GoogleFonts.oswald(
+                      fontSize: 14, fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : AppColors.waoNavy,
+                    )),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Container(
+                      width: 6, height: 6,
+                      decoration: BoxDecoration(
+                          color: statusColor, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(_statusLabel(player.status),
+                        style: TextStyle(fontSize: 11, color: statusColor)),
+                    if (player.age != null) ...[
+                      const SizedBox(width: 8),
+                      Text('Age ${player.age}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          )),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Stats
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _MiniStat(label: 'GP', value: '${player.gamesPlayed}', isDark: isDark),
+              const SizedBox(height: 4),
+              _MiniStat(label: 'G', value: '${player.goalsScored}', isDark: isDark),
+            ],
+          ),
+          const SizedBox(width: 10),
+
+          // Role icon
+          Container(
+            width: 32, height: 32,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withOpacity(0.06)
+                  : AppColors.waoNavy.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(_roleIcon(player.role), size: 16,
+                color: isDark ? Colors.white54 : AppColors.waoNavy.withOpacity(0.6)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _statusColor(PlayerStatus s) {
+    switch (s) {
+      case PlayerStatus.active:    return const Color(0xFF1A7A4A);
+      case PlayerStatus.inactive:  return Colors.orange;
+      case PlayerStatus.suspended: return AppColors.waoRed;
+    }
+  }
+
+  String _statusLabel(PlayerStatus s) {
+    switch (s) {
+      case PlayerStatus.active:    return 'Active';
+      case PlayerStatus.inactive:  return 'Inactive';
+      case PlayerStatus.suspended: return 'Suspended';
+    }
+  }
+
+  IconData _roleIcon(PlayerRole r) {
+    switch (r) {
+      case PlayerRole.king:       return Icons.emoji_events_rounded;
+      case PlayerRole.worker:     return Icons.construction_rounded;
+      case PlayerRole.protague:   return Icons.shield_rounded;
+      case PlayerRole.antague:    return Icons.security_rounded;
+      case PlayerRole.warrior:    return Icons.sports_martial_arts_rounded;
+      case PlayerRole.sacrificer: return Icons.favorite_rounded;
+      case PlayerRole.servitor:   return Icons.support_agent_rounded;
+      case PlayerRole.substitute: return Icons.swap_horiz_rounded;
+    }
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({required this.label, required this.value, required this.isDark});
+  final String label, value;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label,
+            style: TextStyle(
+              fontSize: 10,
+              color: isDark ? Colors.white38 : Colors.black38,
+            )),
+        const SizedBox(width: 3),
+        Text(value,
+            style: GoogleFonts.oswald(
+              fontSize: 13, fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+            )),
+      ],
+    );
+  }
+}
+
+// ── Big stat (W/D/L) ──────────────────────────────────────────────────────────
+
+class _BigStat extends StatelessWidget {
+  const _BigStat({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.isDark,
+  });
+  final String label, value;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8, offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(value,
+                style: GoogleFonts.oswald(
+                  fontSize: 28, fontWeight: FontWeight.w800, color: color,
+                )),
+            const SizedBox(height: 2),
+            Text(label,
+                style: GoogleFonts.oswald(
+                  fontSize: 12, fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white54 : Colors.black45,
+                  letterSpacing: 0.3,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Stat grid ─────────────────────────────────────────────────────────────────
+
+class _StatGrid extends StatelessWidget {
+  const _StatGrid({required this.isDark, required this.items});
+  final bool isDark;
+  final List<(String, String, IconData)> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      childAspectRatio: 1.1,
+      children: items.map((item) {
+        final (label, value, icon) = item;
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: _cardDecor(isDark),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: AppColors.waoRed),
+              const SizedBox(height: 6),
+              Text(value,
+                  style: GoogleFonts.oswald(
+                    fontSize: 18, fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                  )),
+              const SizedBox(height: 2),
+              Text(label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isDark ? Colors.white54 : Colors.black45,
+                  )),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ── Result row ────────────────────────────────────────────────────────────────
+
+class _ResultRow extends StatelessWidget {
+  const _ResultRow({required this.game, required this.isDark});
+  final GameResult game;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final isWin  = game.isWin;
+    final isDraw = game.isDraw;
+    final resultColor = isWin
+        ? const Color(0xFF1A7A4A)
+        : isDraw
+            ? AppColors.waoNavy
+            : AppColors.waoRed;
+    final resultLabel = isWin ? 'W' : isDraw ? 'D' : 'L';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: _cardDecor(isDark),
+      child: Row(
+        children: [
+          Container(
+            width: 28, height: 28,
+            decoration: BoxDecoration(
+              color: resultColor,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Center(
+              child: Text(resultLabel,
+                  style: GoogleFonts.oswald(
+                    fontSize: 13, fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  )),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'vs ${game.opponentTeamName}',
+              style: GoogleFonts.oswald(
+                fontSize: 14, fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : AppColors.waoNavy,
+              ),
+            ),
+          ),
+          Text(
+            '${game.teamScore} – ${game.opponentScore}',
+            style: GoogleFonts.oswald(
+              fontSize: 15, fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : AppColors.waoNavy,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shared card decoration ────────────────────────────────────────────────────
+
+BoxDecoration _cardDecor(bool isDark) => BoxDecoration(
+      color: isDark ? AppColors.darkSurface : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: isDark
+            ? Colors.white.withOpacity(0.08)
+            : AppColors.waoNavy.withOpacity(0.08),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 8, offset: const Offset(0, 2),
+        ),
+      ],
+    );

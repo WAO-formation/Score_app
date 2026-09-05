@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:wao_mobile/View/games_details/widgets/game_detail_shared.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
+import 'package:wao_mobile/core/utils/drive_image.dart';
 import '../../../Model/news/news_model.dart';
 
 class NewsDetailsPage extends StatelessWidget {
@@ -15,7 +16,12 @@ class NewsDetailsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      body: SingleChildScrollView(
+      // top:false leaves the hero image full-bleed against the status bar
+      // (it hand-rolls its own top inset for the back button); bottom
+      // protects the article text from the home indicator.
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,6 +60,7 @@ class NewsDetailsPage extends StatelessWidget {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -64,9 +71,19 @@ class _NewsHero extends StatelessWidget {
   const _NewsHero({required this.news});
   final NewsModel news;
 
+  static Widget _placeholder() => Container(
+        color: AppColors.waoNavy.withOpacity(0.08),
+        child: Icon(
+          Icons.image_outlined,
+          color: AppColors.waoNavy.withOpacity(0.3),
+          size: 40,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
+    final resolvedUrl = DriveImage.resolve(news.imageUrl);
 
     return SizedBox(
       height: 260,
@@ -74,24 +91,18 @@ class _NewsHero extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(
-            news.imageUrl,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(color: AppColors.waoNavy.withOpacity(0.08));
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: AppColors.waoNavy.withOpacity(0.08),
-                child: Icon(
-                  Icons.image_outlined,
-                  color: AppColors.waoNavy.withOpacity(0.3),
-                  size: 40,
-                ),
-              );
-            },
-          ),
+          if (DriveImage.isSafeToLoad(resolvedUrl))
+            Image.network(
+              resolvedUrl,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(color: AppColors.waoNavy.withOpacity(0.08));
+              },
+              errorBuilder: (context, error, stackTrace) => _placeholder(),
+            )
+          else
+            _placeholder(),
           // Scrim so the back button and badge stay legible over any photo.
           Container(
             decoration: BoxDecoration(

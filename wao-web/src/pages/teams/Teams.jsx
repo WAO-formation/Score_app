@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Trophy, Users, Search, Filter, MoreVertical, Trash2, Eye, ChevronLeft, ChevronRight, X, Shield, ChevronRight as Arrow } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateTeam from '../../components/CreateTeam';
 import * as teamsService from '../../services/teamsService';
@@ -16,6 +16,7 @@ function Teams() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const isCoach = user?.role === 'moderator';
   const [teamsData, setTeamsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,6 +91,78 @@ function Teams() {
       )
     );
   };
+
+  // Coach view: card grid, no admin controls
+  if (isCoach) {
+    return (
+      <section className="scrollbar-hide px-2 py-2 md:p-4">
+        <div className="flex flex-col gap-3 py-4 md:py-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-900 uppercase tracking-widest" style={{ fontFamily: BRAND.font.body }}>Teams</h2>
+            <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: BRAND.font.body }}>{teamsData.length} teams registered</p>
+          </div>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text" placeholder="Search teams..."
+                value={searchQuery} onChange={e => handleSearchChange(e.target.value)}
+                className="pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 transition w-56"
+                style={{ fontFamily: BRAND.font.body }}
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                value={selectedCategory} onChange={e => handleCategoryChange(e.target.value)}
+                className="pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-gray-400 bg-gray-50 appearance-none cursor-pointer min-w-[140px]"
+                style={{ fontFamily: BRAND.font.body }}
+              >
+                {categories.map(c => <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="py-16 text-center text-sm text-gray-400" style={{ fontFamily: BRAND.font.body }}>Loading teams…</div>
+        ) : filteredTeams.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-14 h-14 bg-gray-100 rounded-sm flex items-center justify-center mx-auto mb-4"><Users className="w-6 h-6 text-gray-300" /></div>
+            <p className="text-sm text-gray-500" style={{ fontFamily: BRAND.font.body }}>No teams found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredTeams.map(team => (
+              <button
+                key={team.id}
+                onClick={() => viewTeamDetails(team.id)}
+                className="bg-white border border-gray-100 p-5 text-left hover:shadow-md hover:border-gray-200 transition-all group"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ backgroundColor: BRAND.primary, fontFamily: BRAND.font.heading }}>
+                    {team.icon}
+                  </div>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-sm ${CATEGORY_COLORS[team.category]}`} style={{ fontFamily: BRAND.font.body }}>{team.category}</span>
+                </div>
+                <p className="text-sm font-semibold text-[#011B3B] mb-1 truncate" style={{ fontFamily: BRAND.font.body }}>{team.name}</p>
+                <p className="text-xs text-gray-400 mb-4" style={{ fontFamily: BRAND.font.body }}>Coach: {team.coach}</p>
+                <div className="flex items-center justify-between border-t border-gray-50 pt-3">
+                  <div className="flex items-center gap-1 text-xs text-gray-400" style={{ fontFamily: BRAND.font.body }}>
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>{team.gamesPlayed} games</span>
+                  </div>
+                  <span className="text-xs text-gray-400 group-hover:text-[#011B3B] transition-colors flex items-center gap-0.5" style={{ fontFamily: BRAND.font.body }}>
+                    Manage roster <Arrow className="w-3 h-3" />
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section className="scrollbar-hide px-2 py-2 md:p-4">

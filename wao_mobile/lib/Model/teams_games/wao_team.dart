@@ -116,15 +116,11 @@ class WaoTeam {
     return WaoTeam(
       id: id,
       name: data['name'] ?? '',
-      // byName() throws for any value outside {senior, junior, youth} — real
-      // seeded data (SeedingService) writes 'campus'/'general', which aren't
-      // in TeamCategory at all yet. That threw inside every getTopTeams()/
-      // getAllTeams() stream's .map(), surfacing as "Error loading teams"
-      // for every viewer. firstWhere+orElse matches the defensive pattern
-      // already used for AccountRole/ThemePreference in user_model.dart —
-      // an unrecognized category degrades to 'senior' instead of crashing
-      // the whole list. TeamCategory may need 'campus'/'general' added
-      // properly; flagging rather than guessing at the intended taxonomy.
+      // byName() throws for any value outside {senior, junior, youth} — a
+      // legacy or malformed doc could still carry an old/typo'd category.
+      // firstWhere+orElse matches the defensive pattern already used for
+      // AccountRole/ThemePreference in user_model.dart — an unrecognized
+      // category degrades to 'senior' instead of crashing the whole list.
       category: TeamCategory.values.firstWhere(
         (e) => e.name == data['category'],
         orElse: () => TeamCategory.senior,

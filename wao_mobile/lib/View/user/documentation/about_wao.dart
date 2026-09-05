@@ -1,216 +1,351 @@
 import 'package:flutter/material.dart';
-import '../../../shared/app_bar.dart';
-import '../../../shared/theme_data.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:wao_mobile/core/theme/app_colors.dart';
 
 class AboutPage extends StatelessWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final top = MediaQuery.of(context).padding.top;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'About WAO!',
-        showBackButton: true,
-        showNotification: true,
-        hasNotificationDot: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    // Logo/Brand
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFD30336).withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'WAO',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Inline header ───────────────────────────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, top + 20, 20, 0),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : AppColors.waoNavy.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.08)
+                            : AppColors.waoNavy.withOpacity(0.1),
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    Text(
-                      'Waoherds Limited',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 16,
+                      color: isDark ? Colors.white : AppColors.waoNavy,
                     ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'About WAO',
+                  style: GoogleFonts.oswald(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-                    const SizedBox(height: 8),
+          const SizedBox(height: 20),
 
-                    Text(
-                      'Championing World Oneness Through Sport',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDarkMode ? Colors.white60 : Colors.black54,
-                      ),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, bottomInset + 84),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Brand hero card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 28),
+                    decoration: BoxDecoration(
+                      color: AppColors.waoNavy,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-
-                    const SizedBox(height: 32),
-
-                    // Overview
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
-                        ),
-                      ),
-                      child: Text(
-                        'Founded in June 2012 by Solomon Kyei, Waoherds Limited pioneers an innovative sport that blends physical gameplay with digital storytelling. We revolutionize sports by integrating technology, community engagement, and entertainment to foster global unity and individual empowerment.',
-                        style: TextStyle(
-                          fontSize: 15,
-                          height: 1.8,
-                          color: isDarkMode ? Colors.white70 : Colors.black54,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    _buildValueCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.visibility,
-                      title: 'Our Vision',
-                      description: 'To champion world oneness through innovative sports experiences that blend technology with traditional gameplay.',
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildValueCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.flag,
-                      title: 'Our Mission',
-                      description: 'Empowering individuals through world-class edutainment and sports development, leveraging success as a catalyst for broader life achievements.',
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildValueCard(
-                      isDarkMode: isDarkMode,
-                      icon: Icons.sports_basketball,
-                      title: 'The Sport',
-                      description: 'WAO! – a two-ball hand-controlled sport played on the WaoSphere, blending dynamic gameplay with storytelling.',
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Text(
-                      'Contact Us',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildContactItem(isDarkMode, Icons.public, 'www.waosport.com'),
-                    const SizedBox(height: 8),
-                    _buildContactItem(isDarkMode, Icons.email, 'waosport@gmail.com'),
-                    const SizedBox(height: 8),
-                    _buildContactItem(isDarkMode, Icons.phone, '+233 242 786 261'),
-
-                    const SizedBox(height: 24),
-
-                    // Social Media
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        _buildSocialIcon(Icons.facebook),
-                        _buildSocialIcon(Icons.sports_basketball),
-                        _buildSocialIcon(Icons.camera_alt),
-                        _buildSocialIcon(Icons.play_circle_fill),
+                        Text(
+                          'WAO',
+                          style: GoogleFonts.oswald(
+                            fontSize: 48,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 8,
+                            color: AppColors.waoRed,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'WORLD AS ONE',
+                          style: GoogleFonts.oswald(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 4,
+                            color: Colors.white54,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          width: 36,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: AppColors.waoRed,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            'Championing World Oneness Through Sport',
+                            style: GoogleFonts.oswald(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white60,
+                              letterSpacing: 0.3,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Overview
+                  _SectionHeader(title: 'Who We Are', isDark: isDark),
+                  const SizedBox(height: 12),
+                  _Card(
+                    isDark: isDark,
+                    child: Text(
+                      'Founded in June 2012 by Solomon Kyei, Waoherds Limited pioneers an innovative sport that blends physical gameplay with digital storytelling. We revolutionise sports by integrating technology, community engagement, and entertainment to foster global unity and individual empowerment.',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.7,
+                        color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  _SectionHeader(title: 'Our Purpose', isDark: isDark),
+                  const SizedBox(height: 12),
+                  _ValueTile(
+                    isDark: isDark,
+                    icon: Icons.visibility_outlined,
+                    title: 'Vision',
+                    text: 'To champion world oneness through innovative sports experiences that blend technology with traditional gameplay.',
+                  ),
+                  const SizedBox(height: 10),
+                  _ValueTile(
+                    isDark: isDark,
+                    icon: Icons.flag_outlined,
+                    title: 'Mission',
+                    text: 'Empowering individuals through world-class edutainment and sports development, leveraging success as a catalyst for broader life achievements.',
+                  ),
+                  const SizedBox(height: 10),
+                  _ValueTile(
+                    isDark: isDark,
+                    icon: Icons.sports_basketball_outlined,
+                    title: 'The Sport',
+                    text: 'WAO! — a two-ball hand-controlled sport played on the WaoSphere, blending dynamic gameplay with storytelling.',
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  _SectionHeader(title: 'Contact Us', isDark: isDark),
+                  const SizedBox(height: 12),
+                  _Card(
+                    isDark: isDark,
+                    child: Column(
+                      children: [
+                        _ContactRow(isDark: isDark, icon: Icons.public_rounded,   text: 'www.waosport.com'),
+                        const SizedBox(height: 12),
+                        _ContactRow(isDark: isDark, icon: Icons.email_outlined,   text: 'waosport@gmail.com'),
+                        const SizedBox(height: 12),
+                        _ContactRow(isDark: isDark, icon: Icons.phone_outlined,   text: '+233 242 786 261'),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.04)
+                          : AppColors.waoNavy.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '© 2026 Waoherds Limited. All rights reserved.',
+                      style: GoogleFonts.oswald(
+                        fontSize: 12,
+                        color: isDark ? Colors.white24 : AppColors.waoNavy.withOpacity(0.3),
+                        letterSpacing: 0.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildValueCard({
-    required bool isDarkMode,
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
+// ── Section header ────────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, required this.isDark});
+  final String title;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 20,
+          decoration: BoxDecoration(
+            color: AppColors.waoRed,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: GoogleFonts.oswald(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : AppColors.waoNavy,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+
+class _Card extends StatelessWidget {
+  const _Card({required this.isDark, required this.child});
+  final bool isDark;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : AppColors.waoNavy.withOpacity(0.08),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+// ── Value tile ────────────────────────────────────────────────────────────────
+
+class _ValueTile extends StatelessWidget {
+  const _ValueTile({
+    required this.isDark,
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+  final bool isDark;
+  final IconData icon;
+  final String title, text;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : AppColors.waoNavy.withOpacity(0.08),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF011B3B), Color(0xFFD30336)],
-              ),
+              color: AppColors.waoNavy,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.black87,
+                  style: GoogleFonts.oswald(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : AppColors.waoNavy,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
-                  description,
+                  text,
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDarkMode ? Colors.white60 : Colors.black54,
+                    height: 1.6,
+                    color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
                   ),
                 ),
               ],
@@ -220,38 +355,41 @@ class AboutPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildContactItem(bool isDarkMode, IconData icon, String text) {
+// ── Contact row ───────────────────────────────────────────────────────────────
+
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({required this.isDark, required this.icon, required this.text});
+  final bool isDark;
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: isDarkMode ? Colors.white60 : Colors.black54,
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withOpacity(0.06)
+                : AppColors.waoNavy.withOpacity(0.06),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16,
+              color: isDark ? Colors.white60 : AppColors.waoNavy),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         Text(
           text,
           style: TextStyle(
-            fontSize: 14,
-            color: isDarkMode ? Colors.white70 : Colors.black54,
+            fontSize: 13.5,
+            color: isDark ? Colors.white70 : AppColors.textSecondary(isDark),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSocialIcon(IconData icon) {
-    return Container(
-      width: 40,
-      height: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFD30336)),
-      ),
-      child: Icon(icon, size: 20, color: const Color(0xFFD30336)),
     );
   }
 }
