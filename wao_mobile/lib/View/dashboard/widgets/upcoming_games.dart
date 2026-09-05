@@ -5,9 +5,14 @@ import 'package:wao_mobile/View/games_details/upcoming_game_details.dart';
 import '../../../Model/teams_games/wao_match.dart';
 import '../../../ViewModel/teams_games/match_viewmodel.dart';
 
-class UpcomingMatchesCarousel extends StatelessWidget {
+class UpcomingMatchesCarousel extends StatefulWidget {
   const UpcomingMatchesCarousel({Key? key}) : super(key: key);
 
+  @override
+  State<UpcomingMatchesCarousel> createState() => _UpcomingMatchesCarouselState();
+}
+
+class _UpcomingMatchesCarouselState extends State<UpcomingMatchesCarousel> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -44,11 +49,15 @@ class UpcomingMatchesCarousel extends StatelessWidget {
         }
 
         final upcomingMatches = snapshot.data!;
+        final shouldAutoPlay = upcomingMatches.length > 2;
 
         return CarouselSlider(
           options: CarouselOptions(
             height: 180,
-            autoPlay: false,
+            autoPlay: shouldAutoPlay,
+            autoPlayInterval: const Duration(seconds: 4),
+            autoPlayAnimationDuration: const Duration(milliseconds: 600),
+            autoPlayCurve: Curves.easeInOut,
             enlargeCenterPage: true,
             viewportFraction: 1.03,
             enableInfiniteScroll: upcomingMatches.length > 1,

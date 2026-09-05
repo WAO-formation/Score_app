@@ -22,6 +22,7 @@ const MOD_B = 'mod-b-uid';     // NOT assigned to match1
 const JUDGE_A = 'judge-a-uid'; // assigned to match1's judges/judgeUids
 const JUDGE_B = 'judge-b-uid'; // NOT assigned to match1
 const FAN = 'fan-uid';
+const COACH_A = 'coach-a-uid'; // coach of team1
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
@@ -46,6 +47,7 @@ beforeEach(async () => {
     await setDoc(doc(db, 'users', JUDGE_A), { role: 'official' });
     await setDoc(doc(db, 'users', JUDGE_B), { role: 'official' });
     await setDoc(doc(db, 'users', FAN), { role: 'fan' });
+    await setDoc(doc(db, 'users', COACH_A), { role: 'coach', teamId: 'team1' });
   });
 });
 
@@ -55,6 +57,7 @@ const asModB = () => testEnv.authenticatedContext(MOD_B).firestore();
 const asJudgeA = () => testEnv.authenticatedContext(JUDGE_A).firestore();
 const asJudgeB = () => testEnv.authenticatedContext(JUDGE_B).firestore();
 const asFan = () => testEnv.authenticatedContext(FAN).firestore();
+const asCoachA = () => testEnv.authenticatedContext(COACH_A).firestore();
 const unauth = () => testEnv.unauthenticatedContext().firestore();
 
 // Seeds match1 with moderatorUid = MOD_A and JUDGE_A as its sole judge,
@@ -400,5 +403,39 @@ describe('teams / players — CRUD boundaries', () => {
 
   it('a fan cannot create a player', async () => {
     await assertFails(setDoc(doc(asFan(), 'players', 'p1'), { name: 'New Player' }));
+  });
+});
+
+describe('teams — roster size cap (12 players)', () => {
+  const emptyRoster = () => ({
+    kingIds: [], workerIds: [], protagueIds: [], antagueIds: [],
+    warriorIds: [], sacrificerIds: [], servitorIds: [], substituteIds: [],
+  });
+  const rosterOfSize = (n) => ({ ...emptyRoster(), workerIds: Array.from({ length: n }, (_, i) => `p${i}`) });
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'teams', 'team1'), {
+        name: 'Team One', roster: emptyRoster(), updatedAt: serverTimestamp(),
+      });
+    });
+  });
+
+  it('a coach can write a roster at exactly the 12-player cap', async () => {
+    await assertSucceeds(updateDoc(doc(asCoachA(), 'teams', 'team1'), {
+      roster: rosterOfSize(12), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('a coach cannot write a roster of 13 players', async () => {
+    await assertFails(updateDoc(doc(asCoachA(), 'teams', 'team1'), {
+      roster: rosterOfSize(13), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the cap applies to admins/officials too, not just coaches', async () => {
+    await assertFails(updateDoc(doc(asAdmin(), 'teams', 'team1'), {
+      roster: rosterOfSize(13), updatedAt: serverTimestamp(),
+    }));
   });
 });

@@ -14,9 +14,8 @@ import 'package:wao_mobile/View/games_details/past_match_details.dart';
 import 'package:wao_mobile/View/games_details/upcoming_game_details.dart';
 import 'package:wao_mobile/View/games_details/widgets/game_detail_shared.dart';
 import 'package:wao_mobile/ViewModel/teams_games/match_viewmodel.dart';
+import 'package:wao_mobile/ViewModel/teams_games/player_viewmodel.dart';
 import 'package:wao_mobile/ViewModel/teams_games/team_viewmodel.dart';
-import 'package:wao_mobile/core/services/match_team_service/player_service.dart';
-import 'package:wao_mobile/core/services/match_team_service/team_service.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 import 'package:wao_mobile/core/widgets/wao_toast.dart';
 
@@ -202,7 +201,7 @@ class _MyStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<WaoPlayer?>(
-      future: PlayerService().getPlayerByEmail(email),
+      future: context.read<PlayerViewModel>().getPlayerByEmail(email),
       builder: (context, snapshot) {
         final player = snapshot.data;
 
@@ -403,7 +402,7 @@ class _RosterManagementSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           StreamBuilder<List<WaoPlayer>>(
-            stream: PlayerService().getPlayersByTeam(team.id),
+            stream: context.read<PlayerViewModel>().getPlayersByTeam(team.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Padding(
@@ -533,9 +532,10 @@ class _ManagedPlayerTile extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
+              final teamViewModel = context.read<TeamViewModel>();
               Navigator.pop(dialogContext);
               try {
-                await TeamService().removePlayerFromTeam(teamId: team.id, playerId: player.id);
+                await teamViewModel.removePlayerFromTeam(teamId: team.id, playerId: player.id);
                 if (context.mounted) WaoToast.success(context, '${player.name} removed from roster');
               } catch (_) {
                 if (context.mounted) WaoToast.error(context, 'Failed to remove player');
@@ -584,6 +584,12 @@ class _AddPlayerSheetState extends State<_AddPlayerSheet> {
   // would otherwise fail with "Player is not available or already in a
   // team" since the first call already claimed them.
   bool _isSubmitting = false;
+
+  // Fetched once when the sheet opens, not on every rebuild — _isSubmitting
+  // toggling would otherwise hand StreamBuilder a brand new stream (and a
+  // fresh Firestore listener) on every tap.
+  late final Stream<List<WaoPlayer>> _availablePlayersStream =
+      context.read<PlayerViewModel>().getAvailablePlayers();
 
   @override
   Widget build(BuildContext context) {
@@ -665,7 +671,7 @@ class _AddPlayerSheetState extends State<_AddPlayerSheet> {
               const SizedBox(height: 16),
               Expanded(
                 child: StreamBuilder<List<WaoPlayer>>(
-                  stream: PlayerService().getAvailablePlayers(),
+                  stream: _availablePlayersStream,
                   builder: (context, snapshot) {
                     final players = snapshot.data ?? [];
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -694,7 +700,7 @@ class _AddPlayerSheetState extends State<_AddPlayerSheet> {
                               : () async {
                                   setState(() => _isSubmitting = true);
                                   try {
-                                    await TeamService().addPlayerToTeam(
+                                    await context.read<TeamViewModel>().addPlayerToTeam(
                                       teamId: widget.team.id,
                                       playerId: p.id,
                                       role: _selectedRole,

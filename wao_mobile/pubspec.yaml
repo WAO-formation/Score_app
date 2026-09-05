@@ -48,6 +48,7 @@ dependencies:
   cloud_firestore: ^6.1.2
   google_fonts: ^6.3.2
   firebase_messaging: 16.1.1
+  firebase_crashlytics: ^5.2.0
 
 
 dev_dependencies:
@@ -63,6 +64,24 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Regenerate with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/images/WAO_LOGO.jpg"
+  android: true
+  ios: true
+  web:
+    generate: true
+    image_path: "assets/images/WAO_LOGO.jpg"
+    background_color: "#ffffff"
+    theme_color: "#011B3B"
+  windows:
+    generate: true
+    image_path: "assets/images/WAO_LOGO.jpg"
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: "assets/images/WAO_LOGO.jpg"
 
 # The following section is specific to Flutter packages.
 flutter:

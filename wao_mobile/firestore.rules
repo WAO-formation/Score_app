@@ -44,6 +44,21 @@ service cloud.firestore {
       return isSignedIn() && callerRole() == 'coach' && callerTeamId() == teamId;
     }
 
+    // Mirrors WaoTeam.maxSquadSize (wao_mobile/lib/Model/teams_games/wao_team.dart)
+    // and TeamRoster.totalPlayers — that 12-player cap was previously only
+    // ever checked client-side, so a modified client (or any future code
+    // path writing `roster` directly) could write an unlimited squad.
+    function rosterSize(roster) {
+      return roster.get('kingIds', []).size()
+           + roster.get('workerIds', []).size()
+           + roster.get('protagueIds', []).size()
+           + roster.get('antagueIds', []).size()
+           + roster.get('warriorIds', []).size()
+           + roster.get('sacrificerIds', []).size()
+           + roster.get('servitorIds', []).size()
+           + roster.get('substituteIds', []).size();
+    }
+
     // True once at least `seconds` have passed since the document's last
     // recorded write. Acts as a per-document cooldown — the closest thing
     // to rate limiting Firestore rules can do without a Cloud Function
@@ -111,10 +126,13 @@ service cloud.firestore {
 
       // A coach may only ever touch their own team's roster field — name,
       // category, coach/secretary/director etc. stay isOfficial()-only.
-      allow update: if isOfficial()
-                    || (isCoachOfTeam(teamId)
-                        && request.resource.data.diff(resource.data).affectedKeys()
-                             .hasOnly(['roster', 'updatedAt']));
+      // The 12-player cap applies to anyone writing `roster`, admin/official
+      // included — this is a squad-size rule, not a coach-specific one.
+      allow update: if (isOfficial()
+                        || (isCoachOfTeam(teamId)
+                            && request.resource.data.diff(resource.data).affectedKeys()
+                                 .hasOnly(['roster', 'updatedAt'])))
+                    && rosterSize(request.resource.data.roster) <= 12;
     }
 
     match /teamStatistics/{teamId} {

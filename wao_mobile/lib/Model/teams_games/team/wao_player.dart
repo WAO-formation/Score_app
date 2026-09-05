@@ -64,16 +64,22 @@ class WaoPlayer {
       status: PlayerStatus.values.byName(data['status'] ?? 'active'),
       currentTeamId: data['currentTeamId'],
       currentTeamName: data['currentTeamName'],
-      joinedTeamAt: data['joinedTeamAt'] != null
+      // `is Timestamp` (not just a null check) matters here: toFirestore()
+      // below writes FieldValue.serverTimestamp() when a date is absent,
+      // and that sentinel only ever resolves to a real Timestamp after a
+      // round-trip through the server — a plain `as Timestamp` cast throws
+      // if this ever runs against data that hasn't made that round-trip yet
+      // (see MOBILE_ARCHITECTURE_REVIEW.md finding #9 / wao_player_test.dart).
+      joinedTeamAt: data['joinedTeamAt'] is Timestamp
           ? (data['joinedTeamAt'] as Timestamp).toDate()
           : null,
       gamesPlayed: data['gamesPlayed'] ?? 0,
       goalsScored: data['goalsScored'] ?? 0,
       assists: data['assists'] ?? 0,
-      createdAt: data['createdAt'] != null
+      createdAt: data['createdAt'] is Timestamp
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
-      updatedAt: data['updatedAt'] != null
+      updatedAt: data['updatedAt'] is Timestamp
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
       jerseyNumber: data['jerseyNumber'],

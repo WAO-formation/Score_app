@@ -377,7 +377,7 @@ class _PlayersPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<WaoPlayer>>(
-      future: _fetchPlayers(team.roster),
+      future: _fetchPlayers(context, team.roster),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const Padding(
@@ -440,14 +440,11 @@ class _PlayersPanel extends StatelessWidget {
   List<WaoPlayer> _byRole(List<WaoPlayer> all, List<String> ids) =>
       all.where((p) => ids.contains(p.id)).toList();
 
-  Future<List<WaoPlayer>> _fetchPlayers(TeamRoster roster) async {
-    final svc = PlayerService();
-    final result = <WaoPlayer>[];
-    for (final id in roster.getAllPlayerIds()) {
-      final p = await svc.getPlayerById(id);
-      if (p != null) result.add(p);
-    }
-    return result;
+  // Reads run concurrently rather than one at a time.
+  Future<List<WaoPlayer>> _fetchPlayers(BuildContext context, TeamRoster roster) async {
+    final playerViewModel = context.read<PlayerViewModel>();
+    final players = await Future.wait(roster.getAllPlayerIds().map(playerViewModel.getPlayerById));
+    return players.whereType<WaoPlayer>().toList();
   }
 }
 

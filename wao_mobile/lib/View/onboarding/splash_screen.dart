@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:wao_mobile/core/widgets/wao_loading_screen.dart';
 
 import '../authentication/login.dart';
+import '../authentication/signup.dart';
 
 /// "Get Started" screen shown to signed-out users. Styled to match the WAO web
 /// app: darkened hero image, navy wash, Anton headline, Oswald body and a flat
 /// crimson primary action.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
+
+  void _goToRegister(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const RegistrationScreen()),
+    );
+  }
 
   void _goToLogin(BuildContext context) {
     Navigator.pushReplacement(
@@ -80,7 +88,7 @@ class SplashScreen extends StatelessWidget {
 
                   _PrimaryButton(
                     label: 'GET STARTED',
-                    onTap: () => _goToLogin(context),
+                    onTap: () => _goToRegister(context),
                   ),
                   const SizedBox(height: 16),
                   Center(

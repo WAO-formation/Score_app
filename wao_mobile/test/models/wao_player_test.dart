@@ -87,8 +87,15 @@ void main() {
     });
   });
 
-  group('Known issue: FieldValue.serverTimestamp() sentinel is not round-trip safe', () {
-    test('toFirestore() with no updatedAt writes a FieldValue sentinel that fromFirestore() cannot parse locally', () {
+  group('fromFirestore tolerates an unresolved FieldValue.serverTimestamp() sentinel', () {
+    test('toFirestore() with no updatedAt writes a FieldValue sentinel; fromFirestore() degrades to null instead of crashing', () {
+      // Previously threw a TypeError here (see MOBILE_ARCHITECTURE_REVIEW.md
+      // finding #9): toFirestore() writes FieldValue.serverTimestamp() when
+      // updatedAt is null, which only resolves to a real Timestamp after an
+      // actual Firestore round-trip. fromFirestore() now checks `is Timestamp`
+      // rather than blindly casting, so feeding the sentinel straight back in
+      // (as this test does, and as a fake-Firestore unit test might) degrades
+      // gracefully instead of crashing.
       final player = WaoPlayer(
         id: 'p6', name: 'N', email: 'n@wao.com', role: PlayerRole.worker,
         createdAt: DateTime(2026, 1, 1),
@@ -96,11 +103,9 @@ void main() {
       );
 
       final map = player.toFirestore();
-      // This is safe in production: Firestore always resolves the sentinel
-      // to a real Timestamp before any read/listener sees the document. It
-      // is NOT safe to feed straight back into fromFirestore() without a
-      // real server round-trip in between — this throws today.
-      expect(() => WaoPlayer.fromFirestore(map, player.id), throwsA(isA<TypeError>()));
+      final roundTripped = WaoPlayer.fromFirestore(map, player.id);
+      expect(roundTripped.updatedAt, isNull);
+      expect(roundTripped.name, 'N');
     });
   });
 

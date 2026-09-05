@@ -3,7 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../Model/teams_games/team/wao_player.dart';
 
 class PlayerService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Accepts an injected Firestore instance (e.g. a fake for unit tests);
+  // defaults to the real app instance so existing call sites (`PlayerService()`)
+  // don't need to change.
+  PlayerService({FirebaseFirestore? firestore}) : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
 
   // Create a new player
   Future<String> createPlayer(WaoPlayer player) async {
@@ -31,15 +36,6 @@ class PlayerService {
       print('Error fetching player: $e');
       rethrow;
     }
-  }
-
-  // Get all players
-  Stream<List<WaoPlayer>> getAllPlayers() {
-    return _firestore.collection('players').snapshots().map(
-          (snap) => snap.docs
-          .map((doc) => WaoPlayer.fromFirestore(doc.data(), doc.id))
-          .toList(),
-    );
   }
 
   // Get a player by their account email (players aren't linked to a Firebase
@@ -72,29 +68,20 @@ class PlayerService {
     );
   }
 
-  // Get available players (not in any team)
+  // Get available players (not in any team). Safety cap, not true
+  // pagination — see MOBILE_ARCHITECTURE_REVIEW.md finding #1: this scans
+  // every unassigned player platform-wide, unbounded before this.
+  static const _availablePlayersLimit = 200;
   Stream<List<WaoPlayer>> getAvailablePlayers() {
     return _firestore
         .collection('players')
         .where('currentTeamId', isEqualTo: null)
+        .limit(_availablePlayersLimit)
         .snapshots()
         .map((snap) => snap.docs
             .map((doc) => WaoPlayer.fromFirestore(doc.data(), doc.id))
             .where((p) => p.status == PlayerStatus.active)
             .toList());
-  }
-
-  // Get players by role
-  Stream<List<WaoPlayer>> getPlayersByRole(PlayerRole role) {
-    return _firestore
-        .collection('players')
-        .where('role', isEqualTo: role.name)
-        .snapshots()
-        .map(
-          (snap) => snap.docs
-          .map((doc) => WaoPlayer.fromFirestore(doc.data(), doc.id))
-          .toList(),
-    );
   }
 
   // Check if player is in a team
@@ -215,34 +202,32 @@ class PlayerService {
     }
   }
 
-  // Get active players count for a team
+  // Get active players count for a team. Filters status server-side
+  // (rather than fetching every player on the team and filtering in Dart)
+  // so this stays a single, cheap query as rosters grow.
   Future<int> getActivePlayersCount(String teamId) async {
     try {
       final snapshot = await _firestore
           .collection('players')
           .where('currentTeamId', isEqualTo: teamId)
+          .where('status', isEqualTo: PlayerStatus.active.name)
           .get();
-      return snapshot.docs
-          .where((d) => d.data()['status'] == PlayerStatus.active.name)
-          .length;
+      return snapshot.docs.length;
     } catch (e) {
       print('Error getting active players count: $e');
       return 0;
     }
   }
 
-  // Get inactive players count for a team
+  // Get inactive players count for a team (inactive + suspended).
   Future<int> getInactivePlayersCount(String teamId) async {
     try {
       final snapshot = await _firestore
           .collection('players')
           .where('currentTeamId', isEqualTo: teamId)
+          .where('status', whereIn: [PlayerStatus.inactive.name, PlayerStatus.suspended.name])
           .get();
-      return snapshot.docs
-          .where((d) =>
-              d.data()['status'] == PlayerStatus.inactive.name ||
-              d.data()['status'] == PlayerStatus.suspended.name)
-          .length;
+      return snapshot.docs.length;
     } catch (e) {
       print('Error getting inactive players count: $e');
       return 0;

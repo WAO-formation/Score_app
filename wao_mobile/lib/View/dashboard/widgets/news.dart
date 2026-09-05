@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 import 'package:wao_mobile/core/utils/drive_image.dart';
 import '../../../Model/news/news_model.dart';
-import '../../../core/services/news/news_service.dart';
+import '../../../ViewModel/news_viewmodel/news_viewmodel.dart';
 import 'news_details.dart';
 
 class NewsListItem extends StatelessWidget {
@@ -231,14 +232,16 @@ class _NewsImage extends StatelessWidget {
 // Widget to display news section with StreamBuilder
 class NewsSection extends StatelessWidget {
   final bool isDarkMode;
-  final NewsService _newsService = NewsService();
 
-  NewsSection({Key? key, required this.isDarkMode}) : super(key: key);
+  const NewsSection({Key? key, required this.isDarkMode}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<NewsModel>>(
-      stream: _newsService.getAllNewsStream(),
+      // Routed through NewsViewModel (already in the provider tree) rather
+      // than instantiating NewsService directly — a fresh service/stream
+      // was previously created on every rebuild of this widget.
+      stream: context.read<NewsViewModel>().listenToNews(),
       builder: (context, snapshot) {
         // Loading state
         if (snapshot.connectionState == ConnectionState.waiting) {

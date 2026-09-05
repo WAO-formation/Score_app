@@ -3,7 +3,7 @@
     "short_name": "WAO",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
+    "background_color": "#ffffff",
     "theme_color": "#011B3B",
     "description": "WAO — World Oneness Through Sport",
     "orientation": "portrait-primary",

@@ -2,6 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
 
 void main() {
+  group('WaoTeam.fromFirestore tolerates an unresolved FieldValue.serverTimestamp() sentinel', () {
+    test('toFirestore() with no updatedAt round-trips to null instead of crashing (MOBILE_ARCHITECTURE_REVIEW.md finding #9)', () {
+      final team = WaoTeam(
+        id: 't5', name: 'Sentinel FC', category: TeamCategory.senior,
+        coach: 'C', secretary: 'S', director: 'D', logoUrl: '',
+        createdAt: DateTime(2026, 1, 1),
+        // updatedAt intentionally omitted.
+      );
+      final roundTripped = WaoTeam.fromFirestore(team.toFirestore(), team.id);
+      expect(roundTripped.updatedAt, isNull);
+      expect(roundTripped.name, 'Sentinel FC');
+    });
+  });
+
   group('TeamRoster', () {
     test('totalPlayers and getAllPlayerIds cover all 8 role buckets', () {
       final roster = TeamRoster(

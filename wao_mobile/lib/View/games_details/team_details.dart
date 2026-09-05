@@ -329,7 +329,7 @@ class _RosterTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<WaoPlayer>>(
-      future: _fetchPlayers(),
+      future: _fetchPlayers(context),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -379,15 +379,12 @@ class _RosterTab extends StatelessWidget {
     );
   }
 
-  Future<List<WaoPlayer>> _fetchPlayers() async {
-    final svc = PlayerService();
+  // Reads run concurrently rather than one at a time.
+  Future<List<WaoPlayer>> _fetchPlayers(BuildContext context) async {
+    final playerViewModel = context.read<PlayerViewModel>();
     final ids = team.roster.getAllPlayerIds();
-    final List<WaoPlayer> out = [];
-    for (final id in ids) {
-      final p = await svc.getPlayerById(id);
-      if (p != null) out.add(p);
-    }
-    return out;
+    final players = await Future.wait(ids.map(playerViewModel.getPlayerById));
+    return players.whereType<WaoPlayer>().toList();
   }
 }
 

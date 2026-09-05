@@ -2,4 +2,7 @@
 <resources>
     <!-- WAO brand navy — keep in sync with wao-web/src/config/brand.js -->
     <color name="wao_navy">#011B3B</color>
+    <!-- Launch screen ground: white so it matches the logo's own white
+         background seamlessly instead of showing as a separate patch. -->
+    <color name="wao_splash_background">#FFFFFF</color>
 </resources>

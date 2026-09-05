@@ -6,10 +6,11 @@ import VenuesAndTournaments from './components/VenuesAndTournaments';
 import Reports from './components/Reports';
 import GamesManagement from './components/GamesManagement';
 import Users from './components/Users';
+import News from './components/News';
 import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
-const ADMIN_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games', 'Users'];
+const ADMIN_TABS = ['Officials', 'Players', 'Venues & Tournaments', 'Reports', 'Games', 'News', 'Users'];
 // Officials and Venues & Tournaments are admin-only concerns (staffing and
 // venue/championship setup) — a moderator only needs their own roster-facing
 // and game-facing tools here.
@@ -68,6 +69,7 @@ export default function Management() {
       {tab === 'Venues & Tournaments' && <VenuesAndTournaments />}
       {tab === 'Reports'              && <Reports />}
       {tab === 'Games'                && <GamesManagement />}
+      {tab === 'News' && isAdmin      && <News />}
       {tab === 'Users' && isAdmin     && <Users />}
     </div>
   );

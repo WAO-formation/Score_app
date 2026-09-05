@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- WAO branded launch screen: navy ground with the centred app mark. -->
+<!-- WAO branded launch screen: white ground (matches the logo's own
+     background) with the centred app mark. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/wao_navy" />
+    <item android:drawable="@color/wao_splash_background" />
 
     <item>
         <bitmap

@@ -97,9 +97,12 @@ class NewsViewModel extends ChangeNotifier {
     }
   }
 
-  // Listen to real-time news updates
+  // Listen to real-time news updates. Memoized — a StreamBuilder that calls
+  // this on every build (e.g. from a StatelessWidget) would otherwise get a
+  // brand new Firestore listener each time instead of reusing one.
+  Stream<List<NewsModel>>? _newsStream;
   Stream<List<NewsModel>> listenToNews() {
-    return _newsService.getAllNewsStream();
+    return _newsStream ??= _newsService.getAllNewsStream().asBroadcastStream();
   }
 
   // Listen to news updates and update state

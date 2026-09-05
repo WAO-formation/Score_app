@@ -352,16 +352,16 @@ class _FavouriteMatchesList extends StatelessWidget {
       );
     }
 
-    return StreamBuilder<List<WaoMatch>>(
-      stream: context.read<MatchViewModel>().getAllMatches(),
+    return FutureBuilder<List<WaoMatch>>(
+      // Fetches exactly these match docs rather than the whole matches
+      // collection — see MatchService.getMatchesByIds.
+      future: context.read<MatchViewModel>().getMatchesByIds(favouriteIds),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final matches = (snapshot.data ?? [])
-            .where((m) => favouriteIds.contains(m.id))
-            .toList()
           ..sort((a, b) => b.startTime.compareTo(a.startTime));
 
         if (matches.isEmpty) {

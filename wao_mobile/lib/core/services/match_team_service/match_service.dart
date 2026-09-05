@@ -3,11 +3,50 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wao_mobile/Model/teams_games/wao_match.dart';
 
 class MatchService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  MatchService({FirebaseFirestore? firestore}) : _db = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _db;
+
+  // Safety caps, not true cursor-based pagination — see
+  // MOBILE_ARCHITECTURE_REVIEW.md finding #1. High enough to never
+  // practically truncate live/upcoming games (there are only ever a
+  // handful at once); `getFinishedMatches` below gets a real ordered+limited
+  // query since match history is the one list here that grows unboundedly.
+  static const _defensiveLimit = 200;
+
+  // Fetches exactly the given match docs (chunked by 10, Firestore's
+  // documentId-`whereIn` cap) instead of downloading the whole collection
+  // and filtering client-side — used for a fan's starred-match list, which
+  // previously called getAllMatches() for this (MOBILE_ARCHITECTURE_REVIEW.md
+  // finding #1).
+  Future<List<WaoMatch>> getMatchesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final chunks = <List<String>>[];
+    for (var i = 0; i < ids.length; i += 10) {
+      chunks.add(ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10));
+    }
+    final results = await Future.wait(chunks.map(
+      (chunk) => _db.collection('matches').where(FieldPath.documentId, whereIn: chunk).get(),
+    ));
+    return results
+        .expand((snap) => snap.docs)
+        .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
+        .toList();
+  }
+
+  // Live updates for a single match — used by the live/upcoming/past detail
+  // screens so a score change is reflected while the user is looking at it,
+  // instead of the page showing a frozen snapshot from when it was opened.
+  Stream<WaoMatch?> getMatchStream(String matchId) {
+    return _db.collection('matches').doc(matchId).snapshots().map(
+          (doc) => doc.exists && doc.data() != null ? WaoMatch.fromFirestore(doc.data()!, doc.id) : null,
+        );
+  }
 
   Stream<List<WaoMatch>> getAllMatches() {
     return _db
         .collection('matches')
+        .limit(_defensiveLimit)
         .snapshots()
         .map((snap) {
       final matches = snap.docs
@@ -22,6 +61,7 @@ class MatchService {
     return _db
         .collection('matches')
         .where('status', isEqualTo: status.name)
+        .limit(_defensiveLimit)
         .snapshots()
         .map((snap) {
       final matches = snap.docs
@@ -46,29 +86,31 @@ class MatchService {
     return getMatchesByStatus(MatchStatus.upcoming);
   }
 
-  Stream<List<WaoMatch>> getFinishedMatches() {
-    return getMatchesByStatus(MatchStatus.finished);
-  }
-
-  Stream<List<WaoMatch>> getMatchesByType(MatchType type) {
+  // Unlike live/upcoming (naturally small), finished matches accumulate
+  // forever — this is the one list that actually needs real pagination
+  // rather than just a defensive cap. Ordered + limited server-side
+  // (requires the composite index in firestore.indexes.json: status ASC,
+  // startTime DESC) so "most recent 100" is correct, not an arbitrary 100.
+  Stream<List<WaoMatch>> getFinishedMatches({int limit = 100}) {
     return _db
         .collection('matches')
-        .where('type', isEqualTo: type.name)
+        .where('status', isEqualTo: MatchStatus.finished.name)
+        .orderBy('startTime', descending: true)
+        .limit(limit)
         .snapshots()
-        .map((snap) {
-      final matches = snap.docs
-          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-          .toList();
-
-      matches.sort((a, b) => b.startTime.compareTo(a.startTime));
-      return matches;
-    });
+        .map((snap) => snap.docs.map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id)).toList());
   }
+
+  // Safety cap, not true pagination — high enough to never truncate a real
+  // team's history for years, just a backstop against unbounded growth.
+  // (MOBILE_ARCHITECTURE_REVIEW.md finding #1.)
+  static const _teamMatchesSafetyLimit = 200;
 
   Stream<List<WaoMatch>> getTeamMatches(String teamId) {
     return _db
         .collection('matches')
         .where('teamAId', isEqualTo: teamId)
+        .limit(_teamMatchesSafetyLimit)
         .snapshots()
         .asyncMap((snapA) async {
       final matchesA = snapA.docs
@@ -78,6 +120,7 @@ class MatchService {
       final snapB = await _db
           .collection('matches')
           .where('teamBId', isEqualTo: teamId)
+          .limit(_teamMatchesSafetyLimit)
           .get();
 
       final matchesB = snapB.docs
@@ -87,21 +130,6 @@ class MatchService {
       final allMatches = [...matchesA, ...matchesB];
       allMatches.sort((a, b) => b.startTime.compareTo(a.startTime));
       return allMatches;
-    });
-  }
-
-  Stream<List<WaoMatch>> getChampionshipMatches(String championshipId) {
-    return _db
-        .collection('matches')
-        .where('championshipId', isEqualTo: championshipId)
-        .snapshots()
-        .map((snap) {
-      final matches = snap.docs
-          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-          .toList();
-
-      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
-      return matches;
     });
   }
 
@@ -128,45 +156,47 @@ class MatchService {
     });
   }
 
-  // NEW: Get matches in a date range
-  Stream<List<WaoMatch>> getMatchesInDateRange({
-    required DateTime startDate,
-    required DateTime endDate,
-  }) {
-    final start = DateTime(startDate.year, startDate.month, startDate.day, 0, 0, 0);
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-
-    return _db
-        .collection('matches')
-        .where('startTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('startTime', isLessThanOrEqualTo: Timestamp.fromDate(end))
-        .snapshots()
-        .map((snap) {
-      final matches = snap.docs
-          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-          .toList();
-
-      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
-      return matches;
-    });
-  }
-
-  // NEW: Get matches for multiple teams (for followed teams)
+  // Get matches for multiple teams (a fan's followed teams). Previously
+  // downloaded the *entire* matches collection on every update and filtered
+  // client-side — the worst offender found in MOBILE_ARCHITECTURE_REVIEW.md
+  // finding #1. Now queries only the relevant teams via `whereIn` (chunked
+  // by 10, Firestore's per-query cap): the first chunk drives the live
+  // listener, any further chunks (only when a fan follows >10 teams) are
+  // merged in via one-time reads alongside each update.
   Stream<List<WaoMatch>> getMatchesForTeams(List<String> teamIds) {
     if (teamIds.isEmpty) {
       return Stream.value([]);
     }
 
+    final chunks = <List<String>>[];
+    for (var i = 0; i < teamIds.length; i += 10) {
+      chunks.add(teamIds.sublist(i, i + 10 > teamIds.length ? teamIds.length : i + 10));
+    }
+
+    Future<List<WaoMatch>> matchesWhereTeamIn(String field, List<String> ids) async {
+      final snap = await _db.collection('matches').where(field, whereIn: ids).get();
+      return snap.docs.map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id)).toList();
+    }
+
     return _db
         .collection('matches')
+        .where('teamAId', whereIn: chunks.first)
         .snapshots()
-        .map((snap) {
-      final matches = snap.docs
-          .map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id))
-          .where((match) => teamIds.contains(match.teamAId) || teamIds.contains(match.teamBId))
-          .toList();
+        .asyncMap((primarySnap) async {
+      final results = await Future.wait([
+        Future.value(primarySnap.docs.map((doc) => WaoMatch.fromFirestore(doc.data(), doc.id)).toList()),
+        matchesWhereTeamIn('teamBId', chunks.first),
+        for (final chunk in chunks.skip(1)) matchesWhereTeamIn('teamAId', chunk),
+        for (final chunk in chunks.skip(1)) matchesWhereTeamIn('teamBId', chunk),
+      ]);
 
-      matches.sort((a, b) => a.startTime.compareTo(b.startTime));
+      final byId = <String, WaoMatch>{};
+      for (final list in results) {
+        for (final match in list) {
+          byId[match.id] = match;
+        }
+      }
+      final matches = byId.values.toList()..sort((a, b) => a.startTime.compareTo(b.startTime));
       return matches;
     });
   }

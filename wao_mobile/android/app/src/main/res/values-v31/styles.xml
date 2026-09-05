@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Android 12+ uses the platform SplashScreen API, which ignores
-         windowBackground in favour of these attributes. Keep the WAO navy
-         ground so the launch matches the in-app splash. -->
+         windowBackground in favour of these attributes. White ground so it
+         matches the logo's own white background instead of showing as a
+         separate patch. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
-        <item name="android:windowSplashScreenBackground">@color/wao_navy</item>
+        <item name="android:windowSplashScreenBackground">@color/wao_splash_background</item>
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>

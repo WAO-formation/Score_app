@@ -135,10 +135,12 @@ class WaoTeam {
       roster: data['roster'] != null
           ? TeamRoster.fromFirestore(data['roster'] as Map<String, dynamic>)
           : TeamRoster(),
-      createdAt: data['createdAt'] != null
+      // `is Timestamp`, not just a null check — see the matching comment in
+      // WaoPlayer.fromFirestore (MOBILE_ARCHITECTURE_REVIEW.md finding #9).
+      createdAt: data['createdAt'] is Timestamp
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
-      updatedAt: data['updatedAt'] != null
+      updatedAt: data['updatedAt'] is Timestamp
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
     );

@@ -5,13 +5,24 @@ import { useAuth } from './AuthContext';
 
 export const QUARTER_TIMES = { 1: 17 * 60, 2: 17 * 60, 3: 13 * 60, 4: 13 * 60 };
 
-// firestore.rules enforces a 2s per-document cooldown on official-tier match
-// writes (rate limiting added deliberately — see pastCooldown() in the
-// rules). Live scoring needs to feel instant, so local state updates apply
-// immediately and Firestore writes are coalesced to at most one per game
-// every WRITE_INTERVAL_MS, always reading the freshest local state at flush
-// time rather than the value captured when the write was first requested.
-const WRITE_INTERVAL_MS = 2200;
+// firestore.rules enforces a 2000ms per-document cooldown on official-tier
+// match writes (rate limiting added deliberately — see pastCooldown() in
+// the rules). Live scoring needs to feel instant, so local state updates
+// apply immediately and Firestore writes are coalesced to at most one per
+// game every WRITE_INTERVAL_MS, always reading the freshest local state at
+// flush time rather than the value captured when the write was first
+// requested.
+//
+// This must stay comfortably above the 2000ms rules cooldown, not just
+// above it — 2200ms (100ms of margin) was too thin: ordinary network
+// latency variance between two consecutive writes could push the *server's*
+// timestamp gap under 2000ms even though the client waited 2200ms between
+// initiating them, which the rules then reject outright. That surfaced as
+// scores visibly ticking up then reverting (the optimistic local value got
+// overwritten by the next real-time snapshot, which still held the last
+// *successfully persisted* score). 600ms of margin is far more forgiving of
+// realistic round-trip jitter.
+const WRITE_INTERVAL_MS = 2600;
 const SYNC_KEYS = [
   'status', 'statusReason',
   'homeScore', 'awayScore', 'scoring',
@@ -105,7 +116,18 @@ export const GamesProvider = ({ children }) => {
         patch.currentQuarter = `Q${t.currentQuarter}`;
         patch.timeRemaining = formatTime(t.timeRemaining);
       }
-      updateMatch(id, patch).catch((err) => console.error('Failed to sync game update:', err));
+      updateMatch(id, patch).catch((err) => {
+        console.error('Failed to sync game update, retrying shortly:', err);
+        // Re-mark these fields pending so the retry writes them (not just
+        // whatever SYNC_KEYS covers) and reschedule — otherwise a failed
+        // write (e.g. a cooldown near-miss) only gets picked up again by
+        // the next unrelated trigger (the per-second tick, if this game
+        // happens to be playing), which can lag visibly behind the score
+        // the moderator actually just entered.
+        const pending = pendingFieldsRef.current[id] || (pendingFieldsRef.current[id] = new Set());
+        keys.forEach((k) => pending.add(k));
+        scheduleSync(id);
+      });
     }, delay);
   };
 
@@ -142,13 +164,21 @@ export const GamesProvider = ({ children }) => {
       })
     );
     if (judgeWriteTimeoutRef.current[id]) return; // already scheduled — flush picks up the latest state
-    judgeWriteTimeoutRef.current[id] = setTimeout(() => {
+    const flushJudgeScore = () => {
       judgeWriteTimeoutRef.current[id] = null;
       const current = gamesRef.current.find((g) => g.id === id);
       if (!current) return;
-      updateMatch(id, { judgesScore: current.scoring.judges })
-        .catch((err) => console.error('Failed to submit judge score:', err));
-    }, WRITE_INTERVAL_MS);
+      updateMatch(id, { judgesScore: current.scoring.judges }).catch((err) => {
+        // Same cooldown-near-miss risk as scheduleSync above, and this timer
+        // runs independently of it — a moderator and a judge scoring the
+        // same live match at once write on two uncoordinated ~2.6s cycles,
+        // so a collision here isn't fully eliminated by widening the
+        // interval alone. Retry rather than silently drop the grant.
+        console.error('Failed to submit judge score, retrying shortly:', err);
+        judgeWriteTimeoutRef.current[id] = setTimeout(flushJudgeScore, WRITE_INTERVAL_MS);
+      });
+    };
+    judgeWriteTimeoutRef.current[id] = setTimeout(flushJudgeScore, WRITE_INTERVAL_MS);
   };
 
   const getTimerState = (id) => {

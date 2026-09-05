@@ -3,8 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../Model/news/news_model.dart';
 
 class NewsService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  NewsService({FirebaseFirestore? firestore}) : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
   final String _collectionName = 'news';
+
+  // Safety cap, not true pagination — see MOBILE_ARCHITECTURE_REVIEW.md
+  // finding #1.
+  static const _feedLimit = 100;
 
   // Get collection reference
   CollectionReference get _newsCollection =>
@@ -55,6 +61,7 @@ class NewsService {
   Stream<List<NewsModel>> getAllNewsStream() {
     return _newsCollection
         .orderBy('publishedDate', descending: true)
+        .limit(_feedLimit)
         .snapshots()
         .map((snapshot) => snapshot.docs
         .map((doc) => NewsModel.fromFirestore(doc))
@@ -66,6 +73,7 @@ class NewsService {
     try {
       final snapshot = await _newsCollection
           .orderBy('publishedDate', descending: true)
+          .limit(_feedLimit)
           .get();
       return snapshot.docs
           .map((doc) => NewsModel.fromFirestore(doc))
@@ -73,17 +81,6 @@ class NewsService {
     } catch (e) {
       throw Exception('Failed to get all news: $e');
     }
-  }
-
-  // Get news by category (stream)
-  Stream<List<NewsModel>> getNewsByCategory(String category) {
-    return _newsCollection
-        .where('category', isEqualTo: category)
-        .orderBy('publishedDate', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => NewsModel.fromFirestore(doc))
-        .toList());
   }
 
   // Get latest news (limited)

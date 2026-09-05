@@ -4,7 +4,9 @@ import '../../core/services/match_team_service/match_service.dart';
 import '../../Model/teams_games/wao_match.dart';
 
 class MatchViewModel extends ChangeNotifier {
-  final MatchService _matchService = MatchService();
+  MatchViewModel({MatchService? matchService}) : _matchService = matchService ?? MatchService();
+
+  final MatchService _matchService;
 
   // Initialize method for consistency with other ViewModels
   void initialize() {
@@ -13,6 +15,14 @@ class MatchViewModel extends ChangeNotifier {
 
   Stream<List<WaoMatch>> getAllMatches() {
     return _matchService.getAllMatches();
+  }
+
+  Stream<WaoMatch?> getMatchStream(String matchId) {
+    return _matchService.getMatchStream(matchId);
+  }
+
+  Future<List<WaoMatch>> getMatchesByIds(List<String> ids) {
+    return _matchService.getMatchesByIds(ids);
   }
 
   Stream<List<WaoMatch>> getMatchesByStatus(MatchStatus status) {
@@ -31,32 +41,13 @@ class MatchViewModel extends ChangeNotifier {
     return _matchService.getFinishedMatches();
   }
 
-  Stream<List<WaoMatch>> getMatchesByType(MatchType type) {
-    return _matchService.getMatchesByType(type);
-  }
-
   Stream<List<WaoMatch>> getTeamMatches(String teamId) {
     return _matchService.getTeamMatches(teamId);
-  }
-
-  Stream<List<WaoMatch>> getChampionshipMatches(String championshipId) {
-    return _matchService.getChampionshipMatches(championshipId);
   }
 
   // NEW: Get matches for a specific date
   Stream<List<WaoMatch>> getMatchesByDate(DateTime date) {
     return _matchService.getMatchesByDate(date);
-  }
-
-  // NEW: Get matches in a date range
-  Stream<List<WaoMatch>> getMatchesInDateRange({
-    required DateTime startDate,
-    required DateTime endDate,
-  }) {
-    return _matchService.getMatchesInDateRange(
-      startDate: startDate,
-      endDate: endDate,
-    );
   }
 
   // NEW: Get matches for multiple teams (for followed teams)
