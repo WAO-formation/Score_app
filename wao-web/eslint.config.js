@@ -5,7 +5,11 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // .history is a local-history editor backup directory (timestamped
+  // snapshots of every save, e.g. SideNav_20260208101808.jsx) — not real
+  // source. Left unignored, its hundreds of half-edited snapshots drowned
+  // out every real finding under src/ (96% of lint output was from here).
+  globalIgnores(['dist', '.history']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

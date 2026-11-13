@@ -828,21 +828,13 @@ class _PastMatchDetailsState extends State<PastMatchDetails> with SingleTickerPr
     );
   }
 
-  // Helper method to get team players
+  // Helper method to get team players. Reads run concurrently rather than
+  // one at a time — a full roster previously meant N sequential round-trips.
   Future<List<WaoPlayer>> _getTeamPlayers(TeamRoster roster) async {
-    final playerService = PlayerService();
-    final List<WaoPlayer> players = [];
-
+    final playerViewModel = context.read<PlayerViewModel>();
     final allPlayerIds = roster.getAllPlayerIds();
-
-    for (final playerId in allPlayerIds) {
-      final player = await playerService.getPlayerById(playerId);
-      if (player != null) {
-        players.add(player);
-      }
-    }
-
-    return players;
+    final players = await Future.wait(allPlayerIds.map(playerViewModel.getPlayerById));
+    return players.whereType<WaoPlayer>().toList();
   }
 
   // Helper method to filter players by role

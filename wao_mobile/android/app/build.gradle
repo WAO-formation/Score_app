@@ -41,7 +41,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.wao_mobile"
-        minSdkVersion 23
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -64,3 +64,4 @@ dependencies {
 
 // Apply Google Services plugin LAST (after everything else)
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'

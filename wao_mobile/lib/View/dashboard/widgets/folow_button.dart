@@ -1,20 +1,22 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:wao_mobile/core/theme/app_colors.dart';
 
 class FollowButton extends StatefulWidget {
   final bool isFollowing;
   final VoidCallback? onToggle;
 
   const FollowButton({
+    super.key,
     required this.isFollowing,
     this.onToggle,
   });
 
   @override
-  State<FollowButton> createState() => FollowButtonState();
+  State<FollowButton> createState() => _FollowButtonState();
 }
 
-class FollowButtonState extends State<FollowButton> {
+class _FollowButtonState extends State<FollowButton> {
   bool _isLoading = false;
   late bool _isFollowing;
 
@@ -27,7 +29,6 @@ class FollowButtonState extends State<FollowButton> {
   @override
   void didUpdateWidget(FollowButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update local state when parent updates
     if (oldWidget.isFollowing != widget.isFollowing) {
       _isFollowing = widget.isFollowing;
     }
@@ -35,31 +36,16 @@ class FollowButtonState extends State<FollowButton> {
 
   Future<void> _handleToggle() async {
     if (_isLoading || widget.onToggle == null) return;
-
     setState(() {
       _isLoading = true;
+      _isFollowing = !_isFollowing;
     });
-
     try {
-      // Optimistically update UI
-      setState(() {
-        _isFollowing = !_isFollowing;
-      });
-
-      // Call the actual toggle function
       widget.onToggle!();
-    } catch (e) {
-      // Revert on error
-      setState(() {
-        _isFollowing = !_isFollowing;
-      });
-      print('Error toggling follow: $e');
+    } catch (_) {
+      setState(() => _isFollowing = !_isFollowing);
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -70,36 +56,36 @@ class FollowButtonState extends State<FollowButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: 100,
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+        height: 30,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: _isFollowing
-              ? const Color(0xFFFFC600)
-              : const Color(0xFFFFC600).withOpacity(0.2),
+          color: _isFollowing ? AppColors.waoRed : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFFFC600),
+            color: _isFollowing
+                ? AppColors.waoRed
+                : Colors.white.withOpacity(0.4),
             width: 1,
           ),
         ),
         child: _isLoading
-            ? const SizedBox(
-          width: 14,
-          height: 14,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        )
+            ? SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _isFollowing ? Colors.white : Colors.white54,
+                ),
+              )
             : Text(
-          _isFollowing ? "Following" : "Follow",
-          style: TextStyle(
-            color: _isFollowing ? const Color(0xFF011B3B) : Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
+                _isFollowing ? 'Following' : 'Follow',
+                style: GoogleFonts.oswald(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
       ),
     );
   }

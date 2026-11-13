@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:wao_mobile/core/theme/app_colors.dart';
 
@@ -14,13 +15,13 @@ class DateFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      height: 80,
+      height: 72,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: 7,
         itemBuilder: (context, index) {
           final date = DateTime.now().add(Duration(days: index - 1));
@@ -29,70 +30,53 @@ class DateFilter extends StatelessWidget {
 
           return GestureDetector(
             onTap: () => onDateSelected(date),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              margin: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF011B3B),
-                    Color(0xFFD30336),
-                  ],
-                )
-                    : null,
                 color: isSelected
-                    ? null
-                    : isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                    ? AppColors.waoRed
+                    : isDark
+                        ? Colors.white.withOpacity(0.06)
+                        : AppColors.waoNavy.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.waoRed
+                      : isDark
+                          ? Colors.white.withOpacity(0.08)
+                          : AppColors.waoNavy.withOpacity(0.1),
+                  width: 1,
+                ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (isToday)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.waoYellow,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'TODAY',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  else
-                    Text(
-                      DateFormat('EEE').format(date).toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected
-                            ? Colors.white
-                            : isDarkMode
-                            ? Colors.white70
-                            : Colors.black54,
-                      ),
+                  Text(
+                    isToday ? 'TODAY' : DateFormat('EEE').format(date).toUpperCase(),
+                    style: GoogleFonts.oswald(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white70
+                          : isDark
+                              ? Colors.white38
+                              : AppColors.waoNavy.withOpacity(0.45),
+                      letterSpacing: 0.6,
                     ),
-                  const SizedBox(height: 4),
+                  ),
+                  const SizedBox(height: 3),
                   Text(
                     DateFormat('d MMM').format(date),
-                    style: TextStyle(
-                      fontSize: isToday ? 14 : 13,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    style: GoogleFonts.oswald(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                       color: isSelected
                           ? Colors.white
-                          : isDarkMode
-                          ? Colors.white
-                          : Colors.black87,
+                          : isDark
+                              ? Colors.white
+                              : AppColors.waoNavy,
                     ),
                   ),
                 ],
@@ -119,47 +103,52 @@ class CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      height: 40,
-      child: ListView.builder(
+      height: 36,
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: filters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = selectedFilter == filter;
 
           return GestureDetector(
             onTap: () => onFilterSelected(filter),
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.waoYellow
-                    : isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
+                    ? AppColors.waoRed
+                    : isDark
+                        ? Colors.white.withOpacity(0.06)
+                        : AppColors.waoNavy.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? AppColors.waoYellow : Colors.transparent,
+                  color: isSelected
+                      ? AppColors.waoRed
+                      : isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : AppColors.waoNavy.withOpacity(0.12),
                   width: 1,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  filter,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected
-                        ? const Color(0xFF011B3B)
-                        : isDarkMode
-                        ? Colors.white70
-                        : Colors.black54,
-                  ),
+              alignment: Alignment.center,
+              child: Text(
+                filter,
+                style: GoogleFonts.oswald(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? Colors.white
+                      : isDark
+                          ? Colors.white60
+                          : AppColors.waoNavy.withOpacity(0.7),
+                  letterSpacing: 0.3,
                 ),
               ),
             ),

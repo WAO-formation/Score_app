@@ -14,7 +14,11 @@ class ContactUsPage extends StatelessWidget {
 
       appBar: CustomAppBar(title: 'Contact Us', leading: IconButton(onPressed: (){ Navigator.pop(context);}, icon: const Icon(Icons.arrow_back, color: Colors.white,)),),
 
-      body: Column(
+      // AppBar already handles the top inset; this protects the social
+      // icons row at the bottom from the home indicator / gesture area.
+      body: SafeArea(
+        top: false,
+        child: Column(
         children: [
 
           Container(
@@ -152,6 +156,7 @@ class ContactUsPage extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

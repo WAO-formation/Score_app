@@ -3,12 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../Model/teams_games/team/team_stat.dart';
 import '../../../Model/teams_games/team/wao_player.dart';
 import '../../../Model/teams_games/wao_team.dart';
-import '../../../ViewModel/teams_games/player_viewmodel.dart';
+import 'player_service.dart';
+import 'team_statistics_service.dart';
 
-
+/// Team CRUD and roster management only. Season stats live in
+/// TeamStatisticsService and "follow a team" lives in TeamFollowService —
+/// this used to be one 644-line class doing all three; see
+/// MOBILE_ARCHITECTURE_REVIEW.md finding #6 for why that got split up.
 class TeamService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final PlayerService _playerService = PlayerService();
+  // All dependencies are injectable (default to the real singletons) so
+  // this can be unit-tested against fakes instead of always hitting a live
+  // project.
+  TeamService({FirebaseFirestore? firestore, PlayerService? playerService, TeamStatisticsService? statisticsService})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _playerService = playerService ?? PlayerService(),
+        _statisticsService = statisticsService ?? TeamStatisticsService();
+
+  final FirebaseFirestore _firestore;
+  final PlayerService _playerService;
+  final TeamStatisticsService _statisticsService;
 
   // ==================== DATA INTEGRITY CHECKS ====================
 
@@ -54,17 +67,19 @@ class TeamService {
     await _validateRosterPlayers(team.roster, team.id);
   }
 
-  /// Validate all players in roster
+  /// Validate all players in roster. Reads run concurrently (Future.wait)
+  /// instead of one at a time — a full 12-player roster previously meant 12
+  /// sequential round-trips here.
   Future<void> _validateRosterPlayers(TeamRoster roster, String teamId) async {
     final allPlayerIds = roster.getAllPlayerIds();
 
-    for (final playerId in allPlayerIds) {
-      final player = await _playerService.getPlayerById(playerId);
+    final players = await Future.wait(allPlayerIds.map(_playerService.getPlayerById));
 
+    for (var i = 0; i < allPlayerIds.length; i++) {
+      final player = players[i];
       if (player == null) {
-        throw Exception('Player with ID $playerId does not exist');
+        throw Exception('Player with ID ${allPlayerIds[i]} does not exist');
       }
-
       // Check if player is already in another team
       if (player.currentTeamId != null && player.currentTeamId != teamId) {
         throw Exception(
@@ -392,7 +407,8 @@ class TeamService {
     );
   }
 
-  /// Helper: Assign all players in roster to team
+  /// Helper: Assign all players in roster to team. Writes run concurrently
+  /// rather than one at a time (see _validateRosterPlayers above).
   Future<void> _assignPlayersToTeam(
       String teamId,
       String teamName,
@@ -400,218 +416,18 @@ class TeamService {
       ) async {
     final allPlayerIds = roster.getAllPlayerIds();
 
-    for (final playerId in allPlayerIds) {
-      await _playerService.assignPlayerToTeam(
-        playerId: playerId,
-        teamId: teamId,
-        teamName: teamName,
-      );
-    }
+    await Future.wait(allPlayerIds.map((playerId) => _playerService.assignPlayerToTeam(
+          playerId: playerId,
+          teamId: teamId,
+          teamName: teamName,
+        )));
   }
 
-  // ==================== TEAM STATISTICS ====================
-
-  /// Get team statistics
-  Stream<TeamStatistics?> getTeamStatistics(String teamId) {
-    return _firestore
-        .collection('teamStatistics')
-        .doc(teamId)
-        .snapshots()
-        .map((doc) {
-      if (doc.exists && doc.data() != null) {
-        return TeamStatistics.fromFirestore(doc.data()!, doc.id);
-      }
-      return null;
-    });
-  }
-
-  /// Update team statistics after a game
-  Future<void> updateTeamStatisticsAfterGame({
-    required String teamId,
-    required GameResult gameResult,
-  }) async {
-    try {
-      final statsDoc = _firestore.collection('teamStatistics').doc(teamId);
-      final statsSnapshot = await statsDoc.get();
-
-      TeamStatistics currentStats;
-      if (statsSnapshot.exists && statsSnapshot.data() != null) {
-        currentStats = TeamStatistics.fromFirestore(statsSnapshot.data()!, teamId);
-      } else {
-        currentStats = TeamStatistics(teamId: teamId, updatedAt: DateTime.now());
-      }
-
-      // Update game counts
-      int newWins = currentStats.wins;
-      int newDraws = currentStats.draws;
-      int newLosses = currentStats.losses;
-
-      if (gameResult.isWin) {
-        newWins++;
-      } else if (gameResult.isDraw) {
-        newDraws++;
-      } else {
-        newLosses++;
-      }
-
-      // Update recent games (keep last 10)
-      List<GameResult> updatedRecentGames = [
-        gameResult,
-        ...currentStats.recentGames,
-      ];
-      if (updatedRecentGames.length > 10) {
-        updatedRecentGames = updatedRecentGames.sublist(0, 10);
-      }
-
-      // Create updated statistics
-      final updatedStats = currentStats.copyWith(
-        totalGamesPlayed: currentStats.totalGamesPlayed + 1,
-        wins: newWins,
-        draws: newDraws,
-        losses: newLosses,
-        goalsScored: currentStats.goalsScored + gameResult.teamScore,
-        goalsConceded: currentStats.goalsConceded + gameResult.opponentScore,
-        recentGames: updatedRecentGames,
-        lastGameDate: gameResult.playedAt,
-        updatedAt: DateTime.now(),
-      );
-
-      await statsDoc.set(updatedStats.toFirestore());
-    } catch (e) {
-      print('Error updating team statistics: $e');
-      rethrow;
-    }
-  }
-
-  /// Update player counts (active/inactive)
+  /// Update player counts (active/inactive) after a roster change.
   Future<void> _updatePlayerCounts(String teamId) async {
-    try {
-      final activeCount = await _playerService.getActivePlayersCount(teamId);
-      final inactiveCount = await _playerService.getInactivePlayersCount(teamId);
-
-      await _firestore.collection('teamStatistics').doc(teamId).update({
-        'activePlayers': activeCount,
-        'inactivePlayers': inactiveCount,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error updating player counts: $e');
-    }
-  }
-
-  /// Update follower count
-  Future<void> updateFollowerCount(String teamId) async {
-    try {
-      final count = await getTeamFollowerCount(teamId);
-
-      await _firestore.collection('teamStatistics').doc(teamId).update({
-        'totalFollowers': count,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error updating follower count: $e');
-    }
-  }
-
-  // ==================== FOLLOW FUNCTIONALITY ====================
-
-  Future<void> followTeam(String userId, String teamId) async {
-    try {
-      final followDoc = _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('followedTeams')
-          .doc(teamId);
-
-      await followDoc.set({
-        'teamId': teamId,
-        'followedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Update follower count
-      await updateFollowerCount(teamId);
-
-      print('Successfully followed team: $teamId');
-    } catch (e) {
-      print('Error following team: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> unfollowTeam(String userId, String teamId) async {
-    try {
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('followedTeams')
-          .doc(teamId)
-          .delete();
-
-      // Update follower count
-      await updateFollowerCount(teamId);
-
-      print('Successfully unfollowed team: $teamId');
-    } catch (e) {
-      print('Error unfollowing team: $e');
-      rethrow;
-    }
-  }
-
-  Future<bool> isFollowingTeam(String userId, String teamId) async {
-    try {
-      final doc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('followedTeams')
-          .doc(teamId)
-          .get();
-
-      return doc.exists;
-    } catch (e) {
-      print('Error checking follow status: $e');
-      return false;
-    }
-  }
-
-  Stream<List<String>> getFollowedTeamIds(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('followedTeams')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
-  }
-
-  Future<int> getTeamFollowerCount(String teamId) async {
-    try {
-      // Count directly from the team's subcollection — no collectionGroup index needed
-      final querySnapshot = await _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('followers')
-          .get();
-      return querySnapshot.docs.length;
-    } catch (e) {
-      print('Error getting follower count: $e');
-      return 0;
-    }
-  }
-
-  Future<bool> toggleFollowTeam(String userId, String teamId) async {
-    try {
-      final isFollowing = await isFollowingTeam(userId, teamId);
-
-      if (isFollowing) {
-        await unfollowTeam(userId, teamId);
-        return false;
-      } else {
-        await followTeam(userId, teamId);
-        return true;
-      }
-    } catch (e) {
-      print('Error toggling follow status: $e');
-      rethrow;
-    }
+    final activeCount = await _playerService.getActivePlayersCount(teamId);
+    final inactiveCount = await _playerService.getInactivePlayersCount(teamId);
+    await _statisticsService.updatePlayerCounts(teamId, activeCount: activeCount, inactiveCount: inactiveCount);
   }
 
   // ==================== UTILITY FUNCTIONS ====================

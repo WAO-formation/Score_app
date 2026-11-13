@@ -4,12 +4,25 @@ import '../../Model/teams_games/team/team_stat.dart';
 import '../../Model/teams_games/team/wao_player.dart';
 import '../../Model/teams_games/wao_team.dart';
 import '../../core/services/match_team_service/player_service.dart';
+import '../../core/services/match_team_service/team_follow_service.dart';
 import '../../core/services/match_team_service/team_service.dart';
-
+import '../../core/services/match_team_service/team_statistics_service.dart';
 
 class TeamViewModel extends ChangeNotifier {
-  final TeamService _teamService = TeamService();
-  final PlayerService _playerService = PlayerService();
+  TeamViewModel({
+    TeamService? teamService,
+    PlayerService? playerService,
+    TeamStatisticsService? statisticsService,
+    TeamFollowService? followService,
+  })  : _teamService = teamService ?? TeamService(),
+        _playerService = playerService ?? PlayerService(),
+        _statisticsService = statisticsService ?? TeamStatisticsService(),
+        _followService = followService ?? TeamFollowService();
+
+  final TeamService _teamService;
+  final PlayerService _playerService;
+  final TeamStatisticsService _statisticsService;
+  final TeamFollowService _followService;
 
   // Cache for followed team IDs
   Set<String> _followedTeamIds = {};
@@ -27,7 +40,7 @@ class TeamViewModel extends ChangeNotifier {
   void _loadFollowedTeams() {
     if (_currentUserId == null) return;
 
-    _teamService.getFollowedTeamIds(_currentUserId!).listen((teamIds) {
+    _followService.getFollowedTeamIds(_currentUserId!).listen((teamIds) {
       _followedTeamIds = teamIds.toSet();
       notifyListeners();
     });
@@ -188,7 +201,7 @@ class TeamViewModel extends ChangeNotifier {
 
   /// Get team statistics
   Stream<TeamStatistics?> getTeamStatistics(String teamId) {
-    return _teamService.getTeamStatistics(teamId);
+    return _statisticsService.getTeamStatistics(teamId);
   }
 
   /// Update team statistics after a game
@@ -197,7 +210,7 @@ class TeamViewModel extends ChangeNotifier {
     required GameResult gameResult,
   }) async {
     try {
-      await _teamService.updateTeamStatisticsAfterGame(
+      await _statisticsService.updateTeamStatisticsAfterGame(
         teamId: teamId,
         gameResult: gameResult,
       );
@@ -210,7 +223,7 @@ class TeamViewModel extends ChangeNotifier {
 
   /// Get follower count for a team
   Future<int> getTeamFollowerCount(String teamId) async {
-    return await _teamService.getTeamFollowerCount(teamId);
+    return await _followService.getTeamFollowerCount(teamId);
   }
 
   // ==================== FOLLOW FUNCTIONALITY ====================
@@ -223,7 +236,7 @@ class TeamViewModel extends ChangeNotifier {
     }
 
     try {
-      final nowFollowing = await _teamService.toggleFollowTeam(_currentUserId!, teamId);
+      final nowFollowing = await _followService.toggleFollowTeam(_currentUserId!, teamId);
 
       // Update local cache immediately for better UX
       if (nowFollowing) {

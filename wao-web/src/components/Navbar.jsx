@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND } from '../config/brand';
+import { useGames } from '../context/GamesContext';
+import { isPastDue } from '../services/matchesService';
 
-const NAV_LINKS = [
+const BASE_NAV_LINKS = [
   { label: 'Home',       to: '/' },
   { label: 'About Us',   to: '/#about' },
   { label: 'How To Play', to: '/#how-to-play' },
@@ -15,6 +17,9 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { games } = useGames();
+  const hasUpcomingGames = games.some((g) => g.status === 'upcoming' && !isPastDue(g));
+  const NAV_LINKS = BASE_NAV_LINKS.filter((link) => link.label !== 'Upcoming Games' || hasUpcomingGames);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);

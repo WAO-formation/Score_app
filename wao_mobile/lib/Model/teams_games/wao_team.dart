@@ -116,7 +116,15 @@ class WaoTeam {
     return WaoTeam(
       id: id,
       name: data['name'] ?? '',
-      category: TeamCategory.values.byName(data['category'] ?? 'senior'),
+      // byName() throws for any value outside {senior, junior, youth} — a
+      // legacy or malformed doc could still carry an old/typo'd category.
+      // firstWhere+orElse matches the defensive pattern already used for
+      // AccountRole/ThemePreference in user_model.dart — an unrecognized
+      // category degrades to 'senior' instead of crashing the whole list.
+      category: TeamCategory.values.firstWhere(
+        (e) => e.name == data['category'],
+        orElse: () => TeamCategory.senior,
+      ),
       campusId: data['campusId'],
       coach: data['coach'] ?? 'Unknown Coach',
       secretary: data['secretary'] ?? '',
@@ -127,10 +135,12 @@ class WaoTeam {
       roster: data['roster'] != null
           ? TeamRoster.fromFirestore(data['roster'] as Map<String, dynamic>)
           : TeamRoster(),
-      createdAt: data['createdAt'] != null
+      // `is Timestamp`, not just a null check — see the matching comment in
+      // WaoPlayer.fromFirestore (MOBILE_ARCHITECTURE_REVIEW.md finding #9).
+      createdAt: data['createdAt'] is Timestamp
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
-      updatedAt: data['updatedAt'] != null
+      updatedAt: data['updatedAt'] is Timestamp
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
     );

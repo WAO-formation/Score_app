@@ -12,7 +12,8 @@ const DashboardLayout = () => {
   // wraps or gets clipped mid-word, so past a length threshold we drop to
   // just the first name instead of truncating with an ellipsis.
   const userName = fullName.length > 16 ? fullName.trim().split(' ')[0] : fullName;
-  const roleLabel = user?.role === 'admin' ? 'Admin' : 'Moderator';
+  const ROLE_LABELS = { admin: 'Admin', moderator: 'Moderator', official: 'Judge' };
+  const roleLabel = ROLE_LABELS[user?.role] || 'Moderator';
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
