@@ -49,7 +49,7 @@ const Hero = () => {
   return (
     <section
       ref={rootRef}
-      className="relative isolate flex min-h-dvh items-end justify-center overflow-hidden pb-16 sm:pb-20 md:pb-24"
+      className="relative isolate flex min-h-[80vh] md:min-h-dvh items-center md:items-end justify-center overflow-hidden pb-16 sm:pb-20 md:pb-24"
     >
       <div
         className="hero-bg absolute inset-0 bg-cover bg-no-repeat bg-[position:25%_center] sm:bg-[position:38%_center] md:bg-center"
