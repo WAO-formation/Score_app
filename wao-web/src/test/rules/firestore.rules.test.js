@@ -79,6 +79,21 @@ async function seedMatch(secondsAgo = 10, overrides = {}) {
   });
 }
 
+describe('matches — read', () => {
+  it('allows an unauthenticated client to read a match (public landing-page schedule)', async () => {
+    await seedMatch();
+    await assertSucceeds(getDoc(doc(unauth(), 'matches', 'match1')));
+  });
+
+  it('still rejects an unauthenticated client reading the access-code subdoc', async () => {
+    await seedMatch();
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'matches', 'match1', 'private', 'access'), { accessCode: 'ABC123' });
+    });
+    await assertFails(getDoc(doc(unauth(), 'matches', 'match1', 'private', 'access')));
+  });
+});
+
 describe('matches — create', () => {
   it('rejects a fan (non-official) creating a match', async () => {
     await assertFails(addDoc(collection(asFan(), 'matches'), {

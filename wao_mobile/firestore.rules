@@ -190,7 +190,11 @@ service cloud.firestore {
     // ==================== MATCHES ====================
 
     match /matches/{matchId} {
-      allow read: if isSignedIn();
+      // Public read: wao-web's landing page shows real upcoming fixtures to
+      // signed-out visitors (marketing/fan-facing), same as live scores
+      // elsewhere in the app once a visitor is signed in. The access code
+      // (needed to start/simulate a match) stays gated below in /private/access.
+      allow read: if true;
 
       // Admin-only: creating a match assigns a moderator to run it and
       // judges to officiate it, which is an admin decision — a moderator

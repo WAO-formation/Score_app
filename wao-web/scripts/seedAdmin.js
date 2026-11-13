@@ -30,7 +30,7 @@ const firebaseConfig = {
   appId:             process.env.VITE_FIREBASE_APP_ID,
 };
 
-const ADMIN = {
+export const ADMIN = {
   name:     'WAO Admin',
   email:    'afanyuemma2002@gmail.com',
   password: 'Wao@Admin2024!',
@@ -78,4 +78,9 @@ async function seed() {
   process.exit(0);
 }
 
-seed();
+// Guarded so other scripts can `import { ADMIN } from './seedAdmin.js'` to
+// reuse the credential constant without re-running this file's seed() (which
+// calls process.exit) as a side effect of the import.
+if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
+  seed();
+}
