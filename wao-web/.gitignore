@@ -33,3 +33,6 @@ TEST_ACCOUNTS.md
 *.njsproj
 *.sln
 *.sw?
+
+# VS Code Local History
+.history/
