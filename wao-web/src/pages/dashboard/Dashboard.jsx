@@ -3,12 +3,15 @@ import React, { useState, useEffect } from "react";
 import { subscribeToTeams } from "../../services/teamsService";
 import { isPastDue } from "../../services/matchesService";
 import { useGames } from "../../context/GamesContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CreateTeam from "../../components/CreateTeam";
 import { BRAND } from "../../config/brand";
 
 function Dashboard() {
   const { games } = useGames();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [teams, setTeams] = useState([]);
@@ -62,13 +65,15 @@ function Dashboard() {
           >
             <Users className="w-4 h-4" /> Create Team
           </button>
-          <button
-            onClick={() => navigate('/games/create')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
-            style={{ fontFamily: BRAND.font.body }}
-          >
-            <Trophy className="w-4 h-4" /> Create Game
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/games/create')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
+              style={{ fontFamily: BRAND.font.body }}
+            >
+              <Trophy className="w-4 h-4" /> Create Game
+            </button>
+          )}
         </div>
       </div>
 
@@ -264,7 +269,7 @@ function Dashboard() {
             <h3 className="text-white text-base mb-3 uppercase tracking-widest" style={{ fontFamily: BRAND.font.heading }}>Quick Actions</h3>
             <div className="space-y-2">
               {[
-                { label: "Schedule a Game", icon: Calendar, action: () => navigate('/games/create') },
+                ...(isAdmin ? [{ label: "Schedule a Game", icon: Calendar, action: () => navigate('/games/create') }] : []),
                 { label: "Add a Team", icon: Users, action: () => setShowCreateTeamModal(true) },
                 { label: "View All Games", icon: Trophy, action: () => navigate('/games') },
               ].map(({ label, icon: Icon, action }) => (

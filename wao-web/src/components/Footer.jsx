@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BRAND } from '../config/brand';
+import { useGames } from '../context/GamesContext';
+import { isPastDue } from '../services/matchesService';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const NAV = [
+const BASE_NAV = [
   { label: 'Home',          to: '/' },
   { label: 'About',         to: '/#about' },
   { label: 'How To Play',   to: '/#how-to-play' },
@@ -64,6 +66,9 @@ const SOCIALS = [
 const Footer = () => {
   const rootRef = useRef(null);
   const year = new Date().getFullYear();
+  const { games } = useGames();
+  const hasUpcomingGames = games.some((g) => g.status === 'upcoming' && !isPastDue(g));
+  const NAV = BASE_NAV.filter((link) => link.label !== 'Upcoming Games' || hasUpcomingGames);
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
@@ -183,11 +188,20 @@ const Footer = () => {
                   +233 24 278 6261
                 </a>
               </li>
+              <li>
+                <a
+                  href="mailto:waosport@gmail.com"
+                  className="text-sm transition-colors duration-200 hover:text-white"
+                  style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.6)' }}
+                >
+                  waosport@gmail.com
+                </a>
+              </li>
               <li
                 className="text-sm leading-relaxed"
                 style={{ fontFamily: BRAND.font.body, color: 'rgba(255,255,255,0.6)' }}
               >
-                Cornerstone Baptist Church Court,<br />Dome, Accra
+                GA-157-8721 Dzorwulu Junction,<br />Accra, Ghana
               </li>
             </ul>
           </div>

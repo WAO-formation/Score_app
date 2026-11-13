@@ -32,6 +32,33 @@ service cloud.firestore {
       return isSignedIn() && (callerRole() == 'official' || callerRole() == 'moderator' || callerRole() == 'admin');
     }
 
+    function callerTeamId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId;
+    }
+
+    // A coach may manage the roster of *their own* team only (users/{uid}.
+    // teamId, the same admin-assigned link TeamActivitiesPage reads on
+    // mobile) — not any other team, and not match/score data, which stays
+    // isOfficial()-only.
+    function isCoachOfTeam(teamId) {
+      return isSignedIn() && callerRole() == 'coach' && callerTeamId() == teamId;
+    }
+
+    // Mirrors WaoTeam.maxSquadSize (wao_mobile/lib/Model/teams_games/wao_team.dart)
+    // and TeamRoster.totalPlayers — that 12-player cap was previously only
+    // ever checked client-side, so a modified client (or any future code
+    // path writing `roster` directly) could write an unlimited squad.
+    function rosterSize(roster) {
+      return roster.get('kingIds', []).size()
+           + roster.get('workerIds', []).size()
+           + roster.get('protagueIds', []).size()
+           + roster.get('antagueIds', []).size()
+           + roster.get('warriorIds', []).size()
+           + roster.get('sacrificerIds', []).size()
+           + roster.get('servitorIds', []).size()
+           + roster.get('substituteIds', []).size();
+    }
+
     // True once at least `seconds` have passed since the document's last
     // recorded write. Acts as a per-document cooldown — the closest thing
     // to rate limiting Firestore rules can do without a Cloud Function
@@ -81,7 +108,7 @@ service cloud.firestore {
                                'favoriteTeamIds', 'favoriteMatchIds',
                                'totalMatches', 'totalTeams', 'themePreference',
                                'notificationsEnabled', 'emailNotifications',
-                               'language', 'updatedAt',
+                               'language', 'fcmToken', 'updatedAt',
                              ]));
 
       allow delete: if isAdmin();
@@ -95,22 +122,36 @@ service cloud.firestore {
 
     match /teams/{teamId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isOfficial();
+      allow create, delete: if isOfficial();
+
+      // A coach may only ever touch their own team's roster field — name,
+      // category, coach/secretary/director etc. stay isOfficial()-only.
+      // The 12-player cap applies to anyone writing `roster`, admin/official
+      // included — this is a squad-size rule, not a coach-specific one.
+      allow update: if (isOfficial()
+                        || (isCoachOfTeam(teamId)
+                            && request.resource.data.diff(resource.data).affectedKeys()
+                                 .hasOnly(['roster', 'updatedAt'])))
+                    && rosterSize(request.resource.data.roster) <= 12;
     }
 
     match /teamStatistics/{teamId} {
       allow read: if isSignedIn();
 
-      // Derived data — officials write the match-driven fields today via
-      // TeamService; the real fix is a Cloud Function recomputing them
-      // after each finished match, so no client can hand-edit win/loss
-      // counts. totalFollowers is carved out separately because following
-      // a team is an ordinary-fan action (TeamService.updateFollowerCount),
-      // not an officiating one.
+      // Win/loss/goals now come from the onMatchFinished Cloud Function
+      // (Admin SDK, bypasses these rules) so no client can hand-edit them.
+      // totalFollowers is carved out separately because following a team is
+      // an ordinary-fan action (TeamService.updateFollowerCount), not an
+      // officiating one. activePlayers/inactivePlayers is carved out for a
+      // coach too — TeamService recomputes those right after a roster edit
+      // (add/removePlayerFromTeam), which a coach is now allowed to do.
       allow update: if isOfficial()
                     || (isSignedIn()
                         && request.resource.data.diff(resource.data).affectedKeys()
-                             .hasOnly(['totalFollowers', 'updatedAt']));
+                             .hasOnly(['totalFollowers', 'updatedAt']))
+                    || (isCoachOfTeam(teamId)
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['activePlayers', 'inactivePlayers', 'updatedAt']));
       allow create: if isOfficial();
       allow delete: if isOfficial();
     }
@@ -124,15 +165,42 @@ service cloud.firestore {
 
     match /players/{playerId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isOfficial();
+      allow delete: if isOfficial();
+
+      // A coach may create a player doc only for their own team, and edit
+      // an existing player only via the same fields TeamService's
+      // add/removePlayerFromTeam and updatePlayerRole/Status actually
+      // write. Stats fields (gamesPlayed etc.) stay Cloud-Function/
+      // admin-only. Joining is only allowed from unassigned
+      // (resource.currentTeamId == null) — a coach can't poach a player
+      // who's already on a *different* team; that stays isOfficial().
+      allow create: if isOfficial()
+                    || (isSignedIn() && callerRole() == 'coach'
+                        && request.resource.data.currentTeamId == callerTeamId());
+      allow update: if isOfficial()
+                    || (isSignedIn() && callerRole() == 'coach'
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['currentTeamId', 'currentTeamName', 'joinedTeamAt',
+                                       'role', 'status', 'jerseyNumber', 'age', 'updatedAt'])
+                        && (resource.data.currentTeamId == callerTeamId()
+                            || (resource.data.currentTeamId == null
+                                && request.resource.data.currentTeamId == callerTeamId())));
     }
 
     // ==================== MATCHES ====================
 
     match /matches/{matchId} {
-      allow read: if isSignedIn();
+      // Public read: wao-web's landing page shows real upcoming fixtures to
+      // signed-out visitors (marketing/fan-facing), same as live scores
+      // elsewhere in the app once a visitor is signed in. The access code
+      // (needed to start/simulate a match) stays gated below in /private/access.
+      allow read: if true;
 
-      allow create: if isOfficial()
+      // Admin-only: creating a match assigns a moderator to run it and
+      // judges to officiate it, which is an admin decision — a moderator
+      // only ever operates a match already assigned to them (wao-web's
+      // CreateGamePage is hidden from non-admins for the same reason).
+      allow create: if isAdmin()
                     && request.resource.data.scoreA == 0
                     && request.resource.data.scoreB == 0
                     && 'moderatorUid' in request.resource.data
@@ -140,14 +208,18 @@ service cloud.firestore {
                     && request.resource.data.moderatorUid.size() > 0
                     && stampsServerTime();
 
-      // Split into two update shapes rather than one blanket "official can
+      // Split into three update shapes rather than one blanket "official can
       // write anything": scoring/status changes are restricted to an admin
       // or the specific moderator assigned to *this* match (moderatorUid,
       // set at creation) — not just any official-tier account, since the
       // web simulate screen has no other gate keeping a moderator out of a
-      // match they weren't assigned. Favoriting is a self-service action
-      // open to any signed-in user but can only ever touch the isFavorite
-      // field.
+      // match they weren't assigned. A plain official assigned as a *judge*
+      // (judgeUids, kept in sync with the judges array — see matchesService)
+      // gets a narrower third branch: only the Judges-category score, and
+      // only while the match is live, so their wao-web "My Officiating" page
+      // can grant that one score without needing moderator-tier access.
+      // Favoriting is a self-service action open to any signed-in user but
+      // can only ever touch the isFavorite field.
       allow update: if
         (isOfficial()
           && (isAdmin() || resource.data.moderatorUid == request.auth.uid)
@@ -161,12 +233,22 @@ service cloud.firestore {
                  'teamAGoalSetting', 'teamBGoalSetting',
                  'teamAJudges', 'teamBJudges',
                  'quarters', 'fouls', 'events', 'currentQuarter', 'timeRemaining', 'isPlaying',
-                 'moderatorUid', 'moderatorName', 'judges', 'completedAt', 'championshipName',
-                 'startTime', 'venue',
+                 'moderatorUid', 'moderatorName', 'judges', 'judgeUids', 'completedAt', 'championshipName',
+                 'startTime', 'venue', 'liveStartedAt',
                  'updatedAt',
                ])
           && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0 && request.resource.data.scoreA <= 999
           && request.resource.data.scoreB is int && request.resource.data.scoreB >= 0 && request.resource.data.scoreB <= 999)
+        ||
+        (isSignedIn()
+          && callerRole() == 'official'
+          && ('judgeUids' in resource.data) && resource.data.judgeUids.hasAny([request.auth.uid])
+          && resource.data.status == 'live'
+          && stampsServerTime()
+          && pastCooldown(resource.data, 2)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teamAJudges', 'teamBJudges', 'updatedAt'])
+          && request.resource.data.teamAJudges is int && request.resource.data.teamAJudges >= 0 && request.resource.data.teamAJudges <= 999
+          && request.resource.data.teamBJudges is int && request.resource.data.teamBJudges >= 0 && request.resource.data.teamBJudges <= 999)
         ||
         (isSignedIn()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isFavorite']));
@@ -202,7 +284,9 @@ service cloud.firestore {
     // ==================== REPORTS ====================
 
     match /reports/{reportId} {
-      allow read: if isSignedIn();
+      // Internal officiating/incident reports — not fan-facing, unlike the
+      // other collections above that intentionally use isSignedIn().
+      allow read: if isOfficial();
       allow create, update: if isOfficial();
       allow delete: if isAdmin();
     }

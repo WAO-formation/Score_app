@@ -17,9 +17,12 @@ const [emuHost, emuPort] = (process.env.FIRESTORE_EMULATOR_HOST || 'localhost:80
 let testEnv;
 
 const ADMIN = 'admin-uid';
-const MOD_A = 'mod-a-uid';   // assigned to match1
-const MOD_B = 'mod-b-uid';   // NOT assigned to match1
+const MOD_A = 'mod-a-uid';     // assigned to match1
+const MOD_B = 'mod-b-uid';     // NOT assigned to match1
+const JUDGE_A = 'judge-a-uid'; // assigned to match1's judges/judgeUids
+const JUDGE_B = 'judge-b-uid'; // NOT assigned to match1
 const FAN = 'fan-uid';
+const COACH_A = 'coach-a-uid'; // coach of team1
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
@@ -41,24 +44,33 @@ beforeEach(async () => {
     await setDoc(doc(db, 'users', ADMIN), { role: 'admin' });
     await setDoc(doc(db, 'users', MOD_A), { role: 'moderator' });
     await setDoc(doc(db, 'users', MOD_B), { role: 'moderator' });
+    await setDoc(doc(db, 'users', JUDGE_A), { role: 'official' });
+    await setDoc(doc(db, 'users', JUDGE_B), { role: 'official' });
     await setDoc(doc(db, 'users', FAN), { role: 'fan' });
+    await setDoc(doc(db, 'users', COACH_A), { role: 'coach', teamId: 'team1' });
   });
 });
 
 const asAdmin = () => testEnv.authenticatedContext(ADMIN).firestore();
 const asModA = () => testEnv.authenticatedContext(MOD_A).firestore();
 const asModB = () => testEnv.authenticatedContext(MOD_B).firestore();
+const asJudgeA = () => testEnv.authenticatedContext(JUDGE_A).firestore();
+const asJudgeB = () => testEnv.authenticatedContext(JUDGE_B).firestore();
 const asFan = () => testEnv.authenticatedContext(FAN).firestore();
+const asCoachA = () => testEnv.authenticatedContext(COACH_A).firestore();
 const unauth = () => testEnv.unauthenticatedContext().firestore();
 
-// Seeds match1 with moderatorUid = MOD_A, updatedAt `secondsAgo` seconds in
-// the past (bypassing rules) so cooldown-dependent tests can control it.
+// Seeds match1 with moderatorUid = MOD_A and JUDGE_A as its sole judge,
+// updatedAt `secondsAgo` seconds in the past (bypassing rules) so
+// cooldown-dependent tests can control it.
 async function seedMatch(secondsAgo = 10, overrides = {}) {
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), 'matches', 'match1'), {
       teamAId: 't1', teamBId: 't2', teamAName: 'Home', teamBName: 'Away',
       scoreA: 0, scoreB: 0, status: 'live',
       moderatorUid: MOD_A, moderatorName: 'Mod A',
+      judges: [{ uid: JUDGE_A, name: 'Judge A' }], judgeUids: [JUDGE_A],
+      teamAJudges: 0, teamBJudges: 0,
       quarters: {}, fouls: { home: [], away: [] }, events: [],
       currentQuarter: 'Q1', timeRemaining: '17:00', isPlaying: false,
       updatedAt: Timestamp.fromMillis(Date.now() - secondsAgo * 1000),
@@ -67,6 +79,21 @@ async function seedMatch(secondsAgo = 10, overrides = {}) {
   });
 }
 
+describe('matches — read', () => {
+  it('allows an unauthenticated client to read a match (public landing-page schedule)', async () => {
+    await seedMatch();
+    await assertSucceeds(getDoc(doc(unauth(), 'matches', 'match1')));
+  });
+
+  it('still rejects an unauthenticated client reading the access-code subdoc', async () => {
+    await seedMatch();
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'matches', 'match1', 'private', 'access'), { accessCode: 'ABC123' });
+    });
+    await assertFails(getDoc(doc(unauth(), 'matches', 'match1', 'private', 'access')));
+  });
+});
+
 describe('matches — create', () => {
   it('rejects a fan (non-official) creating a match', async () => {
     await assertFails(addDoc(collection(asFan(), 'matches'), {
@@ -74,20 +101,32 @@ describe('matches — create', () => {
     }));
   });
 
-  it('allows a moderator to create a valid match doc', async () => {
-    await assertSucceeds(addDoc(collection(asModA(), 'matches'), {
+  it('rejects a moderator creating a match — only admins assign moderators/judges to new games', async () => {
+    await assertFails(addDoc(collection(asModA(), 'matches'), {
+      scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('rejects a judge creating a match', async () => {
+    await assertFails(addDoc(collection(asJudgeA(), 'matches'), {
+      scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('allows an admin to create a valid match doc', async () => {
+    await assertSucceeds(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 0, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
     }));
   });
 
   it('rejects a create with a non-zero starting score', async () => {
-    await assertFails(addDoc(collection(asModA(), 'matches'), {
+    await assertFails(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 1, scoreB: 0, moderatorUid: MOD_A, updatedAt: serverTimestamp(),
     }));
   });
 
   it('rejects a create missing moderatorUid', async () => {
-    await assertFails(addDoc(collection(asModA(), 'matches'), {
+    await assertFails(addDoc(collection(asAdmin(), 'matches'), {
       scoreA: 0, scoreB: 0, updatedAt: serverTimestamp(),
     }));
   });
@@ -208,6 +247,50 @@ describe('matches — update: per-document cooldown', () => {
     await seedMatch(3); // updatedAt = 3s ago, past the 2s cooldown
     await assertSucceeds(updateDoc(doc(asModA(), 'matches', 'match1'), {
       scoreA: 5, updatedAt: serverTimestamp(),
+    }));
+  });
+});
+
+describe('matches — update: judge-tier Judges-score grant', () => {
+  it('the assigned judge can grant teamAJudges/teamBJudges while the match is live', async () => {
+    await seedMatch();
+    await assertSucceeds(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, teamBJudges: 1, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('an official NOT assigned as a judge on this match cannot grant a score', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeB(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot grant a score while the match is not live', async () => {
+    await seedMatch(10, { status: 'upcoming' });
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot piggyback a different field onto a score grant', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, scoreA: 99, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the assigned judge cannot touch scoreA/scoreB directly', async () => {
+    await seedMatch();
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      scoreA: 5, updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the 2s per-document cooldown applies to judge writes too', async () => {
+    await seedMatch(0); // updatedAt = now
+    await assertFails(updateDoc(doc(asJudgeA(), 'matches', 'match1'), {
+      teamAJudges: 3, updatedAt: serverTimestamp(),
     }));
   });
 });
@@ -335,5 +418,39 @@ describe('teams / players — CRUD boundaries', () => {
 
   it('a fan cannot create a player', async () => {
     await assertFails(setDoc(doc(asFan(), 'players', 'p1'), { name: 'New Player' }));
+  });
+});
+
+describe('teams — roster size cap (12 players)', () => {
+  const emptyRoster = () => ({
+    kingIds: [], workerIds: [], protagueIds: [], antagueIds: [],
+    warriorIds: [], sacrificerIds: [], servitorIds: [], substituteIds: [],
+  });
+  const rosterOfSize = (n) => ({ ...emptyRoster(), workerIds: Array.from({ length: n }, (_, i) => `p${i}`) });
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'teams', 'team1'), {
+        name: 'Team One', roster: emptyRoster(), updatedAt: serverTimestamp(),
+      });
+    });
+  });
+
+  it('a coach can write a roster at exactly the 12-player cap', async () => {
+    await assertSucceeds(updateDoc(doc(asCoachA(), 'teams', 'team1'), {
+      roster: rosterOfSize(12), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('a coach cannot write a roster of 13 players', async () => {
+    await assertFails(updateDoc(doc(asCoachA(), 'teams', 'team1'), {
+      roster: rosterOfSize(13), updatedAt: serverTimestamp(),
+    }));
+  });
+
+  it('the cap applies to admins/officials too, not just coaches', async () => {
+    await assertFails(updateDoc(doc(asAdmin(), 'teams', 'team1'), {
+      roster: rosterOfSize(13), updatedAt: serverTimestamp(),
+    }));
   });
 });

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:wao_mobile/Model/teams_games/wao_team.dart';
-
+import 'package:wao_mobile/core/theme/app_colors.dart';
 import 'folow_button.dart';
 
 class TeamCard extends StatelessWidget {
   final WaoTeam team;
   final VoidCallback? onTap;
   final double? width;
-  final bool showCategoryBadge;
   final bool isFollowing;
   final VoidCallback? onFollowToggle;
 
@@ -16,7 +16,6 @@ class TeamCard extends StatelessWidget {
     required this.team,
     this.onTap,
     this.width = 160,
-    this.showCategoryBadge = true,
     this.isFollowing = false,
     this.onFollowToggle,
   });
@@ -27,53 +26,69 @@ class TeamCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        decoration: _buildCardDecoration(),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF011B3B), Color(0xFF02264D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.waoRed.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           child: Stack(
             children: [
-              // Background ball pattern - positioned at bottom right
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Transform.translate(
-                    offset: const Offset(40, 40),
-                    child: Opacity(
-                      opacity: 0.06, // More subtle opacity
-                      child: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFFC600), // waoYellow as watermark
-                          BlendMode.srcIn,
-                        ),
-                        child: Image.asset(
-                          "assets/images/wao-ball.png",
-                          width: 130,
-                          height: 130,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const SizedBox();
-                          },
-                        ),
-                      ),
+              // Watermark
+              Positioned(
+                right: -18,
+                bottom: -18,
+                child: Opacity(
+                  opacity: 0.06,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.waoYellow,
+                      BlendMode.srcIn,
+                    ),
+                    child: Image.asset(
+                      'assets/images/wao-ball.png',
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox(),
                     ),
                   ),
                 ),
               ),
 
-              // Main content - centered
+              // Content — fully centred
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildTeamLogo(),
-                      const SizedBox(height: 12.0),
-                      _buildTeamName(),
-                      const SizedBox(height: 10.0),
-                      // Stateful follow button that rebuilds independently
+                      _TeamLogo(logoUrl: team.logoUrl, size: 58),
+                      const SizedBox(height: 10),
+                      Text(
+                        team.name,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.oswald(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.3,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       FollowButton(
                         isFollowing: isFollowing,
                         onToggle: onFollowToggle,
@@ -88,117 +103,51 @@ class TeamCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  BoxDecoration _buildCardDecoration() {
-    return BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [
-          Color(0xFF011B3B),
-          Color(0xFF02264D),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: const Color(0xFFD30336).withOpacity(0.15), // Subtle red border
-        width: 1,
-      ),
-    );
-  }
+// ── Shared team logo widget ───────────────────────────────────────────────────
 
-  Widget _buildTeamLogo() {
-    final hasValidLogo = team.logoUrl.isNotEmpty &&
-        team.logoUrl.startsWith('http');
+class _TeamLogo extends StatelessWidget {
+  const _TeamLogo({required this.logoUrl, this.size = 60});
+  final String logoUrl;
+  final double size;
 
-    return ClipOval(
-      child: hasValidLogo
-          ? Image.network(
-        team.logoUrl,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildLoadingIndicator();
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackIcon();
-        },
-      )
-          : _buildFallbackIcon(),
-    );
-  }
-
-  Widget _buildTeamName() {
-    return Text(
-      team.name,
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        height: 1.3,
-      ),
-    );
-  }
-
-  Widget _buildCategoryBadge() {
+  @override
+  Widget build(BuildContext context) {
+    final hasLogo = logoUrl.isNotEmpty && logoUrl.startsWith('http');
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        team.category.name.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFallbackIcon() {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
         shape: BoxShape.circle,
+        color: Colors.white.withOpacity(0.08),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
       ),
-      child: const Icon(
-        Icons.shield,
-        color: Colors.white,
-        size: 30,
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        shape: BoxShape.circle,
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        ),
+      child: ClipOval(
+        child: hasLogo
+            ? Image.network(
+                logoUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (_, child, progress) => progress == null
+                    ? child
+                    : Center(
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.shield_outlined,
+                  color: Colors.white54,
+                  size: 26,
+                ),
+              )
+            : const Icon(Icons.shield_outlined, color: Colors.white54, size: 26),
       ),
     );
   }
 }
-
-

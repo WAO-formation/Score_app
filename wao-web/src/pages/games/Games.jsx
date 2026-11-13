@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Plus, Search, Radio, Calendar, CheckCircle, History } from 'lucide-react';
 import { useGames } from '../../context/GamesContext';
+import { useAuth } from '../../context/AuthContext';
 import { isRecentOrActive, isPastDue } from '../../services/matchesService';
 import GameCard from './components/GameCard';
 import { BRAND } from '../../config/brand';
@@ -20,6 +21,8 @@ const TAB_CONFIG = {
 function Games() {
   const navigate = useNavigate();
   const { games: allGames, loading } = useGames();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [activeTab, setActiveTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -78,21 +81,23 @@ function Games() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-5">
-          <button
-            onClick={() => navigate('/games/create')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
-            style={{ fontFamily: B }}
-          >
-            <Plus className="w-4 h-4" /> Create Game
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="relative z-10 mt-5">
+            <button
+              onClick={() => navigate('/games/create')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#c81434] text-white font-semibold text-sm hover:bg-[#e21e43] transition-all"
+              style={{ fontFamily: B }}
+            >
+              <Plus className="w-4 h-4" /> Create Game
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Tabs + Search + Grid ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 pt-4 gap-3 border-b border-gray-100">
-          <div className="flex">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 gap-3 border-b border-gray-100">
+          <div className="flex overflow-x-auto scrollbar-hide w-full sm:w-auto px-4">
             {TABS.map((tab) => {
               const Icon = TAB_CONFIG[tab].icon;
               return (
@@ -112,7 +117,7 @@ function Games() {
               );
             })}
           </div>
-          <div className="relative w-full sm:w-56 pb-3 sm:pb-0">
+          <div className="relative w-full sm:w-56 pb-3 px-4 sm:px-0 sm:pb-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -140,9 +145,9 @@ function Games() {
               </div>
               <h3 className="text-lg text-[#011B3B] mb-1" style={{ fontFamily: H }}>No {activeTab} games</h3>
               <p className="text-sm text-gray-500 mb-5" style={{ fontFamily: B }}>
-                {activeTab === 'upcoming' ? 'Create a new game to get started.' : `No ${activeTab} games at the moment.`}
+                {activeTab === 'upcoming' && isAdmin ? 'Create a new game to get started.' : `No ${activeTab} games at the moment.`}
               </p>
-              {activeTab === 'upcoming' && (
+              {activeTab === 'upcoming' && isAdmin && (
                 <button
                   onClick={() => navigate('/games/create')}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#c81434] text-white font-semibold hover:bg-[#e21e43] transition-all"

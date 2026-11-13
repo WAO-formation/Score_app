@@ -8,6 +8,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { generateAccessCode } from '../../services/matchesService';
 import { useGames } from '../../context/GamesContext';
+import { useAuth } from '../../context/AuthContext';
 import { BRAND } from '../../config/brand';
 
 const B = BRAND.font.body;
@@ -37,6 +38,7 @@ const inputCls = (err) =>
 const CreateGamePage = () => {
   const navigate = useNavigate();
   const { addGame } = useGames();
+  const { user } = useAuth();
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -151,6 +153,21 @@ const CreateGamePage = () => {
       setSaving(false);
     }
   };
+
+  // Creating a game assigns a moderator to run it and judges to officiate
+  // it — an admin-only decision. Firestore rules enforce this too (create
+  // now requires isAdmin()); this just keeps a moderator/judge who reaches
+  // the URL directly from staring at a form that would fail on submit.
+  if (user?.role !== 'admin') {
+    return (
+      <section className="flex flex-col items-center justify-center gap-3 py-24">
+        <p className="text-gray-500 text-sm" style={{ fontFamily: B }}>Only admins can create games.</p>
+        <button onClick={() => navigate('/games')} className="text-sm text-[#011B3B] underline" style={{ fontFamily: B }}>
+          Back to Games
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section className="max-w-3xl mx-auto px-2 py-4 md:p-4 pb-12">

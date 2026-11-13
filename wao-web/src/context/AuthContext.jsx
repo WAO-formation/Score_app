@@ -14,7 +14,10 @@ import { auth, db, googleProvider } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
-const ALLOWED_ROLES = ['admin', 'moderator'];
+// 'official' (judges) can now log in for the read-only /officiating page
+// and their narrow judges-score write — see firestore.rules' judgeUids
+// branch and matchesService's judgesScore patch mapper.
+const ALLOWED_ROLES = ['admin', 'moderator', 'official'];
 
 async function loadAllowedProfile(firebaseUser) {
   const snap = await getDoc(doc(db, 'users', firebaseUser.uid));

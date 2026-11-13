@@ -12,10 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Vercel
+.vercel
+
 # Environment variables
 .env
 .env.local
 .env.*.local
+
+# Local credentials
+TEST_ACCOUNTS.md
 
 # Editor directories and files
 .vscode/*
